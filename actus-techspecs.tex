@@ -59,6 +59,7 @@
 	\hline
 	\endlastfoot
 }{%
+	\hline
 	\end{longtable}
 }
 
@@ -79,6 +80,7 @@
 	\hline
 	\endlastfoot
 }{%
+	\hline
 	\end{longtable}
 }
 
@@ -99,6 +101,7 @@
 	\hline
 	\endlastfoot
 }{%
+	\hline
     	\end{longtable}
 }
 
@@ -106,6 +109,7 @@
 \usepackage{verbatim}
 \usepackage{natbib}
 \setlength\parindent{0pt}
+\newcommand{\Real}{\mathbb{R}}
 \newcommand{\svar}[2]{\textbf{#1}_{#2}}
 \newcommand{\attr}[1]{\texttt{#1}}
 \newcommand{\stf}[2]{STF\_#1\_#2()}
@@ -114,8 +118,14 @@
 \newcommand{\sgn}{R(\attr{CNTRL})}
 \newcommand{\sdl}[3]{S(#1,#2,#3)}
 \newcommand{\yfr}[2]{Y(#1,#2)}
+\newcommand{\yfrfunc}{Y}
 \newcommand{\ann}[5]{A(#1,#2,#3,#4,#5)}
+\newcommand{\obs}[3]{O^{#1}(#2,#3)}
+\newcommand{\obsfull}[5]{O^{#1}(#2,#3,#4,#5)}
+\newcommand{\obsfunc}[1]{O^{#1}}
+\newcommand{\uly}[3]{U(#1,#2,#3)}
 \newcommand{\undef}{\varnothing}
+\newcommand{\tmax}{t^{max}}
 
 
 % ---------------------- Input options --------------------------------
@@ -373,10 +383,10 @@ $\svar{Nvl}{t}$ refers to the State Variable \textit{Nominal Value} observed at 
 
 \subsection{Contract Events}
 
-Contract Events mark specific points in time during the lifetime of a financial contract at which a cash flow is being exchanged or the State Variables of the contract are being updated. Contract Events are written in the short form as defined in table \ref{tbl:events} and printed in bold capitals.
+A contract event $e_t^k$ refers to any contractually scheduled or un-scheduled event at a certain time $t$ and of a certain type $k$. Contract events mark specific points in time during the lifetime of a financial contract at which a cash flow is being exchanged (see section \ref{sec:pof}) or the State Variables of the contract are being updated (see section \ref{sec:stf}). Contract Events types $k$ are written in the short form as defined in table \ref{tbl:events}.
 
 \begin{example}[Contract Events]
-The \textit{Initial Exchange Date} event of a contract is written as \textbf{IED}.
+The \textit{Initial Exchange Date} event with event time $s$ is written as $e_s^{IED}$.
 \end{example}
 
 
@@ -418,9 +428,9 @@ Contract Events of different types may occur at the same time, i.e. exactly the 
 
 The lifetime of an ACTUS contract is the time period of its existence from the perspective of the analyzing user. For every point in time during its lifetime, an ACTUS contract can be analyzed in terms of current State Variables and future cash flows.\\
 
-The lifetime of a contract starts with its \attr{SD} and ends with $\min(MD, AMD, PR^*, STD, TD,$\verb'MAX_LIFETIME'$)$.\\
+The lifetime of a contract starts with its \attr{SD} and ends with $\min(MD, AMD, PR^*, STD, TD,\tmax)$.\\
 
-Note that $PR^*$ refers to the PR event of a maturity contract after which \textbf{Nvl}=0.0 (i.e. at which the remaining outstanding principal is redeemed). Further, \attr{MD}, \attr{AMD}, and PR(\textbf{Nvl}=0.0) in the definition above do only apply for maturity contracts but have to be considered infinity in all other cases. Similarly, \attr{STD} only applies for certain contracts and is considered infinity for all others. Finally, \verb'MAX_LIFETIME' is a parameter that may be used to restrict the considered lifetime in an analysis. In particular, this parameter is used for contracts that do not have a \textit{natural} end to their lifetime such as STK.
+Note that $PR^*$ refers to the PR event of a maturity contract after which \textbf{Nvl}=0.0 (i.e. at which the remaining outstanding principal is redeemed). Further, \attr{MD}, \attr{AMD}, and PR(\textbf{Nvl}=0.0) in the definition above do only apply for maturity contracts but have to be considered infinity in all other cases. Similarly, \attr{STD} only applies for certain contracts and is considered infinity for all others. Finally, $\tmax$ is a parameter that may be used to restrict the considered lifetime in an analysis. In particular, this parameter is used for contracts that do not have a \textit{natural} end to their lifetime such as STK.
 
 
 %%%%%%%%%%%%%%%%%%%% Utility Functions %%%%%%%%%%%%%%%%%%%%
@@ -528,46 +538,38 @@ In general, contract events are scheduled for business days only. Therefore, the
 
 
 
-\subsection{Business Day Calendars}
+\subsection{Business Day Function}
 
-Whether a specific day is a business day (cf. previous section) is defined by attribute \attr{CLDR}. Two calendars are defined as part of the algorithmic standards as follows:
-
-\begin{itemize}
-	\item[] NoHoliday (default): every calendar day is a business day
-
-	\item[] MondayToFriday: all weekdays Monday, Tuesday, Wednesday, Thursday, and Friday are business days
-\end{itemize}
-
-Additional, custom, \attr{CLDR} can be used seamlessly by \textit{implementing} the Interface BusinessDayCalendarProvider shown in figure \ref{fig:bdc-interface}.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.45\textwidth]{./media/bdc-interface.png}
-	\caption{Business Day Calendar interface.}
-	\label{fig:bdc-interface}
-\end{figure}
-
-
-\subsection{Year Fraction Calculation}
-
-Interest income and other calculations are based on \textit{per annum} interest rates. Therefore, the year-fraction function $Y$ is used to calculate time differences between any two times $s,t$ with $s\leq t$ as \textit{fractions of a year} as follows
+Whether a specific day is a business day (cf. previous section) is defined by attribute \attr{CLDR}. Such conventions generally depend on regional official holiday calendars. The Business Day Function interface allows determining for some \attr{CLDR} whether any time $t$ is a business day or not
 
 \[
-	\yfr{s}{t,\attr{DCC}} = \frac{days(s,t,\attr{DCC})}{daysInYear(s,t,\attr{DCC})}
+	B: t \mapsto \{true, false\}
 \]
 
-where functions $days$ and $daysInYear$ count the number of days between $s$ and $t$ and the total number of days in the respective year according to the day count convention \attr{DCC}.\\
+where $true$ indicates that $t$ is a business day and $false$ that it is a holiday.
 
-Specific \attr{DCC} conventions can be defined and integrated seamlessly on a \textit{need-basis} by \textit{implementing} the interface DayCountConventionProvider shown in figure \ref{fig:dcc-interface}.
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.45\textwidth]{./media/dcc-interface.png}
-	\caption{Day Count Convention interface.}
-	\label{fig:dcc-interface}
-\end{figure}
+\begin{example}
+Two standard \attr{CLDR} implementations are the following
+\begin{itemize}
+	\item NoHoliday (default): every calendar day is a business day
 
-Note that for brevity we will omit the \attr{DCC} function argument wherever this does not lead to confusion.
+	\item MondayToFriday: all weekdays Monday, Tuesday, Wednesday, Thursday, and Friday are business days
+\end{itemize}
+\end{example}
+
+
+\subsection{Year Fraction Function}
+
+Interest income and other calculations are based on \textit{per annum} interest rates. Therefore, the year-fraction function interface $Y$ is used to calculate the \textit{fraction of a year} between any two times $s$ and $t$ with $t>s$ for which e.g. an (per annum) interest rate applies according to some day count convention \attr{DCC}
+
+\[
+	\yfrfunc: s,t,\attr{DCC} \mapsto \Real
+\]
+
+Note, the year fraction function interface only defines the structure of year fraction functions but not an actual implementation thereof, or the respective \attr{DCC}, respectively. Therefore, any \attr{DCC} can be implemented according to the interface above supporting user-defined year fraction functions.\\
+
+For brevity we will omit the \attr{DCC} function argument wherever this does not lead to confusion.
 
 
 \subsection{Contract Role Sign}
@@ -710,86 +712,13 @@ By definition, State Variables are updated through Contract Events only. The val
 %%%%%%%%%%%%%%%%%%%% Table No: 5 ends here %%%%%%%%%%%%%%%%%%%%
 
 
-%%%%%%%%%%%%%%%%%%%% Contract Model %%%%%%%%%%%%%%%%%%%%
-
-\section{Contract Model}\label{sec:model}
-
-A Contract Model is a structured representation of the various Contract Attributes a CT is based on. The set of Contract Attributes is different for each CT which has to be reflected in the Contract Model (or model as we will refer to henceforth for brevity). The ACTUS DD defines the set of Contract Attributes by CT which provides the content of a Model. On the other hand, ACTUS does not define the model in terms of data structure used on the Software-level but only a Contract Model Interface which any model-implementation has to implement.
-
-
-%%%%%%%%%%%%%%%%%%%% Figure/Image No: 5 starts here %%%%%%%%%%%%%%%%%%%%
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.45\textwidth]{./media/model-interface.png}
-	\caption{Contract Model Interface.}
-	\label{fig:model-interface}
-\end{figure}
-
-
-%%%%%%%%%%%%%%%%%%%% Figure/Image No: 5 Ends here %%%%%%%%%%%%%%%%%%%%
-
-
-As shown in figure \ref{fig:model-interface}, the Model interface requires from any implementation to implement method getAs  which returns for an attribute’s Long Name it’s value in the specified value type. When requesting from the Model the value of a specific attribute, the value has to be type-casted to the required target-type as indicated in the data dictionary. If this type conversion fails an AttributeConversionException must be thrown.
-
-Hence, the respective function has the following form \par
-
-getAs[T](Par1) throw AttributeConversionException \par
-
-where
-
-\begin{itemize}
-	\item T: the respective variable type
-
-	\item Par1: a string representing the Long-Name of the attribute to be returned
-\end{itemize}
-
-
-
-%%%%%%%%%%%%%%%%%%%% Risk Factor Provider %%%%%%%%%%%%%%%%%%%%
-
-\section{Risk Factor Model}\label{rfmodel}
-
-The payoff of financial instruments always depends on the context in which it is evaluated. That is, financial instruments are always embedded in a context of counterparties, markets, and behavioral factors which drive future payoffs. We refer to these as the risk factors to which financial instruments are exposed to because they are the only source of uncertainty in the ACTUS framework. Obviously, evaluating the future payoff of financial instruments requires an assumption about the future state of the risk factors. However, such assumptions are purely subjective which is why they cannot be embedded in the ACTUS standard. Instead, these assumptions must be collected in an external \textit{Risk Factor Model}  against which ACTUS contracts may be evaluated.  Therefore, ACTUS provides a standardized interface that allows ACTUS contracts to \textit{communicate}  with an external model. The general data flow through this interface is represented in figure \ref{fig:rf-interface}. As the figure shows, the Risk Factor Model interface has two main purposes, it forces any implementation of an external market model to provide certain methods and it assures to the ACTUS contract that these methods will be available. Thereby, the Risk Factor Model interface allows an ACTUS contract to demand the state of the risk factors at any future point in time (or the context to be evaluated in).
-
-
-%%%%%%%%%%%%%%%%%%%% Figure/Image No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.45\textwidth]{./media/rf-interface.png}
-	\caption{Risk Factor Model Interface data flow}
-	\label{fig:rf-interface}
-\end{figure}
-
-
-%%%%%%%%%%%%%%%%%%%% Figure/Image No: 7 Ends here %%%%%%%%%%%%%%%%%%%%
-
-
-On the other hand, the design and implementation of a specific Risk Factor Model is left to the user of ACTUS. This gives the user community the necessary flexibility to account for their specific needs in terms of modeling assumptions. Hence, the structure of the Risk Factor Model consisting of a \textit{connecting} element implementing the Risk Factor Model Interface and multiple sub-models implementing the dynamics of various specific risk factors (such as interest rates, stock prices, prepayment rates, etc.) is just illustrative and an actual implementation may look different.
-
-In this document we will generally refer to the Risk Factor Model function call by\par
-
-RF(Par1, Par2, Par3, Par4)\par
-
-where
-
-\begin{itemize}
-	\item Par1: the unique ID of the risk factor whose state should be returned
-
-	\item Par2: the future date for which the risk factor’s state should be returned
-
-	\item Par3: the inner states of the contract at the future date
-
-	\item Par4: the contract terms of the contract
-\end{itemize}
 
 
 %%%%%%%%%%%%%%%%%%%% Contract Events %%%%%%%%%%%%%%%%%%%%
 
-\section{Contract Events}\label{sec:events}
+\section{Contract Event Types}\label{sec:events}
 
-Find an overview of event types below.
+An overview and description of various event types can be found in table \ref{tbl:events}. 
 
 
 %%%%%%%%%%%%%%%%%%%% Table No: 6 starts here %%%%%%%%%%%%%%%%%%%%
@@ -845,6 +774,44 @@ Find an overview of event types below.
 %%%%%%%%%%%%%%%%%%%% Table No: 6 ends here %%%%%%%%%%%%%%%%%%%%
 
 
+%%%%%%%%%%%%%%%%%%%% Risk Factor Observer %%%%%%%%%%%%%%%%%%%%
+
+\section{Risk Factor Observer}\label{rfmodel}
+
+The payoff of financial contracts always depends on the context in which it is evaluated and which is comprised of the following dimensions; counterparties, markets, and behavioral factors. We refer to these as the \textit{risk factors} to which financial contracts are exposed to. This indicates that these factors are source of uncertainty because financial contracts only reference the factors but their dynamics is outside the control of any contractual agreement. Thus, such factors have to be \textit{observed} and their changing states accounted for when evaluating the payoff of financial contracts. Therefore, we consider a standardized interface $\obsfull{o}{i}{t}{S}{M}$ that allows for \textit{observing}; (1) the state of a certain risk factor $i$ at any time $t$ if $o=$'rf'
+
+\[
+	\obsfunc{rf}: i,t,S,M \mapsto \Real
+\]
+
+and (2) contractual but non-scheduled events if $o=$'ev'
+
+\[
+	\obsfunc{ev}: i,t,S,M \mapsto \{e_t^{k},e_s^{l},...\}
+\]
+
+The parameters to the Risk Factor Observer interface are as follows:
+
+\begin{itemize}
+	\item[$id$]: the identifier of the risk factor \textit{observed}
+
+	\item[$t$]: the time for which the risk factor’s state should be evaluated
+
+	\item [$S$]: the inner states of the contract at time $t$
+
+	\item [$M$]: the contract terms of the contract as per time $t$
+\end{itemize}
+
+Note that the observer interface only defines the structure of an actual observer function but not the actual implementation. Thus, the interface allows for user-defined implementations of observer functions allowing e.g. for representing arbitrary assumptions on the evolution of future risk factor states which is key for any type of forward-looking analysis.
+
+\begin{example}['rf'-Observer] The market-driven 3-month USD-Libor reference rate used as the variable rate in a variable rate loan contract is observed at any time $t$ through $\obs{rf}{\attr{MarketObjectCodeRateReset}}{t}$.
+\end{example}
+
+\begin{example}['rf'-Observer] Unscheduled (pre-) repayments of outstanding notional in a mortgage contract is observed at any time $t$ through $\obs{ev}{\attr{CID}}{t}$.
+\end{example}
+
+For brevity we will omit the $S$ and $M$ function arguments wherever this does not lead to confusion.
+
 
 
 %%%%%%%%%%%%%%%%%%%% End first part here %%%%%%%%%%%%%%%%%%%%
@@ -869,13 +836,13 @@ Find an overview of event types below.
 	\hline
 	IED & $t^{IED} = \attr{IED}$ & \\
 	\hline
-	PR & $t^{PR} = \attr{MD}$ & \\
+	PR & $t^{PR} = \svar{Tmd}{t_0}$ & \\
 	\hline
 	PP & $\vec{t}^{PP} = \begin{cases} \undef & \text{if} \quad \attr{PPEF}=\text{'N'} \\
 					(\vec{u},\vec{v}) & \text{else} \end{cases}$ 
 		\par where \par
 		{$\begin{aligned} \vec{u} &= \sdl{s}{\attr{OPCL}}{T^{MD}} \\
-				\vec{v} &= RF(\attr{PPMO}) \end{aligned}$}
+				\vec{v} &= \obs{rf}{\attr{PPMO}}{Tev} \end{aligned}$}
 		 & with\par $s = \begin{cases} \undef & \text{if} \quad \attr{OPANX}=\undef \land \attr{OPCL}=\undef\\
 					   \attr{IED}+\attr{OPCL} & \text{else if} \quad \attr{OPANX} = \undef \\
 					   \attr{OPANX} & \text{else} \end{cases}$ \\
@@ -926,8 +893,7 @@ Find an overview of event types below.
 					   \attr{IED}+\attr{SCCL} & \text{else if} \quad \attr{SCANX} = \undef \\
 					   \attr{SCANX} & \text{else} \end{cases}$ \\
 	\hline
-	CD & $t^{CD} = RF(LEICP)$ & \\
-  	\hline
+	CD & $t^{CD} = \obs{ev}{LEICP}{t_0}$ & \\
 \end{schedule}
 
 
@@ -969,7 +935,6 @@ Find an overview of event types below.
   	$\svar{Prf}{}$ & $\svar{Prf}{t_0} = \attr{CTS}$ &  \\
 	\hline
 	$\svar{Led}{}$ & $\svar{Led}{t_0} = t_0$ & \\
-	\hline	
 \end{states}
 
 
@@ -1004,17 +969,17 @@ Find an overview of event types below.
 			\svar{Nrt}{t^+} &= 0.0 \\
 			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
 	\hline
-	PP & $\dfl{t^-}RF(\attr{OPMO}, Tev)$
+	PP & $\dfl{t^-}\obs{rf}{\attr{OPMO}}{Tev}$
 		& {$\begin{aligned} 
 			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
 			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
-			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-} - RF(\attr{OPMO},Tev) \\
+			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-} - \obs{rf}{\attr{OPMO}}{Tev} \\
 			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
 	\hline
 	PY & {$\begin{aligned}
 			&\dfl{t^-}\sgn\attr{PYRT} &\text{if} \quad \attr{PYTP}=\text{'A'}\\
 			&c\attr{PYRT} &\text{if} \quad \attr{PYTP}=\text{'N'}\\
-			&c\max(0,\svar{Nrt}{t^-}-RF(\attr{RRMO},Tev)) &\text{if} \quad \attr{PYTP}=\text{'I'} \end{aligned}$}\par
+			&c\max(0,\svar{Nrt}{t^-}-\obs{rf}{\attr{RRMO}}{Tev}) &\text{if} \quad \attr{PYTP}=\text{'I'} \end{aligned}$}\par
 		with\par
 		$c=\dfl{t^-}\sgn\yfr{\svar{Led}{t^-}}{Tev}\svar{Nvl}{t^-}$
 		& {$\begin{aligned} 
@@ -1069,7 +1034,7 @@ Find an overview of event types below.
 			\svar{Nrt}{t^+} &= \min(\max(\svar{Nrt}{t^-}+\Delta r,\attr{RRLF}),\attr{RRLC}) \\
 			\svar{Led}{t^+} &= Tev \end{aligned}$}\par
 		with\par
-		$\Delta r = \min(\max(RF(RRMO, Tev)\attr{RRMT}+\attr{RRSP} - \svar{Nrt}{t^-},\attr{RRPF}),\attr{RRPC})$ \\
+		$\Delta r = \min(\max(\obs{rf}{\attr{RRMO}}{Tev}\attr{RRMT}+\attr{RRSP} - \svar{Nrt}{t^-},\attr{RRPF}),\attr{RRPC})$ \\
 	\hline
 	RRY & 0.0 
 		& {$\begin{aligned} 
@@ -1083,9 +1048,9 @@ Find an overview of event types below.
 			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
 			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Nsc}{t^+} &= \begin{cases} \svar{Nsc}{t^-} & \text{if} \quad \attr{SCEF} = [x]0[x] \\
-							\frac{RF(\attr{SCMO}, Tev) - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
+							\frac{\obs{rf}{\attr{SCMO}}{Tev} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
 			\svar{Isc}{t^+} &= \begin{cases} \svar{Isc}{t^-} & \text{if} \quad \attr{SCEF} = 0[x][x] \\
-							\frac{RF(\attr{SCMO}, Tev) - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
+							\frac{\obs{rf}{\attr{SCMO}}{Tev} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
 			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
 	\hline 
 	CD & 0.0 
@@ -1094,7 +1059,6 @@ Find an overview of event types below.
 			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Prf}{t^+} &= \text{'D'}\\
 			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
-  \hline
 \end{functions}
 
 
@@ -1144,7 +1108,6 @@ Find an overview of event types below.
 		& with\par $s = \begin{cases} \undef & \text{if} \quad \attr{IPCBANX}=\undef \land \attr{IPCBCL}=\undef\\
 					   \attr{IED}+\attr{IPCBCL} & \text{else if} \quad \attr{IPCBANX} = \undef \\
 					   \attr{IPCBANX} & \text{else} \end{cases}$ \\
-	\hline
 \end{schedule}
 
 
@@ -1192,7 +1155,6 @@ Find an overview of event types below.
 	$\svar{Icb}{}$ & $\svar{Icb}{t_0}= \begin{cases} 0.0 & \text{if}\quad t_0<\attr{IED} \\
 					\sgn\attr{NT} & \text{else if}\quad \attr{IPCB}=\text{'NT'} \\
 					\sgn\attr{IPCBA} & \text{else} \end{cases}$ & \\
-	\hline
 \end{states}
 
 
@@ -1230,7 +1192,7 @@ Find an overview of event types below.
 		& {$\begin{aligned} 
 			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
 			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
-			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-} - RF(\attr{OPMO},Tev) \\
+			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-} - \obs{rf}{\attr{OPMO}}{Tev} \\
 			\svar{Icb}{t^+} &= \begin{cases} \svar{Icb}{t^-} & \text{if}\quad \attr{IPCB}\neq\text{'NT'} \\
 							\svar{Nvl}{t^+} & \text{else} \end{cases}\\
 			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
@@ -1278,7 +1240,7 @@ Find an overview of event types below.
 			\svar{Nrt}{t^+} &= \min(\max(\svar{Nrt}{t^-}+\Delta r,\attr{RRLF}),\attr{RRLC}) \\
 			\svar{Led}{t^+} &= Tev \end{aligned}$}\par
 		with\par
-		$\Delta r = \min(\max(RF(RRMO, Tev)\attr{RRMT}+\attr{RRSP} - \svar{Nrt}{t^-},\attr{RRPF}),\attr{RRPC})$ \\
+		$\Delta r = \min(\max(\obs{rf}{\attr{RRMO}}{Tev}\attr{RRMT}+\attr{RRSP} - \svar{Nrt}{t^-},\attr{RRPF}),\attr{RRPC})$ \\
 	\hline
 	RRY & \pof{RRY}{PAM} 
 		& {$\begin{aligned} 
@@ -1292,9 +1254,9 @@ Find an overview of event types below.
 			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
 			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Nsc}{t^+} &= \begin{cases} \svar{Nsc}{t^-} & \text{if} \quad \attr{SCEF} = [x]0[x] \\
-							\frac{RF(\attr{SCMO}, Tev) - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
+							\frac{\obs{rf}{\attr{SCMO}}{Tev} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
 			\svar{Isc}{t^+} &= \begin{cases} \svar{Isc}{t^-} & \text{if} \quad \attr{SCEF} = 0[x][x] \\
-							\frac{RF(\attr{SCMO}, Tev) - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
+							\frac{\obs{rf}{\attr{SCMO}}{Tev} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
 			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
 	\hline 
 	CD & \pof{CD}{PAM} 
@@ -1310,7 +1272,6 @@ Find an overview of event types below.
 			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
 			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
-  \hline
 \end{functions}
 
 
@@ -1364,7 +1325,6 @@ Find an overview of event types below.
 	CD & & Same as PAM \\
   	\hline
 	IPCB & & Same as LAM \\
-	\hline
 \end{schedule}
 
 
@@ -1404,7 +1364,6 @@ Find an overview of event types below.
 	$\svar{Npr}{}$ & $\svar{Npr}{t_0} = \sgn\attr{PRNXT}$ & \\
 	\hline
 	$\svar{Icb}{}$ & & Same as LAM \\
-	\hline
 \end{states}
 
 
@@ -1464,7 +1423,6 @@ Find an overview of event types below.
 	\hline
 	IPCB & \pof{IPCB}{LAM}
 		& \stf{IPCB}{LAM} \\
-  \hline
 \end{functions}
 
 
@@ -1508,7 +1466,6 @@ Find an overview of event types below.
 	CD & & Same as PAM \\
   	\hline
 	IPCB & & Same as LAM \\
-	\hline
 \end{schedule}
 
 
@@ -1543,7 +1500,6 @@ Find an overview of event types below.
 							(\attr{NT}+\svar{Nac}{t_0})\frac{todo}{todo} & \text{else} \end{cases}$ & where $n=|\vec{t}|$ with $|a|$ indicating the cardinality of set $a$ \\
 	\hline
 	$\svar{Icb}{}$ & & Same as LAM \\
-	\hline
 \end{states}
 
 
@@ -1590,7 +1546,7 @@ Find an overview of event types below.
 			\svar{Npr}{t^+} &= \ann{Tev}{\svar{Tmd}{t^+}}{\svar{Nvl}{t^+}}{\svar{Nac}{t^+}}{\svar{Nrt}{t^+}} \\
 			\svar{Led}{t^+} &= Tev \end{aligned}$}\par
 		with\par
-		$\Delta r = \min(\max(RF(RRMO, Tev)\attr{RRMT}+\attr{RRSP} - \svar{Nrt}{t^-},\attr{RRPF}),\attr{RRPC})$ \\
+		$\Delta r = \min(\max(\obs{rf}{\attr{RRMO}}{Tev}\attr{RRMT}+\attr{RRSP} - \svar{Nrt}{t^-},\attr{RRPF}),\attr{RRPC})$ \\
 	\hline
 	RRY & \pof{RRY}{PAM} 
 		& {$\begin{aligned} 
@@ -1608,7 +1564,6 @@ Find an overview of event types below.
 	\hline
 	IPCB & \pof{IPCB}{LAM}
 		& \stf{IPCB}{LAM} \\
-  \hline
 \end{functions}
 
 
@@ -1616,943 +1571,106 @@ Find an overview of event types below.
 
 
 
+\subsection{CLM: Call Money}\label{sec:clm}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
+
+\begin{schedule}{CLM}
+	AD & & Same as PAM \\
+	\hline
+	IED & & Same as PAM \\
+	\hline
+	PR & & Same as PAM \\
+	\hline
+	FP & & Same as PAM \\
+	\hline
+	IP & $t^{IP}=\svar{Tmd}{t_0}$ & \\
+	\hline
+	IPCI & $\vec{t}^{IPCI} = \begin{cases} 
+					\undef & \text{if}\quad \attr{IPANX}=\undef\land\attr{IPCL}=\undef \\
+					\sdl{s}{\attr{IPCL}}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ &
+				where\par
+				$s=\begin{cases} \attr{IPANX} & \text{if}\quad \attr{IPANX}\neq\undef\\
+						\attr{IED}+\attr{IPCL} & \text{else} \end{cases}$ \\
+	\hline
+	RR & & Same as PAM \\
+	\hline
+	RRY & & Same as PAM \\
+	\hline
+	CD & & Same as PAM \\
+\end{schedule}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{states}{CLM}
+	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \begin{cases} \attr{MD} & \text{if}\quad \attr{MD}\neq\undef \\
+							s & \text{else if}\quad \obs{ev}{\attr{CID}}{t_0}\neq\{\} \\
+							\tmax & \text{else} \end{cases}$ & \\
+	\hline
+  	$\svar{Nvl}{}$ & & Same as PAM \\
+	\hline
+	$\svar{Nrt}{}$ & & Same as PAM \\
+  	\hline 
+  	$\svar{Nac}{}$ & & Same as PAM \\
+	\hline
+  	$\svar{Fac}{}$ & & Same as PAM \\
+  	\hline
+  	$\svar{Prf}{}$ & & Same as PAM \\
+	\hline
+	$\svar{Led}{}$ & & Same as PAM \\
+\end{states}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{functions}{CLM}
+	AD & \pof{AD}{PAM} & \stf{AD}{PAM} \\
+	\hline
+	IED & $\dfl{t^-}\sgn (-1)\attr{NT}$ & \stf{IED}{PAM} \\ 
+	\hline
+	PR & \pof{PR}{PAM} & \stf{PR}{PAM} \\
+	\hline
+	FP & \pof{FP}{PAM}
+		& \stf{FP}{PAM} \\
+	\hline
+	IP & $\dfl{t^-}(\svar{Nac}{t^-}+\yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-})$
+		& {$\begin{aligned}
+				\svar{Nac}{t^+} &= 0.0 \\
+				\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+	\hline
+	IPCI & \pof{IPCI}{PAM}
+		& \stf{IPCI}{PAM} \\
+	\hline
+	RR & \pof{RR}{PAM}
+		& \stf{RR}{PAM} \\
+	\hline
+	RRY & \pof{RRY}{PAM}
+		& \stf{RRY}{PAM} \\
+	\hline 
+	CD & \pof{CD}{PAM}
+		& \stf{CD}{LAM} \\
+\end{functions}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
+
+
 \iffalse
 
 
-
-
-
-
-\vspace{\baselineskip}
-\subsection{Linear Amortizer (LAM)}
-\subsubsection{Maturity Determination}
-If MD != NULL: Tmd=MD
-
-Else Tmd=Lpr+[ceil(NT/PRNXT)]PRCL
-
-where \par
-
-\setlength{\parskip}{0.0pt}
-\begin{adjustwidth}{0.5in}{0.0in}
-Lpr:=the last recent PR Event Date (or PRANX if none)\par
-
-\end{adjustwidth}
-
-\begin{adjustwidth}{0.5in}{0.0in}
-[ceil(\textbf{NT}/\textbf{PRNXT})]:=the number of remaining PR events
-
-\end{adjustwidth}
-
-\setlength{\parskip}{8.04pt}
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 10 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-{
-\setlength\extrarowheight{3pt}
-\begin{longtable}{p{0.34in}p{3.05in}p{2.49in}}
-
-\endfirsthead
-\multicolumn{3}{c}{\textit{continued from previous page}}\hline
-\endhead\hline
-\multicolumn{3}{r}{\textit{continued on next page}} \\
-\endfoot
-\hline 
-\endlastfoot\hline
-%row no:1
-\multicolumn{1}{|p{0.34in}}{Event Type} & 
-\multicolumn{1}{|p{3.05in}}{Schedule} & 
-\multicolumn{1}{|p{2.49in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.34in}}{AD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.34in}}{IED} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.34in}}{PR} & 
-\multicolumn{1}{|p{3.05in}}{if PRANX != NULL Then Tstrt = PRANX \par Else Tstrt = IED+PRCL \par Sdl(Tstrt, PRCL, Tmd, EOMC, BDC) >= SD \par } & 
-\multicolumn{1}{|p{2.49in}|}{} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.34in}}{PP} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.34in}}{PY} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.34in}}{FP} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.34in}}{PRD} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.34in}}{TD} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.34in}}{IP} & 
-\multicolumn{1}{|p{3.05in}}{if IPANX != NULL Then Tstrt = IPANX \par Else Tstrt = IED+IPCL \par Sdl(Tstrt, IPCL, IPCED, EOMC, BDC) >= SD \par Sdl(Tstrt, IPCL, PRANX-1PRCL, EOMC, BDC) >= SD \par Sdl(PRANX, PRCL, Tmd, EOMC, BDC) >= SD \par } & 
-\multicolumn{1}{|p{2.49in}|}{IPCED != NULL And Tstrt< IPCED \par IPCED != NULL And Tstrt < PRANX-1PRCL \par } \\
-\hhline{---}
-%row no:11
-\multicolumn{1}{|p{0.34in}}{IPCI} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{IPCED <= PRANX-1PRCL} \\
-\hhline{---}
-%row no:12
-\multicolumn{1}{|p{0.34in}}{RR} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:13
-\multicolumn{1}{|p{0.34in}}{RRY} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:14
-\multicolumn{1}{|p{0.34in}}{SC} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:15
-\multicolumn{1}{|p{0.34in}}{CD} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:16
-\multicolumn{1}{|p{0.34in}}{IPCB} & 
-\multicolumn{1}{|p{3.05in}}{no event \par if IPCBANX != NULL Then Tstrt = IPCBANX \par Else Tstrt = IED+IPCBCL \par Sdl(Tstrt, IPCBCL, Tmd, EOMC, BDC) >= SD \par } & 
-\multicolumn{1}{|p{2.49in}|}{if IPCB == NULL OR IPCB==NT OR IPCB==NTIED \par Else (i.e. if IPCB == NTL) \par } \\
-\hhline{---}
-
-\end{longtable}}
-
-%%%%%%%%%%%%%%%%%%%% Table No: 10 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 11 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.79in}p{2.63in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{State Variable} & 
-\multicolumn{1}{|p{2.79in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.63in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{\textbf{Nvl}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{\textbf{Nrt}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{\textbf{Nac}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.48in}}{\textbf{Fac}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.48in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.48in}}{\textbf{Nsc}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.48in}}{\textbf{Isc}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.48in}}{\textbf{Pod}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.48in}}{\textbf{Npr}} & 
-\multicolumn{1}{|p{2.79in}}{Sign(CNTRL) $\ast$  PRNXT \par Sign(CNTRL) $\ast$  NT / ceil(Yfr(PRANX,Tmd)/Yfr(PRANX, PRANX+1PRCL)) \par Sign(CNTRL) $\ast$  NT / ceil(Yfr(IED+1PRCL,Tmd)/Yfr(IED+1PRCL, IED+2PRCL)) \par Sign(CNTRL) $\ast$  NT / ceil(Yfr(Lpr,Tmd)/Yfr(Lpr, Lpr+1PRCL)) \par } & 
-\multicolumn{1}{|p{2.63in}|}{if PRNXT != NULL \par Else \par if PRANX != NULL And PRANX > SD \par Else if PRANX == NULL And IED + 1PRCL > SD \par Else  \par } \\
-\hhline{---}
-%row no:11
-\multicolumn{1}{|p{0.48in}}{\textbf{Icb}} & 
-\multicolumn{1}{|p{2.79in}}{If SD < IED Then 0.0 \par Else \par if IPCB==NT then Sgn(CNTRL)$\ast$ NT \par Else Sgn(CNTRL)$\ast$ IPCBA \par } & 
-\multicolumn{1}{|p{2.63in}|}{contains either the initial NT (IPCB=NTIED) or the state of the interest calculation base since its last change (IPCB=NTL) \par } \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 11 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 12 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-{
-\setlength\extrarowheight{3pt}
-\begin{longtable}{p{0.48in}p{2.8in}p{-0.45in}p{0.26in}p{0.12in}p{0.37in}p{0.06in}p{0.09in}}
-
-\endfirsthead
-\multicolumn{8}{c}{\textit{continued from previous page}}\hline
-\endhead\hline
-\multicolumn{8}{r}{\textit{continued on next page}} \\
-\endfoot
-\hline 
-\endlastfoot\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{2.8in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{State Transition Function}} & 
-
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{AD} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{IED} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Nvl }= Sgn(CNTRL) $\ast$  NT \par \textbf{Nac }= 0.0 \par \textbf{Fac }= 0.0 \par \textbf{Nrt }= IPNR \par \textbf{Led }= Tev \par If IPCB==NT then  \par \textbf{Icb }= Sgn(CNTRL)$\ast$ NT \par Else  \par \textbf{Icb }= Sgn(CNTRL)$\ast$ IPCBA} & 
-
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{PR} & 
-\multicolumn{1}{|p{2.8in}}{= (1-\textbf{Pod}) $\ast$  \textbf{Nsc $\ast$ } \textbf{Npr}} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Nvl }= \textbf{Nvl }- \textbf{Npr} \par If IPCB == NT then \textbf{Icb }= \textbf{Nvl} \par \textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Led }= Tev } & 
-
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.48in}}{PP} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Nac }= \textbf{Nac} + Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nvl }= ( 1 - RF(OPMO, Tev) ) $\ast$  \textbf{Nvl} \par If IPCB == NT then \textbf{Icb }= \textbf{Nvl} \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.48in}}{PY} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Nac }= \textbf{Nac} + Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.48in}}{FP} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Nac }= \textbf{Nac} + Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= 0.0 \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.48in}}{PRD} & 
-\multicolumn{1}{|p{2.8in}}{= (1-\textbf{Pod}) $\ast$  Sgn(CNTRL) $\ast$  (-1) $\ast$  (PPRD +\textbf{Nac + }Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb})} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.48in}}{TD } & 
-\multicolumn{1}{|p{2.8in}}{= (1-\textbf{Pod}) $\ast$  ( Sgn(CNTRL) $\ast$  (PTD +\textbf{Nac + }Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb}) )} & 
-\multicolumn{1}{|p{-0.45in}}{same as PAM} & 
-
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.48in}}{IP} & 
-\multicolumn{1}{|p{2.8in}}{= (1-\textbf{Pod}) $\ast$  \textbf{Isc} $\ast$  ( \textbf{Nac + }Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb })} & 
-\multicolumn{1}{|p{-0.45in}}{same as PAM} & 
-
-\hhline{---}
-%row no:11
-\multicolumn{1}{|p{0.48in}}{IPCI} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Nvl }= \textbf{Nvl }+ \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par If IPCB == NT then \textbf{Icb }= \textbf{Nvl} \par \textbf{Nac }= 0.0 \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:12
-\multicolumn{1}{|p{0.48in}}{RR} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par rate = RF(RRMO, Tev)$\ast$ RRMT+RRSP \par deltaRate= min(max(rate-\textbf{Nrt},RRPF),RRPC) \par \textbf{Nrt }= min(max(\textbf{Nrt}+deltaRate,RRLF),RRLC) \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:13
-\multicolumn{1}{|p{0.48in}}{RRY} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nrt }= RRNXT \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:14
-\multicolumn{1}{|p{0.48in}}{SC} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par if SCEF == [x]N[x] \par \textbf{Nsc }= (RF(SCMO, Tev) - SCIED) / SCIED \par if SCEF == I[x][x] \par \textbf{Isc }= (RF(SCMO, Tev) - SCIED) / SCIED \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:15
-\multicolumn{1}{|p{0.48in}}{CD} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Pod }= RF(LEICP, Tev) \par \textbf{Nac} = \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:16
-\multicolumn{1}{|p{0.48in}}{IPCB} & 
-\multicolumn{1}{|p{2.8in}}{= 0.0} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Icb }= \textbf{Nvl} \par \textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-
-\end{longtable}}
-
-%%%%%%%%%%%%%%%%%%%% Table No: 12 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsection{Negative Amortizer (NAM)}
-\subsubsection{Maturity Determination}
-If MD != NULL Then Tmd=MD
-
-Else if RRCL == NULL And IPCB == NT Then Tmd=NT/(\textbf{Npr}-\textbf{Nvl}$\ast$ \textbf{Nrt}$\ast$  Yfr(PRANX,PRANX+PRCL)\par
-
-Else Tmd = MAX\_Lifetime
-
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 13 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-{
-\setlength\extrarowheight{3pt}
-\begin{longtable}{p{0.34in}p{3.05in}p{2.49in}}
-
-\endfirsthead
-\multicolumn{3}{c}{\textit{continued from previous page}}\hline
-\endhead\hline
-\multicolumn{3}{r}{\textit{continued on next page}} \\
-\endfoot
-\hline 
-\endlastfoot\hline
-%row no:1
-\multicolumn{1}{|p{0.34in}}{Event Type} & 
-\multicolumn{1}{|p{3.05in}}{Schedule} & 
-\multicolumn{1}{|p{2.49in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.34in}}{AD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.34in}}{IED} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.34in}}{PR} & 
-\multicolumn{1}{|p{3.05in}}{Same as LAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as LAM} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.34in}}{PP} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.34in}}{PY} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.34in}}{FP} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.34in}}{PRD} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.34in}}{TD} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.34in}}{IP} & 
-\multicolumn{1}{|p{3.05in}}{Same as LAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as LAM \par } \\
-\hhline{---}
-%row no:11
-\multicolumn{1}{|p{0.34in}}{IPCI} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as LAM} \\
-\hhline{---}
-%row no:12
-\multicolumn{1}{|p{0.34in}}{RR} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:13
-\multicolumn{1}{|p{0.34in}}{RRY} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:14
-\multicolumn{1}{|p{0.34in}}{SC} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:15
-\multicolumn{1}{|p{0.34in}}{CD} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:16
-\multicolumn{1}{|p{0.34in}}{IPCB} & 
-\multicolumn{1}{|p{3.05in}}{Same as LAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as LAM \par } \\
-\hhline{---}
-
-\end{longtable}}
-
-%%%%%%%%%%%%%%%%%%%% Table No: 13 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 14 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.79in}p{2.63in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{State Variable} & 
-\multicolumn{1}{|p{2.79in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.63in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{\textbf{Nvl}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{\textbf{Nrt}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{\textbf{Nac}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.48in}}{\textbf{Fac}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.48in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.48in}}{\textbf{Nsc}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.48in}}{\textbf{Isc}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.48in}}{\textbf{Pod}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.48in}}{\textbf{Npr}} & 
-\multicolumn{1}{|p{2.79in}}{Sign(CNTRL) $\ast$  PRNXT} & 
-\multicolumn{1}{|p{2.63in}|}{PRNXT is an NN attribute for NAM} \\
-\hhline{---}
-%row no:11
-\multicolumn{1}{|p{0.48in}}{\textbf{Icb}} & 
-\multicolumn{1}{|p{2.79in}}{Same as LAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as LAM} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 14 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 15 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-{
-\setlength\extrarowheight{3pt}
-\begin{longtable}{p{0.4in}p{2.8in}p{-0.59in}p{0.15in}p{0.04in}p{0.23in}p{-0.01in}p{0.02in}}
-
-\endfirsthead
-\multicolumn{8}{c}{\textit{continued from previous page}}\hline
-\endhead\hline
-\multicolumn{8}{r}{\textit{continued on next page}} \\
-\endfoot
-\hline 
-\endlastfoot\hline
-%row no:1
-\multicolumn{1}{|p{0.4in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{2.8in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{-0.59in}}{\textbf{State Transition Function}} & 
-
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.4in}}{AD} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.4in}}{IED} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.4in}}{PR} & 
-\multicolumn{1}{|p{2.8in}}{= (1 - \textbf{Pod}) $\ast$  \textbf{Nsc} $\ast$  ( \textbf{Npr }- \textbf{Nac }- Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb }) )} & 
-\multicolumn{1}{|p{-0.59in}}{\textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nvl }= \textbf{Nvl} - (\textbf{Npr} - \textbf{Nac}) \par If IPCB == NT then \textbf{Icb }= \textbf{Nvl} \par \textbf{Led }= Tev } & 
-
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.4in}}{PP} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.4in}}{PY} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.4in}}{FP} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.4in}}{PRD} & 
-\multicolumn{1}{|p{2.8in}}{Same as LAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.4in}}{TD } & 
-\multicolumn{1}{|p{2.8in}}{Same as LAM} & 
-\multicolumn{1}{|p{-0.59in}}{same as PAM} & 
-
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.4in}}{IP} & 
-\multicolumn{1}{|p{2.8in}}{Same as LAM} & 
-\multicolumn{1}{|p{-0.59in}}{same as PAM} & 
-
-\hhline{---}
-%row no:11
-\multicolumn{1}{|p{0.4in}}{IPCI} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:12
-\multicolumn{1}{|p{0.4in}}{RR} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:13
-\multicolumn{1}{|p{0.4in}}{RRY} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:14
-\multicolumn{1}{|p{0.4in}}{SC} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:15
-\multicolumn{1}{|p{0.4in}}{CD} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:16
-\multicolumn{1}{|p{0.4in}}{IPCB} & 
-\multicolumn{1}{|p{2.8in}}{Same as LAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-
-\end{longtable}}
-
-%%%%%%%%%%%%%%%%%%%% Table No: 15 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsection{Annuity (ANN)}
-\subsubsection{Maturity Determination}
-If MD != NULL Then Tmd=MD
-
-Else if AMD != NULL Then Tmd=AMD
-
-Else if RRCL == NULL And IPCB == NT Then Tmd=NT/(\textbf{Npr}-\textbf{Nvl}$\ast$ \textbf{Nrt}$\ast$  Yfr(PRANX,PRANX+PRCL)\par
-
-Else Tmd = MAX\_Lifetime
-
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 16 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-{
-\setlength\extrarowheight{3pt}
-\begin{longtable}{p{0.34in}p{3.05in}p{2.49in}}
-
-\endfirsthead
-\multicolumn{3}{c}{\textit{continued from previous page}}\hline
-\endhead\hline
-\multicolumn{3}{r}{\textit{continued on next page}} \\
-\endfoot
-\hline 
-\endlastfoot\hline
-%row no:1
-\multicolumn{1}{|p{0.34in}}{Event Type} & 
-\multicolumn{1}{|p{3.05in}}{Schedule} & 
-\multicolumn{1}{|p{2.49in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.34in}}{AD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.34in}}{IED} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.34in}}{PR} & 
-\multicolumn{1}{|p{3.05in}}{Same as LAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as LAM} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.34in}}{PP} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.34in}}{PY} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.34in}}{FP} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.34in}}{PRD} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.34in}}{TD} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.34in}}{IP} & 
-\multicolumn{1}{|p{3.05in}}{Same as LAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as LAM} \\
-\hhline{---}
-%row no:11
-\multicolumn{1}{|p{0.34in}}{IPCI} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as LAM} \\
-\hhline{---}
-%row no:12
-\multicolumn{1}{|p{0.34in}}{RR} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Tstrt must be in-line with PR-Schedule \par RRCL must be a multiple of PRCL \par } \\
-\hhline{---}
-%row no:13
-\multicolumn{1}{|p{0.34in}}{RRY} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:14
-\multicolumn{1}{|p{0.34in}}{SC} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:15
-\multicolumn{1}{|p{0.34in}}{CD} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:16
-\multicolumn{1}{|p{0.34in}}{IPCB} & 
-\multicolumn{1}{|p{3.05in}}{Same as LAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as LAM} \\
-\hhline{---}
-
-\end{longtable}}
-
-%%%%%%%%%%%%%%%%%%%% Table No: 16 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 17 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.79in}p{2.63in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{State Variable} & 
-\multicolumn{1}{|p{2.79in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.63in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{\textbf{Nvl}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{\textbf{Nrt}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{\textbf{Nac}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.48in}}{\textbf{Fac}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.48in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.48in}}{\textbf{Nsc}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.48in}}{\textbf{Isc}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.48in}}{\textbf{Pod}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.48in}}{\textbf{Npr}} & 
-\multicolumn{1}{|p{2.79in}}{PRNXT \par  \(  \left( Nvl+Nac \right) \frac{ \prod_{i=1}^{N-1} \left( 1+Nrt \times Yfr \left( Tev_{i},Tev_{i+1}_{i} \right) }{1+ \sum _{i=1}^{N-1} \prod_{j=i}^{N-1} \left( 1+Nrt \times Yfr \left( Tev_{j},Tev_{j+1} \right)  \right) } \)  \par where  \par  \( N \) := number of IP/PR Events  \( ev_{i} \)  with  \( T_{ev_{i}}>SD, \forall i \)  \par  \( T_{ev_{i}} \) := date of the  \( i \) ’th future IP/PR Event  \( ev_{i} \)  \par } & 
-\multicolumn{1}{|p{2.63in}|}{if PRNXT != NULL \par Else \par } \\
-\hhline{---}
-%row no:11
-\multicolumn{1}{|p{0.48in}}{\textbf{Icb}} & 
-\multicolumn{1}{|p{2.79in}}{Same as LAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as LAM} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 17 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 18 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-{
-\setlength\extrarowheight{3pt}
-\begin{longtable}{p{0.4in}p{2.8in}p{-0.59in}p{0.15in}p{0.04in}p{0.23in}p{-0.01in}p{0.02in}}
-
-\endfirsthead
-\multicolumn{8}{c}{\textit{continued from previous page}}\hline
-\endhead\hline
-\multicolumn{8}{r}{\textit{continued on next page}} \\
-\endfoot
-\hline 
-\endlastfoot\hline
-%row no:1
-\multicolumn{1}{|p{0.4in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{2.8in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{-0.59in}}{\textbf{State Transition Function}} & 
-
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.4in}}{AD} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.4in}}{IED} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.4in}}{PR} & 
-\multicolumn{1}{|p{2.8in}}{Same as NAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as NAM} & 
-
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.4in}}{PP} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.4in}}{PY} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.4in}}{FP} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.4in}}{PRD} & 
-\multicolumn{1}{|p{2.8in}}{Same as LAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.4in}}{TD } & 
-\multicolumn{1}{|p{2.8in}}{Same as LAM} & 
-\multicolumn{1}{|p{-0.59in}}{same as PAM} & 
-
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.4in}}{IP} & 
-\multicolumn{1}{|p{2.8in}}{Same as LAM} & 
-\multicolumn{1}{|p{-0.59in}}{same as PAM} & 
-
-\hhline{---}
-%row no:11
-\multicolumn{1}{|p{0.4in}}{IPCI} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:12
-\multicolumn{1}{|p{0.4in}}{RR} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{\textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par rate = RF(RRMO, Tev)$\ast$ RRMT+RRSP \par deltaRate= min(max(rate-\textbf{Nrt},RRPF),RRPC) \par \textbf{Nrt }= min(max(\textbf{Nrt}+deltaRate,RRLF),RRLC) \par \textbf{Npr }=  \(  \left( Nvl+Nac \right) \frac{ \prod_{i=1}^{N-1} \left( 1+Nrt \times Yfr \left( Tev_{i},Tev_{i+1}_{i} \right) }{1+ \sum _{i=1}^{N-1} \prod_{j=i}^{N-1} \left( 1+Nrt \times Yfr \left( Tev_{j},Tev_{j+1} \right)  \right) } \)  \par where  \par  \( N \) := number of IP/PR Events  \( ev_{i} \)  with  \( T_{ev_{i}}>SD, \forall i \)  \par  \( T_{ev_{i}} \) := date of the  \( i \) ’th future IP/PR Event  \( ev_{i} \)  \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:13
-\multicolumn{1}{|p{0.4in}}{RRY} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{\textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nrt }= RRNXT \par \textbf{Npr }=  \(  \left( Nvl+Nac \right) \frac{ \prod_{i=1}^{N-1} \left( 1+Nrt \times Yfr \left( Tev_{i},Tev_{i+1}_{i} \right) }{1+ \sum _{i=1}^{N-1} \prod_{j=i}^{N-1} \left( 1+Nrt \times Yfr \left( Tev_{j},Tev_{j+1} \right)  \right) } \)  \par where  \par  \( N \) := number of IP/PR Events  \( ev_{i} \)  with  \( T_{ev_{i}}>SD, \forall i \)  \par  \( T_{ev_{i}} \) := date of the  \( i \) ’th future IP/PR Event  \( ev_{i} \)  \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:14
-\multicolumn{1}{|p{0.4in}}{SC} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:15
-\multicolumn{1}{|p{0.4in}}{CD} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-%row no:16
-\multicolumn{1}{|p{0.4in}}{IPCB} & 
-\multicolumn{1}{|p{2.8in}}{Same as LAM} & 
-\multicolumn{1}{|p{-0.59in}}{Same as LAM} & 
-
-\hhline{---}
-
-\end{longtable}}
-
-%%%%%%%%%%%%%%%%%%%% Table No: 18 ends here %%%%%%%%%%%%%%%%%%%%
 
 
 \vspace{\baselineskip}
