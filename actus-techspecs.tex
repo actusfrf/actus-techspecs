@@ -126,6 +126,8 @@
 \newcommand{\uly}[3]{U(#1,#2,#3)}
 \newcommand{\undef}{\varnothing}
 \newcommand{\tmax}{t^{max}}
+\newcommand{\tev}[1]{\tau(#1)}
+\newcommand{\fev}[1]{f(#1)}
 
 
 % ---------------------- Input options --------------------------------
@@ -383,16 +385,27 @@ $\svar{Nvl}{t}$ refers to the State Variable \textit{Nominal Value} observed at 
 
 \subsection{Contract Events}
 
-A contract event $e_t^k$ refers to any contractually scheduled or un-scheduled event at a certain time $t$ and of a certain type $k$. Contract events mark specific points in time during the lifetime of a financial contract at which a cash flow is being exchanged (see section \ref{sec:pof}) or the State Variables of the contract are being updated (see section \ref{sec:stf}). Contract Events types $k$ are written in the short form as defined in table \ref{tbl:events}.
+A contract event $e_t^k$ refers to any contractually scheduled or un-scheduled event at a certain time $t$ and of a certain type $k$. Contract events mark specific points in time during the lifetime of a financial contract at which a cash flow is being exchanged (see section \ref{sec:pof}) or the State Variables of the contract are being updated (see section \ref{sec:stf}). Contract Events types $k$ are written in the short form as defined in table \ref{tbl:events}.\\
+
+As an event always has an associated event time $t$ and payoff $c\in\Real$ we define two operators allowing to retrieve these quantities for any single event $e_t^k$ or set of events $\{e_t^k,e_s^j, ...\}$ as follows;
+
+{$\begin{aligned} 
+	\tev{x} &= \begin{cases} t & \text{if}\quad x=e_t^k \\
+				\{t,s,...\} & \text{else if}\quad x=\{e_t^k,e_s^j,...\} \end{cases} \\
+	\fev{x} &= \begin{cases} c & \text{if}\quad x=e_t^k \\
+				\{c_1, c_2, ...\} & \text{else if}\quad x=\{e_t^k,e_s^j,...\} \end{cases}
+\end{aligned}$}
+
+with $c_1=\fev{e_t^k}, c_2=\fev{e_s^j}, ...$.
 
 \begin{example}[Contract Events]
-The \textit{Initial Exchange Date} event with event time $s$ is written as $e_s^{IED}$.
+The \textit{Initial Exchange Date} event with event time $s$ is written as $e_s^{IED}$ with $\tev{e_s^{IED}}=s$ and $\fev{e_s^{IED}}=c$ where for any contract type \attr{CT} $c=\pof{IED}{\attr{CT}}$.
 \end{example}
 
 
 \subsection{State Transition Functions}
 
-State Transition Functions (STF) define how the State Variables are being updated when a certain Contract Event applies from a pre-event state indexed $t^-$ to a post-event state indexed $t^+$. These functions are specific to a certain Contract Event and Contract Type. STFs are written according to the following pattern \stf{[event type]}{[contract type]} where [event type] and [contract type] refer to the respective event type and contract type to which the STF belongs.
+State Transition Functions (STF) define how the State Variables are being updated when a certain Contract Event $e_t^{k}$ applies from a pre-event (i.e. pre-time $t$) state indexed $t^-$ to a post-event (i.e. post-time $t$) state indexed $t^+$. These functions are specific to a certain Contract Event and Contract Type. STFs are written according to the following pattern \stf{[event type]}{[contract type]} where [event type] and [contract type] refer to the respective event type and contract type to which the STF belongs.
 
 \begin{example}[State Transition Functions]
 The STF for an IP event and PAM contract is written as \stf{IP}{PAM} and maps e.g. state variable \textit{Nominal Accrued} from a pre-event state $\svar{Nac}{t^-}$ to post-event state $\svar{Nac}{t^+}$.
@@ -401,10 +414,10 @@ The STF for an IP event and PAM contract is written as \stf{IP}{PAM} and maps e.
 
 \subsection{Pay Off Functions}
 
-Pay Off Functions (POF) define how the cash flow for a certain Contract Event is being derived from current State Variables and Contract Attributes. These functions are specific to a certain Contract Event and Contract Type. POFs are written according to the following pattern \pof{[event type]}{[contract type]} where [event type] and [contract type] refer to the respective event type and contract type to which the STF belongs.
+Pay Off Functions (POF) define how the cash flow $c\in\Real$ for a certain Contract Event $e_t^k$ is being derived from current State Variables and Contract Attributes. If necessary, the resulting cash flow can be indexed with the event time $c_t$. These functions are specific to a certain Contract Event and Contract Type. POFs are written according to the following pattern \pof{[event type]}{[contract type]} where [event type] and [contract type] refer to the respective event type and contract type to which the STF belongs.
 
 \begin{example}[Pay Off Functions]
-The POF for an IP event and PAM contract is written as \pof{IP}{PAM}.
+The POF for an IP event $e_t^{IP}$ and PAM contract is written as \pof{IP}{PAM} with $\fev{e_t^{IP}}=\pof{IP}{PAM}$.
 \end{example}
 
 
@@ -842,7 +855,7 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 					(\vec{u},\vec{v}) & \text{else} \end{cases}$ 
 		\par where \par
 		{$\begin{aligned} \vec{u} &= \sdl{s}{\attr{OPCL}}{T^{MD}} \\
-				\vec{v} &= \obs{rf}{\attr{PPMO}}{Tev} \end{aligned}$}
+				\vec{v} &= \obs{rf}{\attr{PPMO}}{t} \end{aligned}$}
 		 & with\par $s = \begin{cases} \undef & \text{if} \quad \attr{OPANX}=\undef \land \attr{OPCL}=\undef\\
 					   \attr{IED}+\attr{OPCL} & \text{else if} \quad \attr{OPANX} = \undef \\
 					   \attr{OPANX} & \text{else} \end{cases}$ \\
@@ -947,8 +960,8 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 
 \begin{functions}{PAM}
 	AD & 0.0 & {$\begin{aligned} 
-				\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-1}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-}\\
-				\svar{Led}{t^+} &= Tev 
+				\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-1}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-}\\
+				\svar{Led}{t^+} &= t 
 			\end{aligned}$} \\
 	\hline
 	IED & $\dfl{t^-}\sgn(-1)(\attr{NT}+\attr{PDIED})$ 
@@ -957,108 +970,108 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 			\svar{Nrt}{t^+} &= \begin{cases} 0.0 & \text{if} \quad \attr{IPNR}=\undef \\
 							\attr{IPNR} & \text{else} \end{cases} \\
 			\svar{Nac}{t^+} &= \begin{cases} \attr{IPAC} & \text{if} \quad \attr{IPAC} \neq \undef \\
-							y\svar{Nvl}{t^+}\svar{Nrt}{t^+} & \text{if} \quad \attr{IPANX} \neq \undef \land \attr{IPANX}<Tev \\
+							y\svar{Nvl}{t^+}\svar{Nrt}{t^+} & \text{if} \quad \attr{IPANX} \neq \undef \land \attr{IPANX}<t \\
 							0.0 & \text{else} \end{cases} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$}\par
+			\svar{Led}{t^+} &= t \end{aligned}$}\par
 		with\par
-		$y=\yfr{\attr{IPANX}}{Tev}$ \\
+		$y=\yfr{\attr{IPANX}}{t}$ \\
 	\hline
 	PR & $\dfl{t^-}\svar{Nsc}{t^-}\svar{Nvl}{t^-}$ 
 		& {$\begin{aligned} 
 			\svar{Nvl}{t^+} &= 0.0 \\
 			\svar{Nrt}{t^+} &= 0.0 \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
-	PP & $\dfl{t^-}\obs{rf}{\attr{OPMO}}{Tev}$
+	PP & $\dfl{t^-}\obs{rf}{\attr{OPMO}}{t}$
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
-			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-} - \obs{rf}{\attr{OPMO}}{Tev} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-} - \obs{rf}{\attr{OPMO}}{t} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	PY & {$\begin{aligned}
 			&\dfl{t^-}\sgn\attr{PYRT} &\text{if} \quad \attr{PYTP}=\text{'A'}\\
 			&c\attr{PYRT} &\text{if} \quad \attr{PYTP}=\text{'N'}\\
-			&c\max(0,\svar{Nrt}{t^-}-\obs{rf}{\attr{RRMO}}{Tev}) &\text{if} \quad \attr{PYTP}=\text{'I'} \end{aligned}$}\par
+			&c\max(0,\svar{Nrt}{t^-}-\obs{rf}{\attr{RRMO}}{t}) &\text{if} \quad \attr{PYTP}=\text{'I'} \end{aligned}$}\par
 		with\par
-		$c=\dfl{t^-}\sgn\yfr{\svar{Led}{t^-}}{Tev}\svar{Nvl}{t^-}$
+		$c=\dfl{t^-}\sgn\yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t^-}$
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	FP & {$\begin{aligned}
 			&c &\text{if} \quad \attr{FEB}=\text{'A'}\\
-			&c\yfr{\svar{Led}{t^-}}{Tev}\svar{Nvl}{t^-}+\svar{Fac}{t^-} &\text{if} \quad \attr{FEB}=\text{'N'} \end{aligned}$}\par
+			&c\yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t^-}+\svar{Fac}{t^-} &\text{if} \quad \attr{FEB}=\text{'N'} \end{aligned}$}\par
 		with\par
 		$c=\dfl{t^-}\sgn\attr{FER}$		
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
 			\svar{Fac}{t^+} &= 0.0 \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline 
   	PRD & $\dfl{t^-}\sgn (-1)(\attr{PPRD} + \svar{Nac}{t^-} +$ \par
-		$\qquad\qquad \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-})$
+		$\qquad\qquad \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-})$
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
   	TD & $\dfl{t^-}\sgn (\attr{PTD} + \svar{Nac}{t^-} +$ \par
-		$\qquad\qquad \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-})$
+		$\qquad\qquad \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-})$
 		& {$\begin{aligned} 
 			\svar{Nvl}{t^+} &= 0.0 \\
 			\svar{Nac}{t^+} &= 0.0 \\
 			\svar{Fac}{t^+} &= 0.0 \\
 			\svar{Nrt}{t^+} &= 0.0 \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	IP & $\dfl{t^-}\svar{Isc}{t^-}(\svar{Nac}{t^-} +$\par
-		$\qquad\qquad \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-})$
+		$\qquad\qquad \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-})$
 		& {$\begin{aligned} 		
 			\svar{Nac}{t^+} &= 0.0 \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	IPCI & 0.0
 		& {$\begin{aligned} 
-			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-} + \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nvl}{t^-}\svar{Nrt}{t^-}\\			
+			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-} + \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t^-}\svar{Nrt}{t^-}\\			
 			\svar{Nac}{t^+} &= 0.0 \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	RR & 0.0  
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Nrt}{t^+} &= \min(\max(\svar{Nrt}{t^-}+\Delta r,\attr{RRLF}),\attr{RRLC}) \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$}\par
+			\svar{Led}{t^+} &= t \end{aligned}$}\par
 		with\par
-		$\Delta r = \min(\max(\obs{rf}{\attr{RRMO}}{Tev}\attr{RRMT}+\attr{RRSP} - \svar{Nrt}{t^-},\attr{RRPF}),\attr{RRPC})$ \\
+		$\Delta r = \min(\max(\obs{rf}{\attr{RRMO}}{t}\attr{RRMT}+\attr{RRSP} - \svar{Nrt}{t^-},\attr{RRPF}),\attr{RRPC})$ \\
 	\hline
 	RRY & 0.0 
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Nrt}{t^+} &= \attr{RRNXT} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	SC & 0.0 
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Nsc}{t^+} &= \begin{cases} \svar{Nsc}{t^-} & \text{if} \quad \attr{SCEF} = [x]0[x] \\
-							\frac{\obs{rf}{\attr{SCMO}}{Tev} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
+							\frac{\obs{rf}{\attr{SCMO}}{t} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
 			\svar{Isc}{t^+} &= \begin{cases} \svar{Isc}{t^-} & \text{if} \quad \attr{SCEF} = 0[x][x] \\
-							\frac{\obs{rf}{\attr{SCMO}}{Tev} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+							\frac{\obs{rf}{\attr{SCMO}}{t} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline 
 	CD & 0.0 
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Prf}{t^+} &= \text{'D'}\\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 \end{functions}
 
 
@@ -1173,105 +1186,105 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 			\svar{Nvl}{t^+} &=\sgn\attr{NT} \\
 			\svar{Nrt}{t^+} &= \attr{IPNR} \\
 			\svar{Nac}{t^+} &= \begin{cases} \attr{IPAC} & \text{if} \quad \attr{IPAC} \neq \undef \\
-							y\svar{Nvl}{t^+}\svar{Nrt}{t^+} & \text{if} \quad \attr{IPANX} \neq \undef \land \attr{IPANX}<Tev \\
+							y\svar{Nvl}{t^+}\svar{Nrt}{t^+} & \text{if} \quad \attr{IPANX} \neq \undef \land \attr{IPANX}<t \\
 							0.0 & \text{else} \end{cases} \\
-			\svar{Led}{t^+} &= Tev \\
+			\svar{Led}{t^+} &= t \\
 			\svar{Icb}{t^+} &= \begin{cases} \sgn\attr{NT} & \text{if}\quad \attr{IPCB}=\text{'NT'} \\
 							\sgn\attr{IPCBA} & \text{else} \end{cases} \end{aligned}$} \\
 	\hline
 	PR & $\dfl{t^-}\svar{Nsc}{t^-}\svar{Npr}{t^-}$ 
 		& {$\begin{aligned} 
 			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-}-\svar{Npr}{t^-} \\
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Icb}{t^+} &= \begin{cases} \svar{Icb}{t^-} & \text{if}\quad \attr{IPCB}\neq\text{'NT'} \\
 							\svar{Nvl}{t^+} & \text{else} \end{cases}\\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	PP & \pof{PP}{PAM}
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
-			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-} - \obs{rf}{\attr{OPMO}}{Tev} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-} - \obs{rf}{\attr{OPMO}}{t} \\
 			\svar{Icb}{t^+} &= \begin{cases} \svar{Icb}{t^-} & \text{if}\quad \attr{IPCB}\neq\text{'NT'} \\
 							\svar{Nvl}{t^+} & \text{else} \end{cases}\\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	PY & \pof{PY}{PAM}
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	FP & \pof{FP}{PAM}		
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
 			\svar{Fac}{t^+} &= 0.0 \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline 
   	PRD & $\dfl{t^-}\sgn (-1)(\attr{PPRD} + \svar{Nac}{t^-} +$ \par
-		$\qquad\qquad \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-})$
+		$\qquad\qquad \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-})$
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
   	TD & $\dfl{t^-}\sgn (\attr{PTD} + \svar{Nac}{t^-} +$ \par
-		$\qquad\qquad \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-})$
+		$\qquad\qquad \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-})$
 		& \stf{TD}{PAM} \\
 	\hline
 	IP & $\dfl{t^-}\svar{Isc}{t^-}(\svar{Nac}{t^-} +$ \par
-		$\qquad\qquad \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-})$
+		$\qquad\qquad \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-})$
 		& \stf{IP}{PAM} \\
 	\hline
 	IPCI & \pof{IPCI}{PAM}
 		& {$\begin{aligned} 
-			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-} + \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-}\\			
+			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-} + \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-}\\			
 			\svar{Nac}{t^+} &= 0.0 \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Icb}{t^+} &= \begin{cases} \svar{Icb}{t^-} & \text{if}\quad \attr{IPCB}\neq\text{'NT'} \\
 							\svar{Nvl}{t^+} & \text{else} \end{cases}\\			
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	RR & \pof{RR}{PAM}  
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Nrt}{t^+} &= \min(\max(\svar{Nrt}{t^-}+\Delta r,\attr{RRLF}),\attr{RRLC}) \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$}\par
+			\svar{Led}{t^+} &= t \end{aligned}$}\par
 		with\par
-		$\Delta r = \min(\max(\obs{rf}{\attr{RRMO}}{Tev}\attr{RRMT}+\attr{RRSP} - \svar{Nrt}{t^-},\attr{RRPF}),\attr{RRPC})$ \\
+		$\Delta r = \min(\max(\obs{rf}{\attr{RRMO}}{t}\attr{RRMT}+\attr{RRSP} - \svar{Nrt}{t^-},\attr{RRPF}),\attr{RRPC})$ \\
 	\hline
 	RRY & \pof{RRY}{PAM} 
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Nrt}{t^+} &= \attr{RRNXT} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	SC & \pof{SC}{PAM} 
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Nsc}{t^+} &= \begin{cases} \svar{Nsc}{t^-} & \text{if} \quad \attr{SCEF} = [x]0[x] \\
-							\frac{\obs{rf}{\attr{SCMO}}{Tev} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
+							\frac{\obs{rf}{\attr{SCMO}}{t} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
 			\svar{Isc}{t^+} &= \begin{cases} \svar{Isc}{t^-} & \text{if} \quad \attr{SCEF} = 0[x][x] \\
-							\frac{\obs{rf}{\attr{SCMO}}{Tev} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+							\frac{\obs{rf}{\attr{SCMO}}{t} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline 
 	CD & \pof{CD}{PAM} 
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Prf}{t^+} &= \text{'D'}\\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	IPCB & 0.0 
 		& {$\begin{aligned} 
 			\svar{Icb}{t^+} &= \svar{Nvl}{t^-} \\			
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 \end{functions}
 
 
@@ -1379,14 +1392,14 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 	\hline
 	IED & \pof{IED}{PAM} & \stf{IED}{LAM} \\ 
 	\hline
-	PR & $\dfl{t^-}\svar{Nsc}{t^-}(\svar{Npr}{t^-}-\svar{Nac}{t^-}-$\par $\qquad\qquad \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-})$ 
+	PR & $\dfl{t^-}\svar{Nsc}{t^-}(\svar{Npr}{t^-}-\svar{Nac}{t^-}-$\par $\qquad\qquad \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-})$ 
 		& {$\begin{aligned} 
 			\svar{Nvl}{t^+} &= \svar{Nvl}{t^-}-(\svar{Npr}{t^-}-\svar{Nac}{t^+}) \\
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Icb}{t^+} &= \begin{cases} \svar{Icb}{t^-} & \text{if}\quad \attr{IPCB}\neq\text{'NT'} \\
 							\svar{Nvl}{t^+} & \text{else} \end{cases}\\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	PP & \pof{PP}{PAM}
 		& \stf{PP}{LAM} \\
@@ -1540,21 +1553,21 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 	\hline
 	RR & \pof{RR}{PAM}
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Nrt}{t^+} &= \min(\max(\svar{Nrt}{t^-}+\Delta r,\attr{RRLF}),\attr{RRLC}) \\
-			\svar{Npr}{t^+} &= \ann{Tev}{\svar{Tmd}{t^+}}{\svar{Nvl}{t^+}}{\svar{Nac}{t^+}}{\svar{Nrt}{t^+}} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$}\par
+			\svar{Npr}{t^+} &= \ann{t}{\svar{Tmd}{t^+}}{\svar{Nvl}{t^+}}{\svar{Nac}{t^+}}{\svar{Nrt}{t^+}} \\
+			\svar{Led}{t^+} &= t \end{aligned}$}\par
 		with\par
-		$\Delta r = \min(\max(\obs{rf}{\attr{RRMO}}{Tev}\attr{RRMT}+\attr{RRSP} - \svar{Nrt}{t^-},\attr{RRPF}),\attr{RRPC})$ \\
+		$\Delta r = \min(\max(\obs{rf}{\attr{RRMO}}{t}\attr{RRMT}+\attr{RRSP} - \svar{Nrt}{t^-},\attr{RRPF}),\attr{RRPC})$ \\
 	\hline
 	RRY & \pof{RRY}{PAM} 
 		& {$\begin{aligned} 
-			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
-			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{Tev}\attr{FER}\svar{Nvl}{t^-} \\
+			\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Icb}{t^-} \\
+			\svar{Fac}{t^+} &= \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
 			\svar{Nrt}{t^+} &= \attr{RRNXT} \\
-			\svar{Npr}{t^+} &= \ann{Tev}{\svar{Tmd}{t^+}}{\svar{Nvl}{t^+}}{\svar{Nac}{t^+}}{\svar{Nrt}{t^+}} \\
-			\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+			\svar{Npr}{t^+} &= \ann{t}{\svar{Tmd}{t^+}}{\svar{Nvl}{t^+}}{\svar{Nac}{t^+}}{\svar{Nrt}{t^+}} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	SC & \pof{SC}{PAM}
 		& \stf{SC}{LAM} \\
@@ -1588,7 +1601,7 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 	IP & $t^{IP}=\svar{Tmd}{t_0}$ & \\
 	\hline
 	IPCI & $\vec{t}^{IPCI} = \begin{cases} 
-					\undef & \text{if}\quad \attr{IPANX}=\undef\land\attr{IPCL}=\undef \\
+					\undef & \text{if}\quad \attr{IPNR}=\undef \\
 					\sdl{s}{\attr{IPCL}}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ &
 				where\par
 				$s=\begin{cases} \attr{IPANX} & \text{if}\quad \attr{IPANX}\neq\undef\\
@@ -1613,7 +1626,9 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 \begin{states}{CLM}
 	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \begin{cases} \attr{MD} & \text{if}\quad \attr{MD}\neq\undef \\
 							s & \text{else if}\quad \obs{ev}{\attr{CID}}{t_0}\neq\{\} \\
-							\tmax & \text{else} \end{cases}$ & \\
+							\tmax & \text{else} \end{cases}$ 
+			& where\par
+			$s=\sup t, t\in\tev{\obs{ev}{\attr{CID}}{t_0}}$ \\
 	\hline
   	$\svar{Nvl}{}$ & & Same as PAM \\
 	\hline
@@ -1646,10 +1661,10 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 	FP & \pof{FP}{PAM}
 		& \stf{FP}{PAM} \\
 	\hline
-	IP & $\dfl{t^-}(\svar{Nac}{t^-}+\yfr{\svar{Led}{t^-}}{Tev}\svar{Nrt}{t^-}\svar{Nvl}{t^-})$
+	IP & $\dfl{t^-}(\svar{Nac}{t^-}+\yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-})$
 		& {$\begin{aligned}
 				\svar{Nac}{t^+} &= 0.0 \\
-				\svar{Led}{t^+} &= Tev \end{aligned}$} \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
 	IPCI & \pof{IPCI}{PAM}
 		& \stf{IPCI}{PAM} \\
@@ -1661,522 +1676,527 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 		& \stf{RRY}{PAM} \\
 	\hline 
 	CD & \pof{CD}{PAM}
-		& \stf{CD}{LAM} \\
+		& \stf{CD}{PAM} \\
 \end{functions}
 
 
 %%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
 
+
+\subsection{UMP: Undefined Maturity Profile}\label{sec:ump}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
+
+\begin{schedule}{UMP}
+	AD & & Same as PAM \\
+	\hline
+	IED & & Same as PAM \\
+	\hline
+	PR & $\vec{t}^{PR}=\obs{ev}{\attr{CID}}{t_0}$ & \\
+	\hline
+	FP & & Same as PAM \\
+	\hline
+	IPCI & $\vec{t}^{IPCI} = \begin{cases} 
+					\undef & \text{if}\quad \attr{IPNR}=\undef \\
+					\sdl{s}{\attr{IPCL}}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ &
+				where\par
+				$s=\begin{cases} \attr{IPANX} & \text{if}\quad \attr{IPANX}\neq\undef\\
+						\attr{IED}+\attr{IPCL} & \text{else} \end{cases}$ \\
+	\hline
+	RR & & Same as PAM \\
+	\hline
+	RRY & & Same as PAM \\
+	\hline
+	CD & & Same as PAM \\
+\end{schedule}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{states}{UMP}
+	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \begin{cases} s & \text{if}\quad \obs{ev}{\attr{CID}}{t_0}\neq\{\} \\
+							\tmax & \text{else} \end{cases}$ 
+			& where\par
+			$s=\sup t, t\in\tev{\obs{ev}{\attr{CID}}{t_0}}$ \\
+	\hline
+  	$\svar{Nvl}{}$ & & Same as PAM \\
+	\hline
+	$\svar{Nrt}{}$ & & Same as PAM \\
+  	\hline 
+  	$\svar{Nac}{}$ & & Same as PAM \\
+	\hline
+  	$\svar{Fac}{}$ & & Same as PAM \\
+  	\hline
+  	$\svar{Prf}{}$ & & Same as PAM \\
+	\hline
+	$\svar{Led}{}$ & & Same as PAM \\
+\end{states}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{functions}{UMP}
+	AD & \pof{AD}{PAM} & \stf{AD}{PAM} \\
+	\hline
+	IED & \pof{IED}{CLM} & \stf{IED}{PAM} \\ 
+	\hline
+	PR & $\fev{e_t^{PR}}$ & {$\begin{aligned}
+				\svar{Nac}{t^+} &= \svar{Nac}{t^-}+\yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-} \\
+				\svar{Fac}{t^+} &= \svar{Fac}{t^-}+\yfr{\svar{Led}{t^-}}{t}\attr{FER}\svar{Nvl}{t^-} \\
+				\svar{Nvl}{t^+} &= \svar{Nvl}{t^-}-\fev{e_t^{PR}} \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	FP & \pof{FP}{PAM}
+		& \stf{FP}{PAM} \\
+	\hline
+	IPCI & \pof{IPCI}{PAM}
+		& \stf{IPCI}{PAM} \\
+	\hline
+	RR & \pof{RR}{PAM}
+		& \stf{RR}{PAM} \\
+	\hline
+	RRY & \pof{RRY}{PAM}
+		& \stf{RRY}{PAM} \\
+	\hline 
+	CD & \pof{CD}{PAM}
+		& \stf{CD}{PAM} \\
+\end{functions}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\subsection{CSH: Cash}\label{sec:csh}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
+
+\begin{schedule}{CSH}
+	AD & & Same as PAM \\
+\end{schedule}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{states}{CSH}
+  	$\svar{Nvl}{}$ & $\svar{Nvl}{t_0}=\sgn\attr{NT}$ & \\
+	\hline
+	$\svar{Led}{}$ & & Same as PAM \\
+\end{states}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{functions}{CSH}
+	AD & \pof{AD}{PAM} & $\svar{Led}{t^+}=t$ \\
+\end{functions}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\subsection{STK: Stock}\label{sec:stk}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
+
+\begin{schedule}{STK}
+	AD & & Same as PAM \\
+	\hline
+	PRD & & Same as PAM \\
+	\hline
+	TD & & Same as PAM \\
+	\hline
+	DV$^{(fix)}$ & $t^{DV^{(fix)}} = \begin{cases} 
+					\undef & \text{if}\quad \attr{DVNP}=\undef \\
+					\attr{DVANX} & \text{else} \end{cases}$ & \\
+	\hline
+	DV & $\vec{t}^{DV} = \begin{cases} 
+					\undef & \text{if}\quad \attr{DVANX}=\undef \land \attr{DVCL}=\undef \\
+					\sdl{s}{\attr{DVCL}}{\tmax} & \text{else} \end{cases}$ 
+		& where\par
+		$s=\begin{cases} \attr{DVANX} & \text{if}\quad \attr{DVNP}=\undef \\
+				\attr{DVANX}+\attr{DVCL} & \text{else} \end{cases}$ \\
+	\hline
+	CD & & Same as PAM \\
+\end{schedule}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{states}{STK}
+  	$\svar{Prf}{}$ & & Same as PAM \\
+	\hline
+	$\svar{Led}{}$ & & Same as PAM \\
+\end{states}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{functions}{STK}
+	AD & \pof{AD}{PAM} & $\svar{Led}{t^+}=t$ \\
+	\hline
+	PRD & $\dfl{t^-}\sgn (-1) \attr{PPRD}$
+		& $\svar{Led}{t^+}=t$ \\
+	\hline
+	TD & $\dfl{t^-}\sgn \attr{PTD}$
+		& $\svar{Led}{t^+}=t$ \\
+	\hline
+	DV$^{(fix)}$ & $\dfl{t^-}\sgn\attr{DVNP}$ & $\svar{Led}{t^+}=t$ \\
+	\hline
+	DV & $\dfl{t^-}\sgn \obs{rf}{\attr{DVMO}}{t}$
+		& $\svar{Led}{t^+}=t$ \\
+	\hline 
+	CD & \pof{CD}{PAM}
+		& {$\begin{aligned}
+			\svar{Prf}{t^+} &= \obs{rf}{\attr{LEICP}}{t} \\
+			\svar{Led}{t^+} &= t \end{aligned}$} \\
+\end{functions}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+\subsection{COM: Commodity}\label{sec:com}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
+
+\begin{schedule}{COM}
+	AD & & Same as PAM \\
+	\hline
+	PRD & & Same as STK \\
+	\hline
+	TD & & Same as STK \\
+\end{schedule}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{states}{COM}
+	$\svar{Led}{}$ & & Same as STK \\
+\end{states}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{functions}{COM}
+	AD & \pof{AD}{PAM} & \stf{AD}{STK} \\
+	\hline
+	PRD & \pof{PRD}{STK} & \stf{PRD}{STK} \\
+	\hline
+	TD & \pof{PRD}{STK} & \stf{PRD}{STK} \\
+\end{functions}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\subsection{FXOUT: Foreign Exchange Outright}\label{sec:fxout}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
+
+\begin{schedule}{FXOUT}
+	AD & & Same as PAM \\
+	\hline
+	PRD & & Same as PAM \\
+	\hline
+	TD & & Same as PAM \\
+	\hline
+	STD & $t^{STD} = \begin{cases} 
+					\undef & \text{if}\quad \attr{DS}=\text{'D'} \\
+					\svar{Tmd}{t_0} & \text{else} \end{cases}$ & \\
+	\hline
+	STD$^{(1)}$ & $t^{STD} = \begin{cases} 
+					\undef & \text{if}\quad \attr{DS}=\text{'S'} \\
+					\svar{Tmd}{t_0} & \text{else} \end{cases}$ & \\
+	\hline
+	STD$^{(2)}$ & $t^{STD} = \begin{cases} 
+					\undef & \text{if}\quad \attr{DS}=\text{'S'} \\
+					\svar{Tmd}{t_0} & \text{else} \end{cases}$ & \\
+	\hline
+	CD & & Same as PAM \\
+\end{schedule}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{states}{FXOUT}
+	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \begin{cases} \attr{MD} & \text{if}\quad \attr{STD}=\undef\\
+							\attr{STD} & \text{else} \end{cases}$ & \\
+	\hline
+  	$\svar{Prf}{}$ & & Same as PAM \\
+	\hline
+	$\svar{Led}{}$ & & Same as PAM \\
+\end{states}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{functions}{FXOUT}
+	AD & \pof{AD}{PAM} & \stf{AD}{STK} \\
+	\hline
+	PRD & \pof{PRD}{STK} & \stf{PRD}{STK} \\
+	\hline
+	TD & \pof{TD}{STK} & \stf{TD}{STK} \\
+	\hline
+	STD & $\dfl{t^-}\sgn (\attr{NT}-\obs{rf}{i}{\svar{Tmd}{t}}\attr{NT2})$\par
+		where\par
+		$i=concat(\text{\attr{CUR2},"/",\attr{CUR}})$\par
+		and $concat(x,y,z)$ indicates the string concatenation function
+		& $\svar{Led}{t^+}=t$ \\
+	\hline
+	STD$^{(1)}$ & $\dfl{t^-}\sgn\attr{NT}$ & $\svar{Led}{t^+}=t$ \\
+	\hline
+	STD$^{(2)}$ & $\dfl{t^-}\sgn (-1)\attr{NT2}$ & $\svar{Led}{t^+}=t$ \\
+	\hline 
+	CD & \pof{CD}{PAM}
+		& \stf{CD}{STK} \\
+\end{functions}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+\subsection{SWPPV: Plain Vanilla Interest Rate Swap}\label{sec:swppv}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
+
+\begin{schedule}{SWPPV}
+	AD & & Same as PAM \\
+	\hline
+	PRD & & Same as PAM \\
+	\hline
+	TD & & Same as PAM \\
+	\hline
+	IED & & Same as PAM \\
+	\hline
+	PR & & Same as PAM \\
+	\hline
+	IP & $\vec{t}^{IP} = \begin{cases} 
+					\undef & \text{if}\quad \attr{DS}=\text{'D'} \\
+					\svar{Tmd}{t_0} & \text{else if} \attr{IPCL}=\undef \\
+					\sdl{s}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ 
+		& where\par
+			$s=\begin{cases} \attr{IPANX} & \text{if}\quad \attr{IPANX}\neq\undef \\
+					\attr{IED}+\attr{IPCL} & \text{else} \end{cases}$\\
+	\hline
+	IP$^{(fix)}$ & $\vec{t}^{IP^{(fix)}} = \begin{cases} 
+					\undef & \text{if}\quad \attr{DS}=\text{'S'} \\
+					\svar{Tmd}{t_0} & \text{else if} \attr{IPCL}=\undef \\
+					\sdl{s}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ & \\
+	\hline
+	IP$^{(var)}$ & $\vec{t}^{IP^{(var)}} = \begin{cases} 
+					\undef & \text{if}\quad \attr{DS}=\text{'S'} \\
+					\svar{Tmd}{t_0} & \text{else if} \attr{IPCL}=\undef \\
+					\sdl{s}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ & \\
+	\hline
+	RR & $\vec{t}^{RR}=\sdl{s}{\attr{RRCL}}{\svar{Tmd}{t_0}}$ 
+			& where\par
+				$s=\begin{cases} \attr{RRANX} & \text{if}\quad \attr{RRANX}\neq\undef \\
+						\attr{IED}+\attr{RRCL} & \text{else} \end{cases}$ \\
+	\hline
+	CD & & Same as PAM \\
+\end{schedule}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{states}{SWPPV}
+	$\svar{Tmd}{}$ &  & Same as PAM \\
+	\hline
+	$\svar{Nvl}{}$ &  & Same as PAM \\
+	\hline
+	$\svar{Nrt}{}$ & $\svar{Nrt}{t_0} = \begin{cases} 0.0 & \text{if} \quad \attr{IED} > t_0 \\
+							\attr{IPNR2} & \text{else} \end{cases}$ & \\
+  	\hline 
+  	$\svar{Nac}{}$ & $\svar{Nac}{t_0} = \begin{cases} \attr{IPAC} & \text{if} \quad \attr{IPAC} \neq \undef \\
+						\yfr{t^-}{t_0}\svar{Nvl}{t_0}(\attr{IPNR}-\svar{Nrt}{t_0}) & \text{else} \end{cases}$ & 
+			with $t^- = \sup{t}, t \in t^{IP}, t<t_0$ \\
+	\hline
+	$\svar{Nac1}{}$ & $\svar{Nac1}{t_0} = \yfr{t^-}{t_0}\svar{Nvl}{t_0}\attr{IPNR}$ & with $t^- = \sup{t}, t \in t^{IP}, t<t_0$ \\
+	\hline
+	$\svar{Nac2}{}$ & $\svar{Nac2}{t_0} = \yfr{t^-}{t_0}\svar{Nvl}{t_0}\svar{Nrt}{t_0}$ & with $t^- = \sup{t}, t \in t^{IP}, t<t_0$ \\
+	\hline
+  	$\svar{Fac}{}$ & $\svar{Fac}{t_0} = \begin{cases} 0.0 & \text{if} \quad \attr{FER}=\undef \\
+					\attr{FEAC} & \text{else if} \quad \attr{FEAC} \neq \undef \\
+					\yfr{t^-}{t_0}\times\svar{Nvl}{t_0}\times\attr{FER} & \text{else if} \quad \attr{FEB}=\text{'N'} \\
+					\frac{\yfr{t^-}{t_0}}{\yfr{t^-}{t^+}}\times\attr{FER} & \text{else} \end{cases}$ & 
+			with {$\begin{aligned} t^- &= \sup{t}, t \in t^{FP}, t<t_0 \\
+						t^+ &= \inf{t}, t \in t^{FP}, t>t_0 \end{aligned}$} \\
+  	\hline
+  	$\svar{Prf}{}$ & & Same as PAM \\
+	\hline
+	$\svar{Led}{}$ & & Same as PAM \\
+\end{states}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{functions}{SWPPV}
+	AD & \pof{AD}{PAM} & {$\begin{aligned} 
+				\svar{Nac}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}(\attr{IPNR}-\svar{Nrt}{t_0}) \\
+				\svar{Nac1}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\attr{IPNR} \\
+				\svar{Nac2}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\svar{Nrt}{t_0} \\
+				\svar{Fac}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\attr{FER} \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	IED & 0.0 & {$\begin{aligned} 
+				\svar{Nvl}{t^+} &= \sgn\attr{NT}\\
+				\svar{Nac}{t^+} &= 0.0 \\
+				\svar{Nac1}{t^+} &= 0.0 \\
+				\svar{Nac2}{t^+} &= 0.0 \\
+				\svar{Fac}{t^+} &= 0.0 \\
+				\svar{Nrt}{t^+} &= \attr{IPNR2} \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	PR & 0.0 & {$\begin{aligned} 
+				\svar{Nvl}{t^+} &= 0.0\\
+				\svar{Nac}{t^+} &= 0.0 \\
+				\svar{Nac1}{t^+} &= 0.0 \\
+				\svar{Nac2}{t^+} &= 0.0 \\
+				\svar{Fac}{t^+} &= 0.0 \\
+				\svar{Nrt}{t^+} &= 0.0 \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	PRD & \pof{PRD}{STK} & {$\begin{aligned} 
+				\svar{Nac}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}(\attr{IPNR}-\svar{Nrt}{t_0}) \\
+				\svar{Nac1}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\attr{IPNR} \\
+				\svar{Nac2}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\svar{Nrt}{t_0} \\
+				\svar{Fac}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\attr{FER} \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	TD & \pof{TD}{STK} & {$\begin{aligned} 
+				\svar{Nvl}{t^+} &= 0.0\\
+				\svar{Nac}{t^+} &= 0.0 \\
+				\svar{Nac1}{t^+} &= 0.0 \\
+				\svar{Nac2}{t^+} &= 0.0 \\
+				\svar{Fac}{t^+} &= 0.0 \\
+				\svar{Nrt}{t^+} &= 0.0 \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	IP & $\dfl{t^-}\sgn (\svar{Nac}{t^-}+\yfr{\svar{Led}{t^-}}{t}(\attr{IPNR}-\svar{Nrt}{t^-})\svar{Nvl}{t^-})$ & {$\begin{aligned} 
+				\svar{Nac}{t^+} &= 0.0 \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	IP$^{(fix})$ & $\dfl{t^-}\sgn (\svar{Nac1}{t^-}+\yfr{\svar{Led}{t^-}}{t}\attr{IPNR}\svar{Nvl}{t^-})$ & {$\begin{aligned} 
+				\svar{Nac1}{t^+} &= 0.0 \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	IP$^{(var)}$ & $\dfl{t^-}\sgn (\svar{Nac2}{t^-}-\yfr{\svar{Led}{t^-}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-})$ & {$\begin{aligned} 
+				\svar{Nac2}{t^+} &= 0.0 \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	RR & \pof{RR}{PAM} & {$\begin{aligned} 
+				\svar{Nac}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}(\attr{IPNR}-\svar{Nrt}{t_0}) \\
+				\svar{Nac1}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\attr{IPNR} \\
+				\svar{Nac2}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\svar{Nrt}{t_0} \\
+				\svar{Fac}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\attr{FER} \\
+				\svar{Nrt}{t^+} &= \attr{RRMLT}\obs{rf}{\attr{RRMO}}{t}+\attr{RRSP} \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\	
+\hline 
+	CD & \pof{CD}{PAM}
+		& {$\begin{aligned} 
+				\svar{Nac}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}(\attr{IPNR}-\svar{Nrt}{t_0}) \\
+				\svar{Nac1}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\attr{IPNR} \\
+				\svar{Nac2}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\svar{Nrt}{t_0} \\
+				\svar{Fac}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\attr{FER} \\
+				\svar{Prf}{t^+} &= \text{'D'} \\				
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+\end{functions}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+\subsection{SWAP: Swap}\label{sec:swap}
+
+
+
+
+
 \iffalse
 
 
-
-
-\vspace{\baselineskip}
-\subsection{Call Money (CLM)}
-\subsubsection{Maturity Determination}
-If MD != NULL: Tmd=MD
-
-Else Tmd=AD0+XDN
-
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 19 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.34in}p{3.05in}p{2.49in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.34in}}{Event Type} & 
-\multicolumn{1}{|p{3.05in}}{Schedule} & 
-\multicolumn{1}{|p{2.49in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.34in}}{AD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.34in}}{IED} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.34in}}{PR} & 
-\multicolumn{1}{|p{3.05in}}{Single event at Tmd} & 
-\multicolumn{1}{|p{2.49in}|}{} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.34in}}{FP} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.34in}}{IP} & 
-\multicolumn{1}{|p{3.05in}}{Single event at Tmd} & 
-\multicolumn{1}{|p{2.49in}|}{} \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.34in}}{IPCI} & 
-\multicolumn{1}{|p{3.05in}}{no event \par if IPANX != NULL Then Tstrt = IPANX \par Else Tstrt = IED+IPCL \par Sdl(Tstrt, IPCL, Tmd, EOMC, BDC) >= SD \par } & 
-\multicolumn{1}{|p{2.49in}|}{if IPCL == NULL \par if IPCL != NULL \par } \\
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.34in}}{RR} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.34in}}{RRY} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.34in}}{CD} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 19 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 20 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.79in}p{2.63in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{State Variable} & 
-\multicolumn{1}{|p{2.79in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.63in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{\textbf{Nvl}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{\textbf{Nrt}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{\textbf{Nac}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.48in}}{\textbf{Fac}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.48in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.48in}}{\textbf{Pod}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 20 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 21 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.8in}p{-0.45in}p{0.26in}p{0.12in}p{0.37in}p{0.06in}p{0.09in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{2.8in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{State Transition Function}} & 
-
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{AD} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{IED} & 
-\multicolumn{1}{|p{2.8in}}{= (1-\textbf{Pod}) $\ast$  Sgn(CNTRL) $\ast$  (-1) $\ast$  NT} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{PR} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.48in}}{FP} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.48in}}{IP} & 
-\multicolumn{1}{|p{2.8in}}{= (1-\textbf{Pod})\textbf{ }$\ast$  ( \textbf{Nac + }Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Nvl })} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Nac }= 0.0 \par \textbf{Fac }= 0.0 \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.48in}}{IPCI} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.48in}}{RR} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.48in}}{RRY} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.48in}}{CD} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 21 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsection{Undefined Maturity Profile (UMP)}
-\subsubsection{Maturity Determination}
-Else Tmd=max(Tev) where Tev the sequence of times of events in RF(CID)\par
-
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 22 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.34in}p{3.05in}p{2.49in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.34in}}{Event Type} & 
-\multicolumn{1}{|p{3.05in}}{Schedule} & 
-\multicolumn{1}{|p{2.49in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.34in}}{AD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.34in}}{IED} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.34in}}{PR} & 
-\multicolumn{1}{|p{3.05in}}{un-scheduled events according to RF(CID)} & 
-\multicolumn{1}{|p{2.49in}|}{un-scheduled events only} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.34in}}{FP} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.34in}}{TD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.34in}}{IPCI} & 
-\multicolumn{1}{|p{3.05in}}{no event \par single event at IPANX \par if IPANX != NULL Then Tstrt = IPANX \par Else Tstrt = IED+IPCL \par Sdl(Tstrt, IPCL, Tmd, EOMC, BDC) >= SD \par } & 
-\multicolumn{1}{|p{2.49in}|}{if IPCL == NULL And IPANX == NULL \par If IPCL == NULL And IPANX != NULL \par if IPCL != NULL \par } \\
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.34in}}{RR} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.34in}}{RRY} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.34in}}{CD} & 
-\multicolumn{1}{|p{3.05in}}{same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{same as PAM} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 22 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 23 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.79in}p{2.63in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{State Variable} & 
-\multicolumn{1}{|p{2.79in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.63in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{\textbf{Nvl}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{\textbf{Nrt}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{\textbf{Nac}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.48in}}{\textbf{Fac}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.48in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 23 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 24 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.8in}p{-0.45in}p{0.26in}p{0.12in}p{0.37in}p{0.06in}p{0.09in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{2.8in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{State Transition Function}} & 
-
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{AD} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{IED} & 
-\multicolumn{1}{|p{2.8in}}{Same as CLM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{PR} & 
-\multicolumn{1}{|p{2.8in}}{= Vev} & 
-\multicolumn{1}{|p{-0.45in}}{\textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Icb} \par \textbf{Fac }= \textbf{Fac} + Yfr(\textbf{Led},Tev) $\ast$  FER\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nvl = Nvl - }Vev \par \textbf{Led = }Tev} & 
-
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.48in}}{FP} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.48in}}{TD} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.48in}}{IPCI} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.48in}}{RR} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as CLM} & 
-
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.48in}}{RRY} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.48in}}{CD} & 
-\multicolumn{1}{|p{2.8in}}{same as PAM} & 
-\multicolumn{1}{|p{-0.45in}}{Same as PAM} & 
-
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 24 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsection{Cash (CSH)}
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 25 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.34in}p{3.05in}p{2.49in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.34in}}{Event Type} & 
-\multicolumn{1}{|p{3.05in}}{Schedule} & 
-\multicolumn{1}{|p{2.49in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.34in}}{AD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as STK} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 25 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 26 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.79in}p{2.63in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{State Variable} & 
-\multicolumn{1}{|p{2.79in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.63in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{2.79in}}{Same as STK} & 
-\multicolumn{1}{|p{2.63in}|}{Same as STK} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{\textbf{Nvl}} & 
-\multicolumn{1}{|p{2.79in}}{Sgn(CNTRL) $\ast$  NT} & 
-\multicolumn{1}{|p{2.63in}|}{} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 26 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 27 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.4in}p{2.8in}p{-0.58in}p{0.15in}p{0.05in}p{0.23in}p{0.01in}p{0.02in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.4in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{2.8in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{-0.58in}}{\textbf{State Transition Function}} & 
-
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.4in}}{AD} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.58in}}{\textbf{Led }= Tev} & 
-
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 27 ends here %%%%%%%%%%%%%%%%%%%%
 
 
 \vspace{\baselineskip}
