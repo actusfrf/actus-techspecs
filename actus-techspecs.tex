@@ -123,7 +123,11 @@
 \newcommand{\obs}[3]{O^{#1}(#2,#3)}
 \newcommand{\obsfull}[5]{O^{#1}(#2,#3,#4,#5)}
 \newcommand{\obsfunc}[1]{O^{#1}}
-\newcommand{\uly}[3]{U(#1,#2,#3)}
+\newcommand{\cldev}[3]{U^{ev}(\texttt{#1},#2 \mid\{#3\})}
+\newcommand{\cldsv}[4]{U^{sv}(\texttt{#1},#2,\svar{#3}{} \mid\{#4\})}
+\newcommand{\cldsvs}[3]{U^{sv}(\texttt{#1},#2,\svar{#3}{})}
+\newcommand{\cldca}[2]{U^{ca}(\texttt{#1},#2)}
+\newcommand{\cldfunc}[1]{U^{#1}}
 \newcommand{\undef}{\varnothing}
 \newcommand{\tmax}{t^{max}}
 \newcommand{\tev}[1]{\tau(#1)}
@@ -789,7 +793,7 @@ An overview and description of various event types can be found in table \ref{tb
 
 %%%%%%%%%%%%%%%%%%%% Risk Factor Observer %%%%%%%%%%%%%%%%%%%%
 
-\section{Risk Factor Observer}\label{rfmodel}
+\section{Risk Factor Observer}\label{rfobs}
 
 The payoff of financial contracts always depends on the context in which it is evaluated and which is comprised of the following dimensions; counterparties, markets, and behavioral factors. We refer to these as the \textit{risk factors} to which financial contracts are exposed to. This indicates that these factors are source of uncertainty because financial contracts only reference the factors but their dynamics is outside the control of any contractual agreement. Thus, such factors have to be \textit{observed} and their changing states accounted for when evaluating the payoff of financial contracts. Therefore, we consider a standardized interface $\obsfull{o}{i}{t}{S}{M}$ that allows for \textit{observing}; (1) the state of a certain risk factor $i$ at any time $t$ if $o=$'rf'
 
@@ -806,7 +810,7 @@ and (2) contractual but non-scheduled events if $o=$'ev'
 The parameters to the Risk Factor Observer interface are as follows:
 
 \begin{itemize}
-	\item[$id$]: the identifier of the risk factor \textit{observed}
+	\item[$i$]: the identifier of the risk factor \textit{observed}
 
 	\item[$t$]: the time for which the risk factor’s state should be evaluated
 
@@ -824,6 +828,58 @@ Note that the observer interface only defines the structure of an actual observe
 \end{example}
 
 For brevity we will omit the $S$ and $M$ function arguments wherever this does not lead to confusion.
+
+
+
+%%%%%%%%%%%%%%%%%%%% Child Contract Observer %%%%%%%%%%%%%%%%%%%%
+
+\section{Child Contract Observer}\label{cldobs}
+
+The payoff of certain contracts, i.e. of \textit{Combined Contracts} according to the taxonomy in \ref{fig:taxonomy}, is derived from certain quantities of child contracts. Often times, such contracts are referred to as \textit{underlying instruments} or simply \textit{underlyers} as they build the basis for the payoff of the \textit{parent} contract. Therefore, we consider a standardized interface $\cldfunc{o}$ that allows for \textit{observing} on the parent level; (1) all future events, w.r.t. time $t$, if $o=$'ev'
+
+\[
+	\cldfunc{ev}: i,t,a \mapsto \{e_v^{k},e_w^{l},...\}
+\]
+
+with $v,w>t$ and event types $k,l$ according to the schedule of the child contract, (2) a certain state variable $x$ if $o=$'sv'
+
+\[
+	\cldfunc{sv}: i,t,x,a \mapsto \Real,
+\]
+
+or (3) a particular contract attribute $x$ of the child contract if $o=$'ca'
+
+\[
+	\cldfunc{ca}: i,x \mapsto y
+\]
+
+with $y$ a variable of value type of the respective attribute as per DD.\\
+
+The parameters to the Child Contract Observer interface are as follows:
+
+\begin{itemize}
+	\item[$i$]: the identifier of the child contract \textit{observed}
+
+	\item[$t$]: for $o\in\{\textit{ev,sv}\}$ the time for which the respective quantity should be evaluated
+
+	\item [$x$]: for $o\in\{\textit{sv,ca}\}$ the quantity to be evaluated
+
+	\item [$a$]: for $o\in\{\textit{ev,sv}\}$ a set of contract attributes to which the evaluated quantity should be conditioned
+\end{itemize}
+
+
+Note that the observer interface only defines the structure of an actual observer function but not the actual implementation. Thus, the interface allows for user-defined implementations of observer functions allowing e.g. for using arbitrary data structures.
+
+\begin{example}['ev'-Observer] The future events, w.r.t. time $t$, of the \textit{first leg} (i.e. child contract identified by $\texttt{FirstLeg}$) of a SWAPS contract with $\attr{CNTRL}=PFL$ (i.e. \textit{pay first leg}) can be evaluated as $\cldev{FirstLeg}{t}{\attr{CNTRL}=RPL}$.
+\end{example}
+
+\begin{example}['sv'-Observer] The current state, w.r.t. time $t$, of state variable $\svar{Nvl}{}$ of the \textit{first leg} (i.e. child contract identified by $\texttt{FirstLeg}$) of a SWAPS contract with \attr{CNTRL}=RFL (i.e. \textit{receive first leg}) can be evaluated as $\cldsv{FirstLeg}{t}{Nvl}{\attr{CNTRL}=RPA}$.
+\end{example}
+
+\begin{example}['ca'-Observer] The contract attribute \attr{MOC} of the child contract \textit{Child} (i.e. child contract identified by $\texttt{Child}$) of an OPTNS contract can be evaluated as $\cldca{Child}{\attr{MOC}}$.
+\end{example}
+
+For brevity we will omit the $x$ and $a$ function arguments wherever this does not lead to confusion.
 
 
 
@@ -2043,7 +2099,7 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 	IP & $\vec{t}^{IP} = \begin{cases} 
 					\undef & \text{if}\quad \attr{DS}=\text{'D'} \\
 					\svar{Tmd}{t_0} & \text{else if} \attr{IPCL}=\undef \\
-					\sdl{s}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ 
+					\sdl{s}{\attr{IPCL}}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ 
 		& where\par
 			$s=\begin{cases} \attr{IPANX} & \text{if}\quad \attr{IPANX}\neq\undef \\
 					\attr{IED}+\attr{IPCL} & \text{else} \end{cases}$\\
@@ -2051,12 +2107,12 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 	IP$^{(fix)}$ & $\vec{t}^{IP^{(fix)}} = \begin{cases} 
 					\undef & \text{if}\quad \attr{DS}=\text{'S'} \\
 					\svar{Tmd}{t_0} & \text{else if} \attr{IPCL}=\undef \\
-					\sdl{s}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ & \\
+					\sdl{s}{\attr{IPCL}}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ & \\
 	\hline
 	IP$^{(var)}$ & $\vec{t}^{IP^{(var)}} = \begin{cases} 
 					\undef & \text{if}\quad \attr{DS}=\text{'S'} \\
 					\svar{Tmd}{t_0} & \text{else if} \attr{IPCL}=\undef \\
-					\sdl{s}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ & \\
+					\sdl{s}{\attr{IPCL}}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ & \\
 	\hline
 	RR & $\vec{t}^{RR}=\sdl{s}{\attr{RRCL}}{\svar{Tmd}{t_0}}$ 
 			& where\par
@@ -2186,11 +2242,86 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 
 
 
+\subsection{SWAPS: Swap}\label{sec:swaps}
 
 
-\subsection{SWAP: Swap}\label{sec:swap}
+
+%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
+
+\begin{schedule}{SWAPS}
+	AD & & Same as PAM \\
+	\hline
+	$k$ & $\{e_t^k\} = \begin{cases}
+				\{e_t^{k,1}\}\cup \{e_s^{l,2}\} & \text{if}\quad \attr{DS}=\text{'D'} \\
+				\{e_t^{k,1}\} + \{e_s^{l,2}\} & \text{else} \end{cases}$ \par
+	with\par
+	$\{e_t^{k,1}\}+\{e_s^{l,2}\} = U \cup V$\par
+	and\par
+	{$\begin{aligned}
+		U &= \{e_t^{k,1}\} \triangle \{e_s^{l,2}\}\\
+		V &= \{x_\tau^m+y_\tau^m\}
+	\end{aligned}$} \par
+	where for any two events $x_t^k\in\{e_t^{k,1}\}$, $y_s^l\in\{e_s^{l,1}\}$ we have $x_t^k=y_s^l \iff t=s \land k=l$, $\triangle$ is the \textit{distinct union}-operator, and $x_t^k+y_s^l=z_\tau^m$ with $\tau=t=s$, $m=k=l\in\{\text{IED,IP,PR}\}$ indicates that any two congruent events of type IED, IP, or PR are \textit{merged} into a new \textit{aggregate} event (see payoff and state transition function below).
+		& with\par
+			{$\begin{aligned}
+				e_t^{k,1} &= \cldev{FirstLeg}{t_0}{\attr{CNTRL}=r^{(1)}} \\
+				e_s^{l,2} &= \cldev{SecondLeg}{t_0}{\attr{CNTRL}=r^{(2)}} \\
+				r^{(1)} &= \begin{cases} RPA & \text{if}\quad \attr{CNTRL}=RFL \\
+					RPL & \text{else} \end{cases} \\
+				r^{(2)} &= \begin{cases} RPL & \text{if}\quad \attr{CNTRL}=RFL \\
+					RPA & \text{else} \end{cases}
+			\end{aligned}$} \\
+\end{schedule}
 
 
+%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{states}{SWAPS}
+	$\svar{Tmd}{}$ & $\max(\cldsvs{FirstLeg}{t_0}{Tmd},\cldsvs{SecondLeg}{t_0}{Tmd})$ & \\
+	\hline
+  	$\svar{Nac}{}$ & $\svar{Nac}{t_0} = \cldsv{FirstLeg}{t_0}{Nac}{\attr{CNTRL}=r^{(1)}} + \cldsv{SecondLeg}{t_0}{Nac}{\attr{CNTRL}=r^{(2)}}$ 
+			& For definition of $r^{(1)},r^{(2)}$ see contract schedule \\
+	\hline
+  	$\svar{Fac}{}$ & $\svar{Fac}{t_0} = \begin{cases} 0.0 & \text{if} \quad \attr{FER}=\undef \\
+					\attr{FEAC} & \text{else if} \quad \attr{FEAC} \neq \undef \\
+					\yfr{t^-}{t_0}\times\svar{Nvl}{t_0}\times\attr{FER} & \text{else if} \quad \attr{FEB}=\text{'N'} \\
+					\frac{\yfr{t^-}{t_0}}{\yfr{t^-}{t^+}}\times\attr{FER} & \text{else} \end{cases}$ & 
+			with\par
+			 {$\begin{aligned} t^- &= \sup{t}, t \in t^{FP}, t<t_0 \\
+						t^+ &= \inf{t}, t \in t^{FP}, t>t_0 \end{aligned}$} \\
+  	\hline
+  	$\svar{Prf}{}$ & & Same as PAM \\
+	\hline
+	$\svar{Led}{}$ & & Same as PAM \\
+\end{states}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{functions}{SWAPS}
+	AD & \pof{AD}{PAM} & {$\begin{aligned} 
+				\svar{Nac}{t^+} &= \cldsv{FirstLeg}{t_0}{Nac}{\attr{CNTRL}=r^{(1)}} \\						&+ \cldsv{SecondLeg}{t_0}{Nac}{\attr{CNTRL}=r^{(2)}} \\
+				\svar{Fac}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\attr{FER} \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	$z_\tau^m$ & $\fev{x_\tau^m}+\fev{y_\tau^m}$ 
+		& {$\begin{aligned} 
+				\svar{Nac}{t^+} &= \cldsv{FirstLeg}{t^+}{Nac}{\attr{CNTRL}=r^{(1)}} \\						&+ \cldsv{SecondLeg}{t_0}{Nac}{\attr{CNTRL}=r^{(2)}} \\
+				\svar{Fac}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}\attr{FER} \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+\end{functions}
+
+
+%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
 
 
