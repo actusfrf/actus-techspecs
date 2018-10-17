@@ -720,6 +720,8 @@ By definition, State Variables are updated through Contract Events only. The val
 	\hline
 	Next Principal Redemption Payment & $\svar{Npr}{t}$ & The value at which $\svar{Nvl}{t}$ is being repaid. This may be including or excluding of interest depending on the instrument\\
 	\hline
+	Payoff at Settlement & $\svar{Pos}{t}$ & The payoff of the contract if fixed at time $t$. If evaluated during the lifetime of the contract this quantity gives a hypothetical payoff (e.g. for an OPTNS contract it defines whether the option is in-the-money or not).\\
+	\hline
 	\end{tabular}
 	\caption{State variables}
 	\label{tbl:statevars}
@@ -746,41 +748,43 @@ An overview and description of various event types can be found in table \ref{tb
 	\hline
 	\textbf{Type} & \textbf{Name} & \textbf{Explanation} & \textbf{Seq.} \\
 	\hline
-	STD & Settlement Date & Date when payment for derivatives is settled & 1 \\
+	IED & Initial Exchange Date & Date of first principal event, start of accrual calculation & 1 \\
 	\hline
-	IED & Initial Exchange Date & Date of first principal event, start of accrual calculation & 2 \\
+	IPCI & Interest Capitalization & Periodic interest payment, however capitalized & 2 \\
 	\hline
-	IPCI & Interest Capitalization & Periodic interest payment, however capitalized & 3 \\
+	IP & Interest Payment & Periodic interest payment & 3 \\
 	\hline
-	IP & Interest Payment & Periodic interest payment & 4 \\
+	FP & Fee Payment & (Periodic) fee payment & 4 \\
 	\hline
-	FP & Fee Payment & (Periodic) fee payment & 5 \\
+	PR & Principal Redemption & (Periodic) principal redemption payment & 5 \\
 	\hline
-	PR & Principal Redemption & (Periodic) principal redemption payment & 6 \\
+	PY & Penalty Payment & Payment of a penalty (e.g. due to early repayment of principal outstanding) & 6 \\
 	\hline
-	PY & Penalty Payment & Payment of a penalty (e.g. due to early repayment of principal outstanding) & 7 \\
+	PP & Principal Prepayment & Early repayment of principal outstanding & 7 \\
 	\hline
-	PP & Principal Prepayment & Early repayment of principal outstanding & 8 \\
+	CD & Credit Default & Indicates whether a contract is in its default state or not & 8 \\
 	\hline
-	CD & Credit Default & Indicates whether a contract is in its default state or not & 9 \\
+	RRY & Next Rate Reset & Rate reset event where new rate is already known & 9 \\
 	\hline
-	RRY & Next Rate Reset & Rate reset event where new rate is already known & 10 \\
+	RR & Rate Reset & Interest rate is reset periodically & 10 \\
 	\hline
-	RR & Rate Reset & Interest rate is reset periodically & 11 \\
+	DV & Dividend Payment & Periodic dividend payment & 11 \\
 	\hline
-	DV & Dividend Payment & Periodic dividend payment & 12 \\
+	PRD & Purchase Date & Purchase date of a contract bought in the secondary market & 12 \\
 	\hline
-	PRD & Purchase Date & Purchase date of a contract bought in the secondary market & 13 \\
+	MR & Margin Call Date & Margin call event & 13 \\
 	\hline
-	MR & Margin Call Date & Margin call event & 14 \\
+	TD & Termination Date & Sell date of a contract sold in the secondary market & 14 \\
 	\hline
-	TD & Termination Date & Sell date of a contract sold in the secondary market & 15 \\
+	SC & Scaling Index Revision & & 15 \\
 	\hline
-	SC & Scaling Index Revision & & 16 \\
+	IPCB & Interest Payment Calculation Base & Updates the calculation base for IP accruing & 16 \\
 	\hline
-	IPCB & Interest Payment Calculation Base & Updates the calculation base for IP accruing & 17 \\
+	XD & Expiration Date & Marks expiration of e.g. an OPTNS or FUTUR contract & 17 \\
 	\hline
-	AD & Analysis Event & Retrieves current contract states without alter these & 18 \\
+	STD & Settlement Date & Date when payment for derivatives is settled & 18 \\
+	\hline
+	AD & Analysis Event & Retrieves current contract states without alter these & 19 \\
 	\hline
 	\end{tabular}
 	\caption{Contract Events Definitions.}
