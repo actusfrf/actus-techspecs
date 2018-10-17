@@ -2325,1371 +2325,160 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 
 
-\iffalse
-
-
-
-
-\vspace{\baselineskip}
-\subsection{Stock (STK)}
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 28 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.34in}p{3.05in}p{2.49in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.34in}}{Event Type} & 
-\multicolumn{1}{|p{3.05in}}{Schedule} & 
-\multicolumn{1}{|p{2.49in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.34in}}{AD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.34in}}{PRD} & 
-\multicolumn{1}{|p{3.05in}}{single event at PRD} & 
-\multicolumn{1}{|p{2.49in}|}{if PRD >= SD} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.34in}}{TD} & 
-\multicolumn{1}{|p{3.05in}}{single event at TD} & 
-\multicolumn{1}{|p{2.49in}|}{if TD >= SD} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.34in}}{DV} & 
-\multicolumn{1}{|p{3.05in}}{no event \par Sdl(DVANX, DVCL, MAX\_LIFETIME, EOMC, BDC) >= SD \par } & 
-\multicolumn{1}{|p{2.49in}|}{if DVCL== NULL  \par Else  \par } \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.34in}}{CD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 28 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 29 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.79in}p{2.63in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{State Variable} & 
-\multicolumn{1}{|p{2.79in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.63in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{\textbf{Nvl}} & 
-\multicolumn{1}{|p{2.79in}}{0.0} & 
-\multicolumn{1}{|p{2.63in}|}{Nominal value remains 0.0 throughout the CT’s lifetime} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{\textbf{Nac}} & 
-\multicolumn{1}{|p{2.79in}}{0.0} & 
-\multicolumn{1}{|p{2.63in}|}{Nominal accrued remains 0.0 throughout the CT’s lifetime} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{2.79in}}{SD} & 
-\multicolumn{1}{|p{2.63in}|}{} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.48in}}{\textbf{Pod}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 29 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
 
+\subsection{OPTNS: Option}\label{sec:optns}
 
-%%%%%%%%%%%%%%%%%%%% Table No: 30 starts here %%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
 
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.4in}p{2.8in}p{-0.58in}p{0.15in}p{0.05in}p{0.23in}p{0.01in}p{0.02in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.4in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{2.8in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{-0.58in}}{\textbf{State Transition Function}} & 
-
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.4in}}{AD} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.58in}}{\textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.4in}}{PRD} & 
-\multicolumn{1}{|p{2.8in}}{= Sgn(CNTRL) $\ast$  (-1) $\ast$  (1-\textbf{Pod}) $\ast$  QT $\ast$  PPRD} & 
-\multicolumn{1}{|p{-0.58in}}{\textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.4in}}{TD } & 
-\multicolumn{1}{|p{2.8in}}{= Sgn(CNTRL) $\ast$  (1-\textbf{Pod}) $\ast$  QT $\ast$  PTD} & 
-\multicolumn{1}{|p{-0.58in}}{\textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.4in}}{DV} & 
-\multicolumn{1}{|p{2.8in}}{= Sgn(CNTRL) $\ast$  (1-\textbf{Pod}) $\ast$  Yfr(Tev - DVCL, Tev, A/AISDA) $\ast$  RF(DVMO, Tev, DVCL) $\ast$  MVO} & 
-\multicolumn{1}{|p{-0.58in}}{\textbf{Led }= Tev} & 
+\begin{schedule}{OPTNS}
+	AD & & Same as PAM \\
+	\hline
+	PRD & & Same as PAM \\
+	\hline
+	TD & & Same as PAM \\
+	\hline
+	XD & $t^{XD} = \attr{MD}$ &  \\
+	\hline
+	STD & $t^{XD} = \begin{cases} \attr{MD} & \text{if}\quad \attr{STD}=\undef \\
+					\attr{STD} & \text{else} \end{cases}$ &  \\
+	\hline
+	CD & & Same as PAM \\
+\end{schedule}
 
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.4in}}{CD} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.58in}}{\textbf{Pod }= RF(LEICP, Tev) \par \textbf{Led }= Tev} & 
 
-\hhline{---}
+%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
 
-\end{tabular}
- \end{table}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 30 ends here %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
 
-
-\vspace{\baselineskip}
-\subsection{Commodity (COM)}
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 31 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.34in}p{3.05in}p{2.49in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.34in}}{Event Type} & 
-\multicolumn{1}{|p{3.05in}}{Schedule} & 
-\multicolumn{1}{|p{2.49in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.34in}}{AD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as STK} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.34in}}{PRD} & 
-\multicolumn{1}{|p{3.05in}}{Same as STK} & 
-\multicolumn{1}{|p{2.49in}|}{Same as STK} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.34in}}{TD} & 
-\multicolumn{1}{|p{3.05in}}{Same as STK} & 
-\multicolumn{1}{|p{2.49in}|}{Same as STK} \\
-\hhline{---}
 
-\end{tabular}
- \end{table}
+\begin{states}{OPTNS}
+	$\svar{Pos}{}$ & $\svar{Pos}{t_0} = \begin{cases} 
+							0.0 & \text{if}\quad t_0\leq\attr{MD} \\
+							\max(S_{t_0}-\attr{OPS1},0) & \text{else if}\quad \attr{OPTP}=\text{'C'} \\
+							\max(\attr{OPS1}-S_{t_0},0) & \text{else if}\quad \attr{OPTP}=\text{'P'} \\
+							\max(S_{t_0}-\attr{OPS1},0) & \text{else} \\ \qquad + \max(\attr{OPS2}-S_{t_0},0) &  \end{cases}$ & with\par
+			$S_{t_0}=\obs{rf}{\cldca{Child}{MOC}}{t_0}$ \\
+	\hline	
+	$\svar{Prf}{}$ & & Same as PAM \\
+	\hline
+	$\svar{Led}{}$ & & Same as PAM \\
+\end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 31 ends here %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
 
 
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
+%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 32 starts here %%%%%%%%%%%%%%%%%%%%
+\begin{functions}{OPTNS}
+	AD & \pof{AD}{PAM} & {$\begin{aligned} 
+					\svar{Pos}{t^+} &= \begin{cases} 
+								\max(S_t-\attr{OPS1},0) & \text{if}\quad \attr{OPTP}=\text{'C'} \\
+								\max(\attr{OPS1}-S_t,0) & \text{else if}\quad \attr{OPTP}=\text{'P'} \\
+								\max(S_t-\attr{OPS1},0) & \text{else} \\ \qquad + \max(\attr{OPS2}-S_t,0) &  \end{cases} \\
+					\svar{Led}{t^+} &= t \end{aligned}$}\par
+with\par
+			$S_t=\obs{rf}{\cldca{Child}{MOC}}{t}$ \\
+	\hline
+	PRD & $\dfl{t^-}(-1)\attr{PPRD}$ & $\svar{Led}{t^+} = t$ \\
+	\hline
+	TD & $\dfl{t^-}\attr{PTD}$ & $\svar{Led}{t^+} = t$ \\
+	\hline
+	MD & 0.0 & {$\begin{aligned} 
+					\svar{Pos}{t^+} &= \begin{cases} 
+								\max(S_t-\attr{OPS1},0) & \text{if}\quad \attr{OPTP}=\text{'C'} \\
+								\max(\attr{OPS1}-S_t,0) & \text{else if}\quad \attr{OPTP}=\text{'P'} \\
+								\max(S_t-\attr{OPS1},0) & \text{else} \\ \qquad + \max(\attr{OPS2}-S_t,0) &  \end{cases} \\
+					\svar{Led}{t^+} &= t \end{aligned}$}\par
+with\par
+			$S_t=\obs{rf}{\cldca{Child}{MOC}}{t}$ \\
+	\hline
+	STD & $\dfl{t^-}\sgn\svar{Pos}{t^-}$ & {$\begin{aligned} 
+					\svar{Pos}{t^+} &= 0.0 \\
+					\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	CD & \pof{CD}{PAM} & \stf{CD}{STK} \\
+\end{functions}
 
 
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.79in}p{2.63in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{State Variable} & 
-\multicolumn{1}{|p{2.79in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.63in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{\textbf{Nvl}} & 
-\multicolumn{1}{|p{2.79in}}{0.0} & 
-\multicolumn{1}{|p{2.63in}|}{Nominal value remains 0.0 throughout the CT’s lifetime} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{\textbf{Nac}} & 
-\multicolumn{1}{|p{2.79in}}{0.0} & 
-\multicolumn{1}{|p{2.63in}|}{Nominal accrued remains 0.0 throughout the CT’s lifetime} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{2.79in}}{Same as STK} & 
-\multicolumn{1}{|p{2.63in}|}{Same as STK} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 32 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 33 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.4in}p{2.8in}p{-0.58in}p{0.15in}p{0.05in}p{0.23in}p{0.01in}p{0.02in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.4in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{2.8in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{-0.58in}}{\textbf{State Transition Function}} & 
-
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.4in}}{AD} & 
-\multicolumn{1}{|p{2.8in}}{Same as PAM} & 
-\multicolumn{1}{|p{-0.58in}}{Same as STK} & 
+%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.4in}}{PRD} & 
-\multicolumn{1}{|p{2.8in}}{Same as STK} & 
-\multicolumn{1}{|p{-0.58in}}{Same as STK} & 
 
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.4in}}{TD } & 
-\multicolumn{1}{|p{2.8in}}{Same as STK} & 
-\multicolumn{1}{|p{-0.58in}}{Same as STK} & 
-
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 33 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsection{Combined contract types}
-The class of Combined CTs refers to real-world financial instruments for which their payoff depends on the payoff or the market price of an underlying instrument. The underlying instrument can either be a Basic CT or Combined CT. \par
-
-\subsection{Foreign Exchange Outright (FXOUT)}
-\subsubsection{Settlement determination}
-If STD == NULL: Tstd = MD
-
-Else Tsd = STD
-
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 34 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.34in}p{3.05in}p{2.49in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.34in}}{Event Type} & 
-\multicolumn{1}{|p{3.05in}}{Schedule} & 
-\multicolumn{1}{|p{2.49in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.34in}}{AD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.34in}}{PRD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.34in}}{TD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.34in}}{\multirowcell{2}{}{\begin{tabular}{p{0.34in}}STD\\STD\textsuperscript{1}, STD\textsuperscript{2}\\\end{tabular}}} & 
-\multicolumn{1}{|p{3.05in}}{\multirowcell{3}{}{\begin{tabular}{p{3.05in}}single event at Tstd\\two events at Tstd\\\end{tabular}}} & 
-\multicolumn{1}{|p{2.49in}|}{\multirowcell{3}{}{\begin{tabular}{p{2.49in}}if TD == NULL $\&$  DS == ‘S’\\else if TD == NULL\\\end{tabular}}} \\ 
-
-\hhline{~~~}
-%row no:6
-\multicolumn{1}{|p{0.34in}}{\multirow{1}{*}{\begin{tabular}{p{0.34in}}CD\\\end{tabular}}} & 
-\multicolumn{1}{|p{3.05in}}{\multirowcell{3}{}{\begin{tabular}{p{3.05in}}no event\\dates of RF(LEICP)\\\end{tabular}}} & 
-\multicolumn{1}{|p{2.49in}|}{\multirowcell{5}{}{\begin{tabular}{p{2.49in}}if RF(LEICP) == $ \{ $ $ \} $ $\ast$ \\if RF(LEICP) != $ \{ $ $ \} $ $\ast$ \\$\ast$  credit default risk factor for LEICP is an empty (==$ \{ $ $ \} $ ) or non-empty (!=$ \{ $ $ \} $ ), respectively, set of Date/Value pairs\\\end{tabular}}} \\ 
-
-\hhline{~~~}
-%row no:7
-\multicolumn{1}{|p{0.34in}}{\multirow{1}{*}{\begin{tabular}{p{0.34in}}\end{tabular}}} & 
-\multicolumn{1}{|p{3.05in}}{\multirow{1}{*}{\begin{tabular}{p{3.05in}}\end{tabular}}} & 
-\multicolumn{1}{|p{2.49in}|}{\multirow{1}{*}{\begin{tabular}{p{2.49in}}\end{tabular}}} \\ 
-
-\hhline{~~~}
-%row no:8
-\multicolumn{1}{|p{0.34in}}{CD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 34 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 35 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.79in}p{2.63in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{State Variable} & 
-\multicolumn{1}{|p{2.79in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.63in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{\textbf{Nvl}} & 
-\multicolumn{1}{|p{2.79in}}{0.0} & 
-\multicolumn{1}{|p{2.63in}|}{Nominal value remains 0.0 throughout the CT’s lifetime} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{\textbf{Nac}} & 
-\multicolumn{1}{|p{2.79in}}{0.0} & 
-\multicolumn{1}{|p{2.63in}|}{Nominal accrued remains 0.0 throughout the CT’s lifetime} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{2.79in}}{SD} & 
-\multicolumn{1}{|p{2.63in}|}{} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.48in}}{\textbf{Pod}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 35 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 36 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.46in}p{2.81in}p{2.59in}p{0.08in}p{0.01in}p{0.15in}p{-0.03in}p{-0.02in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.46in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{2.81in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{2.59in}}{\textbf{State Transition Function}} & 
-
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.46in}}{AD} & 
-\multicolumn{1}{|p{2.81in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.59in}}{Same as STK} & 
-
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.46in}}{PRD} & 
-\multicolumn{1}{|p{2.81in}}{= Sgn(CNTRL) $\ast$  (-1) $\ast$  (1-\textbf{Pod}) $\ast$  PPRD} & 
-\multicolumn{1}{|p{2.59in}}{\textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.46in}}{TD } & 
-\multicolumn{1}{|p{2.81in}}{= Sgn(CNTRL) $\ast$  (1-\textbf{Pod}) $\ast$  PTD} & 
-\multicolumn{1}{|p{2.59in}}{\textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.46in}}{STD} & 
-\multicolumn{1}{|p{2.81in}}{= (1 - \textbf{Pod}) $\ast$  Sgn(CNTRL) $\ast$  (NT - RF($``$[CUR2]/[CUR]$"$ , MD) $\ast$  NT2) \par (Event Currency = CUR)} & 
-\multicolumn{1}{|p{2.59in}}{\textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.46in}}{STD\textsuperscript{1}} & 
-\multicolumn{1}{|p{2.81in}}{= (1 - \textbf{Pod}) $\ast$  Sgn(CNTRL) $\ast$  NT \par (Event Currency = CUR2)} & 
-\multicolumn{1}{|p{2.59in}}{\textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.46in}}{STD\textsuperscript{2}} & 
-\multicolumn{1}{|p{2.81in}}{= (1 - \textbf{Pod}) $\ast$  Sgn(CNTRL) $\ast$  (-1) $\ast$  NT2 \par (Event Currency = CUR2)} & 
-\multicolumn{1}{|p{2.59in}}{\textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.46in}}{CD} & 
-\multicolumn{1}{|p{2.81in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.59in}}{\textbf{Pod }= RF(LEICP, Tev) \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 36 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsection{Swap (SWAPS)}
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 37 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.87in}p{3.21in}p{1.81in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.87in}}{Event Type} & 
-\multicolumn{1}{|p{3.21in}}{Schedule} & 
-\multicolumn{1}{|p{1.81in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.87in}}{AD} & 
-\multicolumn{1}{|p{3.21in}}{Same as PAM} & 
-\multicolumn{1}{|p{1.81in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.87in}}{C1-events} & 
-\multicolumn{1}{|p{3.21in}}{all events of underlying 1 with CNTRL=RPA \par all events of underlying 1 with CNTRL=RPL \par } & 
-\multicolumn{1}{|p{1.81in}|}{if CNTRL=RFL \par if CNTRL=PFL \par } \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.87in}}{C2-events} & 
-\multicolumn{1}{|p{3.21in}}{all events of underlying 2 with CNTRL=RPL \par all events of underlying 2 with CNTRL=RPA \par } & 
-\multicolumn{1}{|p{1.81in}|}{if CNTRL=RFL \par if CNTRL=PFL \par } \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 37 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 38 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.5in}p{3.21in}p{2.19in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.5in}}{State Variable} & 
-\multicolumn{1}{|p{3.21in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.19in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.5in}}{\textbf{Nvl}} & 
-\multicolumn{1}{|p{3.21in}}{= \textbf{Nvl }(of underlying 1) - \textbf{Nvl }(of underlying 2)} & 
-\multicolumn{1}{|p{2.19in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.5in}}{\textbf{Nac}} & 
-\multicolumn{1}{|p{3.21in}}{= \textbf{Nac }(of underlying 1) - \textbf{Nac }(of underlying 2)} & 
-\multicolumn{1}{|p{2.19in}|}{} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.5in}}{\textbf{Nrt}} & 
-\multicolumn{1}{|p{3.21in}}{= \textbf{Nrt }(of underlying 1) - \textbf{Nrt }(of underlying 2)} & 
-\multicolumn{1}{|p{2.19in}|}{} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.5in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{3.21in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.19in}|}{} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.5in}}{\textbf{Pod}} & 
-\multicolumn{1}{|p{3.21in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.19in}|}{} \\
-\hhline{---}
 
-\end{tabular}
- \end{table}
 
+\subsection{FUTUR: Future}\label{sec:futur}
 
-%%%%%%%%%%%%%%%%%%%% Table No: 38 ends here %%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
 
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
+\begin{schedule}{FUTUR}
+	AD & & Same as PAM \\
+	\hline
+	PRD & & Same as PAM \\
+	\hline
+	TD & & Same as PAM \\
+	\hline
+	XD & & Same as OPTNS \\
+	\hline
+	STD & & Same as OPTNS \\
+	\hline
+	CD & & Same as PAM \\
+\end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 39 starts here %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
 
 
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.49in}p{1.82in}p{3.57in}p{0.04in}p{-0.02in}p{0.09in}p{-0.06in}p{-0.05in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.49in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{1.82in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{3.57in}}{\textbf{State Transition Function}} & 
 
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.49in}}{AD} & 
-\multicolumn{1}{|p{1.82in}}{= 0.0} & 
-\multicolumn{1}{|p{3.57in}}{\textbf{Nvl }= \textbf{Nvl }(of underlying 1) - \textbf{Nvl }(of underlying 2) \par \textbf{Nac }= \textbf{Nac }(of underlying 1) - \textbf{Nac }(of underlying 2) \par \textbf{Nrt }= \textbf{Nrt }(of underlying 1) - \textbf{Nrt }(of underlying 2) \par \textbf{Led }= Tev} & 
+%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
 
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.49in}}{C1- events} & 
-\multicolumn{1}{|p{1.82in}}{Respective payoff functions of underlying} & 
-\multicolumn{1}{|p{3.57in}}{Respective state transition functions of underlying} & 
 
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.49in}}{C2- events} & 
-\multicolumn{1}{|p{1.82in}}{Respective payoff functions of underlying} & 
-\multicolumn{1}{|p{3.57in}}{Respective state transition functions of underlying} & 
+\begin{states}{FUTUR}
+	$\svar{Pos}{}$ & $\svar{Pos}{t_0} = \begin{cases} 0.0 & \text{if}\quad t_0\leq\attr{MD} \\
+							S_{t_0}-\attr{PFUT} & \text{else} \end{cases}$ & with\par
+			$S_{t_0}=\obs{rf}{\cldca{Child}{MOC}}{t_0}$ \\
+	\hline	
+	$\svar{Prf}{}$ & & Same as PAM \\
+	\hline
+	$\svar{Led}{}$ & & Same as PAM \\
+\end{states}
 
-\hhline{---}
 
-\end{tabular}
- \end{table}
+%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 39 ends here %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
 
 
-\vspace{\baselineskip}
-\subsubsection{Settlement vs. Delivery}
-If DS = ‘D’ then: Delivery case
+\begin{functions}{FUTUR}
+	AD & \pof{AD}{PAM} & {$\begin{aligned} 
+					\svar{Pos}{t^+} &= S_t-\attr{PFUT} \\
+					\svar{Led}{t^+} &= t \end{aligned}$}\par
+with\par
+			$S_t=\obs{rf}{\cldca{Child}{MOC}}{t}$ \\
+	\hline
+	PRD & \pof{PRD}{OPTNS} & \stf{PRD}{OPTNS} \\
+	\hline
+	TD & \pof{TD}{OPTNS} & \stf{TD}{OPTNS} \\
+	\hline
+	MD & \pof{MD}{OPTNS} & {$\begin{aligned} 
+					\svar{Pos}{t^+} &= S_t-\attr{PFUT} \\
+					\svar{Led}{t^+} &= t \end{aligned}$}\par
+with\par
+			$S_t=\obs{rf}{\cldca{Child}{MOC}}{t}$ \\
+	\hline
+	STD & \pof{STD}{OPTNS} & \stf{STD}{OPTNS} \\
+	\hline
+	CD & \pof{CD}{PAM} & \stf{CD}{STK} \\
+\end{functions}
 
-\tab Return the events of the underlyings, i.e. C1 and C2 events
 
-Else (DS = ‘S’): Settlement case
+%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-\tab For all events ev(i)  \(  \in C1  \cup  C2 \) \par
-
-Define for event ev(i):\par
-
-\begin{adjustwidth}{0.5in}{0.0in}
-Tev(i) = event date
-
-\end{adjustwidth}
-
-\begin{adjustwidth}{0.5in}{0.0in}
-Tpe(i) = event type
-
-\end{adjustwidth}
-
-\begin{adjustwidth}{0.5in}{0.0in}
-Vle(i) = event value
-
-\end{adjustwidth}
-
-\begin{adjustwidth}{0.5in}{0.0in}
-Nvl(i) = Nominal value state variable
-
-\end{adjustwidth}
-
-\begin{adjustwidth}{0.5in}{0.0in}
-Nac(i) = Nominal accrued state variable
-
-\end{adjustwidth}
-
-\begin{adjustwidth}{0.5in}{0.0in}
-Nrt(i) = Nominal rate state variable
-
-\end{adjustwidth}
-
-\begin{adjustwidth}{0.5in}{0.0in}
-Led(i) = Last event date state variable
-
-\end{adjustwidth}
-
-If for two events ev(i) and ev(j) with  \( i \neq j \) Tev(i) = Tev(j) And Tpe(i) = Tpe(j) Then
-
-\tab Remove ev(j) and set
-
-\tab Tev(i) = Tev(i)\par
-
-\begin{adjustwidth}{0.5in}{0.0in}
-Tpe(i) = Tpe(i)\par
-
-\end{adjustwidth}
-
-\begin{adjustwidth}{0.5in}{0.0in}
-Vle(i) = Vle(i) - Vle(j)\par
-
-\end{adjustwidth}
-
-\begin{adjustwidth}{0.5in}{0.0in}
-Nvl(i) = Nvl(i) - Nvl(j)\par
-
-\end{adjustwidth}
-
-\begin{adjustwidth}{0.5in}{0.0in}
-Nac(i) = Nac(i) - Nac(j)\par
-
-\end{adjustwidth}
-
-\begin{adjustwidth}{0.5in}{0.0in}
-Nrt(i) = Nrt(i) - Nrt(j)\par
-
-\end{adjustwidth}
-
-\begin{adjustwidth}{0.5in}{0.0in}
-Led(i) = Led(i)\par
-
-\end{adjustwidth}
-
-End
-
-\subsection{Plain Vanilla Interest Rate Swap (SWPPV)}
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 40 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.34in}p{3.05in}p{2.49in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.34in}}{Event Type} & 
-\multicolumn{1}{|p{3.05in}}{Schedule} & 
-\multicolumn{1}{|p{2.49in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.34in}}{AD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.34in}}{PRD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.34in}}{TD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.34in}}{IED} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.34in}}{PR} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{Same as PAM} \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.34in}}{\multirowcell{8}{}{\begin{tabular}{p{0.34in}}IP\\IP\\IP\textsuperscript{1}, IP\textsuperscript{2}\\IP\textsuperscript{1}, IP\textsuperscript{2}\\\end{tabular}}} & 
-\multicolumn{1}{|p{3.05in}}{\multirowcell{13}{}{\begin{tabular}{p{3.05in}}single event at MD\\single schedule Sdl(Tstrt, IPCL, MD, EOMC, BDC) >= SD\\two events at MD\\two schedules Sdl(Tstrt, IPCL, MD, EOMC, BDC) >= SD\\where \\Tstrt: \\=IPANX, if IPANX != NULL,\\=IED+IPCL, else\\\end{tabular}}} & 
-\multicolumn{1}{|p{2.49in}|}{\multirowcell{9}{}{\begin{tabular}{p{2.49in}}if IPCL == NULL and DS == ‘S’\\else if DS == ‘S’\\else if IPCL == NULL and DS == ‘D’\\else if DS == ‘D’\\\end{tabular}}} \\ 
-
-\hhline{~~~}
-%row no:8
-\multicolumn{1}{|p{0.34in}}{\multirow{1}{*}{\begin{tabular}{p{0.34in}}\end{tabular}}} & 
-\multicolumn{1}{|p{3.05in}}{\multirow{1}{*}{\begin{tabular}{p{3.05in}}\end{tabular}}} & 
-\multicolumn{1}{|p{2.49in}|}{\multirow{1}{*}{\begin{tabular}{p{2.49in}}\end{tabular}}} \\ 
-
-\hhline{~~~}
-%row no:9
-\multicolumn{1}{|p{0.34in}}{\multirow{1}{*}{\begin{tabular}{p{0.34in}}\end{tabular}}} & 
-\multicolumn{1}{|p{3.05in}}{\multirow{1}{*}{\begin{tabular}{p{3.05in}}\end{tabular}}} & 
-\multicolumn{1}{|p{2.49in}|}{\multirow{1}{*}{\begin{tabular}{p{2.49in}}\end{tabular}}} \\ 
-
-\hhline{~~~}
-%row no:10
-\multicolumn{1}{|p{0.34in}}{RR} & 
-\multicolumn{1}{|p{3.05in}}{single date at MD \par single schedule Sdl(Tstrt, RRCL, MD, EOMC, BDC) >= SD \par where  \par Tstrt:  \par =RRANX, if RRANX != NULL, \par =IED+RRCL, else \par } & 
-\multicolumn{1}{|p{2.49in}|}{if RRCL == NULL \par else \par } \\
-\hhline{---}
-%row no:11
-\multicolumn{1}{|p{0.34in}}{CD} & 
-\multicolumn{1}{|p{3.05in}}{no event \par dates of RF(LEICP) \par } & 
-\multicolumn{1}{|p{2.49in}|}{if RF(LEICP) == $ \{ $ $ \} $ $\ast$  \par if RF(LEICP) != $ \{ $ $ \} $ $\ast$  \par $\ast$  credit default risk factor for LEICP is an empty (==$ \{ $ $ \} $ ) or non-empty (!=$ \{ $ $ \} $ ), respectively, set of Date/Value pairs \par } \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 40 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 41 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.79in}p{2.63in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{State Variable} & 
-\multicolumn{1}{|p{2.79in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.63in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{\textbf{Nvl}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{CNTRL==’R’: receive fix why NT>0 \par CNTRL==’P’: pay fix why NT<0} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{\textbf{Nrt}} & 
-\multicolumn{1}{|p{2.79in}}{If SD < IED Then 0.0 \par Else IPNR2} & 
-\multicolumn{1}{|p{2.63in}|}{Nominal interest rate of variable leg is IPNR2} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{\textbf{Nac}} & 
-\multicolumn{1}{|p{2.79in}}{If IPAC != DOUBLE\_NULL Then IPAC \par Else Yfr(IP(t-1), SD) $\ast$  \textbf{Nvl }$\ast$  (IPNR\textbf{ - Nrt})} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.48in}}{\textbf{Nac1}} & 
-\multicolumn{1}{|p{2.79in}}{Yfr(IP(t-1), SD) $\ast$  \textbf{Nvl }$\ast$  IPNR} & 
-\multicolumn{1}{|p{2.63in}|}{} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.48in}}{\textbf{Nac2}} & 
-\multicolumn{1}{|p{2.79in}}{Yfr(IP(t-1), SD) $\ast$  (-1) $\ast$  \textbf{Nvl }$\ast$  \textbf{Nrt}} & 
-\multicolumn{1}{|p{2.63in}|}{} \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.48in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{2.79in}}{SD} & 
-\multicolumn{1}{|p{2.63in}|}{} \\
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.48in}}{\textbf{Pod}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 41 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 42 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.49in}p{2.81in}p{2.62in}p{0.15in}p{0.05in}p{0.23in}p{0.01in}p{0.02in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.49in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{2.81in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{2.62in}}{\textbf{State Transition Function}} & 
-
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.49in}}{AD} & 
-\multicolumn{1}{|p{2.81in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.62in}}{\textbf{Nvl} = 0.0 \par \textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  (\textbf{IPNR }- \textbf{Nrt})\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nac1 }= \textbf{Nac1 }+ Yfr(\textbf{Led},Tev) $\ast$  IPNR\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nac2 }= \textbf{Nac2 }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  (-1)\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.49in}}{IED} & 
-\multicolumn{1}{|p{2.81in}}{= 0} & 
-\multicolumn{1}{|p{2.62in}}{\textbf{Nvl }= Sgn(CNTRL) $\ast$  NT \par \textbf{Nac }= 0.0 \par \textbf{Nac1 }= 0.0 \par \textbf{Nac2 }= 0.0 \par \textbf{Nrt }= IPNR2 \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.49in}}{PR} & 
-\multicolumn{1}{|p{2.81in}}{= 0} & 
-\multicolumn{1}{|p{2.62in}}{\textbf{Nvl }= 0.0 \par \textbf{Nac }= 0.0 \par \textbf{Nac1 }= 0.0 \par \textbf{Nac2 }= 0.0 \par \textbf{Nrt }= 0.0 \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.49in}}{PRD} & 
-\multicolumn{1}{|p{2.81in}}{Same as FXOUT} & 
-\multicolumn{1}{|p{2.62in}}{\textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  (\textbf{IPNR }- \textbf{Nrt})\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nac1 }= \textbf{Nac1 }+ Yfr(\textbf{Led},Tev) $\ast$  IPNR\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nac2 }= \textbf{Nac2 }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  (-1)\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.49in}}{TD } & 
-\multicolumn{1}{|p{2.81in}}{Same as FXOUT} & 
-\multicolumn{1}{|p{2.62in}}{\textbf{Nvl }= 0.0 \par \textbf{Nac }= 0.0 \par \textbf{Nac1 }= 0.0 \par \textbf{Nac2 }= 0.0 \par \textbf{Nrt }= 0.0 \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.49in}}{IP} & 
-\multicolumn{1}{|p{2.81in}}{= (1 - \textbf{Pod}) $\ast$  (\textbf{Nac + }Yfr(\textbf{Led},Tev) $\ast$  (IPNR\textbf{ }- \textbf{Nrt}) $\ast$  \textbf{Nvl})} & 
-\multicolumn{1}{|p{2.62in}}{\textbf{Nac }= 0.0 \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:8
-\multicolumn{1}{|p{0.49in}}{IP\textsuperscript{1}} & 
-\multicolumn{1}{|p{2.81in}}{= (1 - \textbf{Pod}) $\ast$  (\textbf{Nac1 + }Yfr(\textbf{Led},Tev) $\ast$  IPNR $\ast$  \textbf{Nvl})} & 
-\multicolumn{1}{|p{2.62in}}{\textbf{Nac }= 0.0 \par \textbf{Nac1 }= 0.0 \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:9
-\multicolumn{1}{|p{0.49in}}{IP\textsuperscript{2}} & 
-\multicolumn{1}{|p{2.81in}}{= (1 - \textbf{Pod}) $\ast$  (\textbf{Nac2 + }(-1) $\ast$  Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Nvl})} & 
-\multicolumn{1}{|p{2.62in}}{\textbf{Nac }= 0.0 \par \textbf{Nac2 }= 0.0 \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:10
-\multicolumn{1}{|p{0.49in}}{RR} & 
-\multicolumn{1}{|p{2.81in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.62in}}{\textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  (\textbf{IPNR }- \textbf{Nrt})\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nac1 }= \textbf{Nac1 }+ Yfr(\textbf{Led},Tev) $\ast$  IPNR\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nac2 }= \textbf{Nac2 }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  (-1)\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nrt }= RF(RRMO, Tev, Yfr(Tev, Tev+RRCL)) \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:11
-\multicolumn{1}{|p{0.49in}}{CD} & 
-\multicolumn{1}{|p{2.81in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.62in}}{\textbf{Pod }= RF(LEICP, Tev) \par \textbf{Nac }= \textbf{Nac }+ Yfr(\textbf{Led},Tev) $\ast$  (\textbf{IPNR }- \textbf{Nrt})\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nac1 }= \textbf{Nac1 }+ Yfr(\textbf{Led},Tev) $\ast$  IPNR\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Nac2 }= \textbf{Nac2 }+ Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  (-1)\textbf{ }$\ast$  \textbf{Nvl} \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 42 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-
-\vspace{\baselineskip}
-
-\vspace{\baselineskip}
-\subsection{Margining Contract (MRGNG)}
-A generic margining contract
-
-\subsection{Future (FUTUR)}
-Shortcut to Forward + Margining
-
-\subsection{Option (OPTNS)}
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 43 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.34in}p{3.05in}p{2.49in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.34in}}{Event Type} & 
-\multicolumn{1}{|p{3.05in}}{Schedule} & 
-\multicolumn{1}{|p{2.49in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.34in}}{AD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.34in}}{PRD} & 
-\multicolumn{1}{|p{3.05in}}{single event at PRD} & 
-\multicolumn{1}{|p{2.49in}|}{if PRD >= SD} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.34in}}{TD} & 
-\multicolumn{1}{|p{3.05in}}{single event at TD} & 
-\multicolumn{1}{|p{2.49in}|}{if TD >= SD} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.34in}}{MD} & 
-\multicolumn{1}{|p{3.05in}}{single event at MD} & 
-\multicolumn{1}{|p{2.49in}|}{if TD == NULL} \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.34in}}{STD} & 
-\multicolumn{1}{|p{3.05in}}{single event at STD \par single event at MD \par } & 
-\multicolumn{1}{|p{2.49in}|}{if STD != NULL \par Else \par } \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.34in}}{CD} & 
-\multicolumn{1}{|p{3.05in}}{no event \par dates of RF(LEICP) \par } & 
-\multicolumn{1}{|p{2.49in}|}{if RF(LEICP) == $ \{ $ $ \} $ $\ast$  \par if RF(LEICP) != $ \{ $ $ \} $ $\ast$  \par $\ast$  credit default risk factor for LEICP is an empty (==$ \{ $ $ \} $ ) or non-empty (!=$ \{ $ $ \} $ ), respectively, set of Date/Value pairs \par } \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 43 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 44 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.79in}p{2.63in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{State Variable} & 
-\multicolumn{1}{|p{2.79in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.63in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{2.79in}}{SD} & 
-\multicolumn{1}{|p{2.63in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{\textbf{Pos}} & 
-\multicolumn{1}{|p{2.79in}}{0} & 
-\multicolumn{1}{|p{2.63in}|}{} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{\textbf{Pod}} & 
-\multicolumn{1}{|p{2.79in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{Same as PAM} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 44 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 45 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.4in}p{-1.56in}p{-1.56in}p{0.26in}p{0.12in}p{0.37in}p{0.06in}p{0.09in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.4in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{-1.56in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{-1.56in}}{\textbf{State Transition Function}} & 
-
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.4in}}{AD} & 
-\multicolumn{1}{|p{-1.56in}}{Same as PAM} & 
-\multicolumn{1}{|p{-1.56in}}{\textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.4in}}{PRD} & 
-\multicolumn{1}{|p{-1.56in}}{=\  (-1) $\ast$  (1-\textbf{Pod}) $\ast$  QT $\ast$  PPRD} & 
-\multicolumn{1}{|p{-1.56in}}{\textbf{Led} = Tev} & 
-
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.4in}}{TD } & 
-\multicolumn{1}{|p{-1.56in}}{= (1-\textbf{Pod}) $\ast$  QT $\ast$  PTD} & 
-\multicolumn{1}{|p{-1.56in}}{\textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.4in}}{MD} & 
-\multicolumn{1}{|p{-1.56in}}{= 0.0 \par if OPTP == C \par else if OPTP == P \par else if OPTP == CP \par } & 
-\multicolumn{1}{|p{-1.56in}}{\textbf{Led }= Tev \par \textbf{Pos }= max[0, VL(Tev, underlying, RF) - OPS1] \par \textbf{Pos }= max[0, OPS1 - VL(Tev, underlying, RF)] \par \textbf{Pos }= max[0, VL(Tev, underlying, RF) - OPS1] + max[0, OPS2 - VL(Tev, underlying, RF)]} & 
-
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.4in}}{STD} & 
-\multicolumn{1}{|p{-1.56in}}{= Sgn(CNTRL) $\ast$  (1-\textbf{Pod}) $\ast$  \textbf{Pos}} & 
-\multicolumn{1}{|p{-1.56in}}{\textbf{Led }= Tev \par \textbf{Pos }= 0.0} & 
-
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.4in}}{CD} & 
-\multicolumn{1}{|p{-1.56in}}{= 0.0} & 
-\multicolumn{1}{|p{-1.56in}}{\textbf{Pod }= RF(LEICP, Tev) \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 45 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsection{Credit Enhancement Guarantee (CEG)}
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 46 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.34in}p{3.05in}p{2.49in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.34in}}{Event Type} & 
-\multicolumn{1}{|p{3.05in}}{Schedule} & 
-\multicolumn{1}{|p{2.49in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.34in}}{AD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.34in}}{PRD} & 
-\multicolumn{1}{|p{3.05in}}{no event \par single event at PRD \par } & 
-\multicolumn{1}{|p{2.49in}|}{if PRD == NULL \par else  \par } \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.34in}}{MD} & 
-\multicolumn{1}{|p{3.05in}}{single event at MD \par single event at max(Tev among all underlyings) \par } & 
-\multicolumn{1}{|p{2.49in}|}{if MD != NULL \par else  \par } \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.34in}}{CD} & 
-\multicolumn{1}{|p{3.05in}}{no event \par dates of RF(LEICP) <= Tev(MD) \par } & 
-\multicolumn{1}{|p{2.49in}|}{if RF(LEICP) == $ \{ $ $ \} $ $\ast$  \par if RF(LEICP) != $ \{ $ $ \} $ $\ast$  \par $\ast$  credit default risk factor for LEICP is an empty (==$ \{ $ $ \} $ ) or non-empty (!=$ \{ $ $ \} $ ), respectively, set of Date/Value pairs \par } \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.34in}}{STD} & 
-\multicolumn{1}{|p{3.05in}}{no event \par shift(dates of RF(LEICP) <= Tev(MD) ) + CEMD, CLDR, BDC, EOMC) \par } & 
-\multicolumn{1}{|p{2.49in}|}{if RF(LEICP) == $ \{ $ $ \} $ $\ast$  \par Else \par $\ast$  or if no CD event occurence \par } \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.34in}}{FP} & 
-\multicolumn{1}{|p{3.05in}}{no event \par Sdl(Tstrt, FECL, Tmd, EOMC, BDC) >= SD \par where  \par Tstrt:  \par =FEANX, if FEANX != NULL, \par =CDD+FECL, else \par } & 
-\multicolumn{1}{|p{2.49in}|}{if FECL == NULL \par Else \par } \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 46 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 47 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.79in}p{2.63in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{State Variable} & 
-\multicolumn{1}{|p{2.79in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.63in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{2.79in}}{SD} & 
-\multicolumn{1}{|p{2.63in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{\textbf{Pod}} & 
-\multicolumn{1}{|p{2.79in}}{same as PAM} & 
-\multicolumn{1}{|p{2.63in}|}{same as PAM} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{\textbf{Pos}} & 
-\multicolumn{1}{|p{2.79in}}{0} & 
-\multicolumn{1}{|p{2.63in}|}{} \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.48in}}{\textbf{Nvl}} & 
-\multicolumn{1}{|p{2.79in}}{0 \par NT \par sum(Nvl per SD over all $``$Covered Contracts$"$ ) \par } & 
-\multicolumn{1}{|p{2.63in}|}{if FECL == NULL or FB == ‘A’ \par else if NT != NULL \par else \par } \\
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.48in}}{\textbf{Nrt}} & 
-\multicolumn{1}{|p{2.79in}}{0 \par FR \par } & 
-\multicolumn{1}{|p{2.63in}|}{if FECL == NULL \par else \par } \\
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.48in}}{\textbf{Nac}} & 
-\multicolumn{1}{|p{2.79in}}{=0 \par =FEAC \par Yfr(FP(t-1), SD) $\ast$  \textbf{Nvl }$\ast$  \textbf{Nrt} \par Yfr(FP(t-1),SD)/Yfr(FP(t-1)+FECL) $\ast$  \textbf{Nrt} \par with FP(t-1) refers to the time of the previous Fee Payment Event according to the Fee Payment schedule \par } & 
-\multicolumn{1}{|p{2.63in}|}{if FECL == NULL \par else if FEAC != NULL \par else if FB == ‘N’ \par else \par } \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 47 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 48 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.33in}p{-1.82in}p{-1.82in}p{0.08in}p{0.01in}p{0.15in}p{-0.03in}p{-0.02in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.33in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{-1.82in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{-1.82in}}{\textbf{State Transition Function}} & 
-
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.33in}}{AD} & 
-\multicolumn{1}{|p{-1.82in}}{Same as PAM} & 
-\multicolumn{1}{|p{-1.82in}}{if (FB == ‘N’ ) then \par \textbf{Nac }= Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Nvl} \par else  \par \textbf{Nac }= Yfr(\textbf{Led},Tev)/Yfr(Tev-FECL, Tev) $\ast$  \textbf{Nrt} \par end \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.33in}}{PRD} & 
-\multicolumn{1}{|p{-1.82in}}{= Sgn(CNTRL) $\ast$  (-1) $\ast$  (1-\textbf{Pod}) $\ast$  PPRD} & 
-\multicolumn{1}{|p{-1.82in}}{if (FB == ‘N’ ) then \par \textbf{Nac }= Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Nvl} \par else  \par \textbf{Nac }= Yfr(\textbf{Led},Tev)/Yfr(Tev-FECL, Tev) $\ast$  \textbf{Nrt} \par end \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.33in}}{FP} & 
-\multicolumn{1}{|p{-1.82in}}{= (1-\textbf{Pod}) $\ast$  ( \textbf{Nac + } fac) \par with  \par if (FEB == ‘N’ ) then \par fac = Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Nvl} \par else  \par fac = Yfr(\textbf{Led},Tev)/Yfr(Tev-FECL, Tev) $\ast$  \textbf{Nrt} \par \textbf{ }end} & 
-\multicolumn{1}{|p{-1.82in}}{\textbf{Nac }= 0.0 \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.33in}}{MD} & 
-\multicolumn{1}{|p{-1.82in}}{= 0.0} & 
-\multicolumn{1}{|p{-1.82in}}{\textbf{Led }= Tev \par \textbf{Nvl }= 0 \par \textbf{Nrt }= 0 \par \textbf{Nac }= 0\textbf{\ \  }} & 
-
-\hhline{---}
-%row no:6
-\multicolumn{1}{|p{0.33in}}{CD} & 
-\multicolumn{1}{|p{-1.82in}}{= 0.0} & 
-\multicolumn{1}{|p{-1.82in}}{if NT != NULL then \par \ \ \ \ \  \textbf{Pos }= NT \par else if CEGE == ‘N’ then  \par \textbf{\ \ \ \ \  Pos }= sum(Nvl at Tev over all $``$Covered Contracts$"$ )  \par else if CEGE == ‘I’ then  \par \textbf{\ \ \ \ \  Pos }= sum(Nvl+Nac at Tev over all $``$Covered Contracts$"$ )  \par else (if CEGE == $``$M$"$ ) \par \ \ \ \ \  \textbf{Pos }= sum(VL(Tev, ct, RF) over all ct in $``$Covered Contracts$"$ ) \par end \par \textbf{Pos }= CECV $\ast$  \textbf{Pos }+ \textbf{Nac }+ fac \par \textbf{Pod }= RF(LEICP, Tev) \par \textbf{Led }= Tev \par \textbf{Nac }= 0 \par with  \par if (FB == ‘N’ ) then \par fac = Yfr(\textbf{Led},Tev) $\ast$  \textbf{Nrt }$\ast$  \textbf{Nvl} \par else  \par fac = Yfr(\textbf{Led},Tev)/Yfr(Tev-FECL, Tev) $\ast$  \textbf{Nrt} \par end} & 
-
-\hhline{---}
-%row no:7
-\multicolumn{1}{|p{0.33in}}{STD} & 
-\multicolumn{1}{|p{-1.82in}}{= (1-\textbf{Pod}) $\ast$  \textbf{Pos}} & 
-\multicolumn{1}{|p{-1.82in}}{\textbf{Led }= Tev \par \textbf{Pos }= 0.0} & 
-
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 48 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsection{Credit Enhancement Collateral (CEC)}
-\subsubsection{Contract Events Generation}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 49 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.34in}p{3.05in}p{2.49in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.34in}}{Event Type} & 
-\multicolumn{1}{|p{3.05in}}{Schedule} & 
-\multicolumn{1}{|p{2.49in}|}{Conditions} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.34in}}{AD} & 
-\multicolumn{1}{|p{3.05in}}{Same as PAM} & 
-\multicolumn{1}{|p{2.49in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.34in}}{MD} & 
-\multicolumn{1}{|p{3.05in}}{single event at max(Tev among all underlyings)} & 
-\multicolumn{1}{|p{2.49in}|}{} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.34in}}{CD} & 
-\multicolumn{1}{|p{3.05in}}{no event \par dates of RF(LEICP) <= Tev(MD) \par } & 
-\multicolumn{1}{|p{2.49in}|}{if RF(LEICP) == $ \{ $ $ \} $ $\ast$  \par if RF(LEICP) != $ \{ $ $ \} $ $\ast$  \par $\ast$  credit default risk factor for LEICP is an empty (==$ \{ $ $ \} $ ) or non-empty (!=$ \{ $ $ \} $ ), respectively, set of Date/Value pairs \par } \\
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.34in}}{STD} & 
-\multicolumn{1}{|p{3.05in}}{no event \par shift(dates of RF(LEICP) <= Tev(MD) ) + CEMD, CLDR, BDC, EOMC) \par } & 
-\multicolumn{1}{|p{2.49in}|}{if RF(LEICP) == $ \{ $ $ \} $ $\ast$  \par Else \par $\ast$  or if no CD event occurence \par } \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 49 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{State Variables Initialization}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 50 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.48in}p{2.79in}p{2.63in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.48in}}{State Variable} & 
-\multicolumn{1}{|p{2.79in}}{Contract Attribute} & 
-\multicolumn{1}{|p{2.63in}|}{Comments} \\
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.48in}}{\textbf{Led}} & 
-\multicolumn{1}{|p{2.79in}}{SD} & 
-\multicolumn{1}{|p{2.63in}|}{} \\
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.48in}}{\textbf{Pod}} & 
-\multicolumn{1}{|p{2.79in}}{0} & 
-\multicolumn{1}{|p{2.63in}|}{} \\
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.48in}}{\textbf{Pos}} & 
-\multicolumn{1}{|p{2.79in}}{0} & 
-\multicolumn{1}{|p{2.63in}|}{} \\
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 50 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\vspace{\baselineskip}
-\subsubsection{Contract Events, State Transition Functions and Pay Off Functions}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 51 starts here %%%%%%%%%%%%%%%%%%%%
-
-
-\begin{table}[H]
- 			\centering
-\begin{tabular}{p{0.45in}p{1.77in}p{3.77in}p{0.15in}p{0.05in}p{0.23in}p{0.01in}p{0.02in}}
-\hline
-%row no:1
-\multicolumn{1}{|p{0.45in}}{\textbf{Event Type}} & 
-\multicolumn{1}{|p{1.77in}}{\textbf{Pay Off Function}} & 
-\multicolumn{1}{|p{3.77in}}{\textbf{State Transition Function}} & 
-
-\hhline{---}
-%row no:2
-\multicolumn{1}{|p{0.45in}}{AD} & 
-\multicolumn{1}{|p{1.77in}}{Same as PAM} & 
-\multicolumn{1}{|p{3.77in}}{\textbf{Led} = Tev} & 
-
-\hhline{---}
-%row no:3
-\multicolumn{1}{|p{0.45in}}{MD} & 
-\multicolumn{1}{|p{1.77in}}{= 0.0} & 
-\multicolumn{1}{|p{3.77in}}{\textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:4
-\multicolumn{1}{|p{0.45in}}{CD} & 
-\multicolumn{1}{|p{1.77in}}{= 0.0} & 
-\multicolumn{1}{|p{3.77in}}{if CEGE == ‘N’ then  \par \textbf{\ \ \ \ \  Pos }= max(0,  \par sum(Nvl at Tev over all $``$Covered Contracts$"$ ) - sum(VL(Tev, ct, RF) over all ct in $``$Covering Contracts$"$ ) \par ) \par else if CEGE == ‘I’ then  \par \textbf{\ \ \ \ \  Pos }= max(0,  \par sum(Nvl+Nac at Tev over all $``$Covered Contracts$"$ ) - sum(VL(Tev, ct, RF) over all ct in "Covering Contracts" ) \par ) \par else (if CEGE == $M$ ) \par \ \ \ \ \  \textbf{Pos }= max(0,  \par sum(VL(Tev, ct, RF) over all ct in "Covered Contracts" ) - sum(VL(Tev, ct, RF) over all ct in "Covering Contracts" ) \par ) \par end \par \textbf{Pod }= RF(LEICP, Tev) \par \textbf{Led }= Tev} & 
-
-\hhline{---}
-%row no:5
-\multicolumn{1}{|p{0.45in}}{STD} & 
-\multicolumn{1}{|p{1.77in}}{= (1-\textbf{Pod}) $\ast$  \textbf{Pos}} & 
-\multicolumn{1}{|p{3.77in}}{\textbf{Led }= Tev \par \textbf{Pos }= 0.0} & 
-
-\hhline{---}
-
-\end{tabular}
- \end{table}
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 51 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\fi
 
 
 \bibliography{bibliography}
