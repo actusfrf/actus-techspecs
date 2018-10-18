@@ -354,12 +354,16 @@ Table \ref{tbl:taxonomy} provides further details on the ACTUS Taxonomy includin
 
 \subsection{Contract Attributes }
 
-Contract Attributes represent the legal contractual terms that define the exchange of cash-flows of a financial contract. Contract Attributes are introduced by the ACTUS data standard and described in the ACTUS Data Dictionary (DD). Throughout this document Contract Attributes are written in the short form and expressed in capitals (not bold). 
+Contract Attributes (attributes) represent the legal contractual terms that define the exchange of cash-flows of a financial contract. Attributes are introduced by the ACTUS data standard and described in the ACTUS Data Dictionary (DD). Different data types exist and are defined in the DD. In particular, scalar-type and vector-type attributes are defined. Throughout this document the attribute short name is used according to the DD. Further, vector-type attributes may be indexed with a subscript indicating that a specific vector-element is referenced.
 
 \begin{example}[Contract Attribute]
 The ACTUS attribute \textit{Initial Exchange Date} is represented in short form \attr{IED}.
 \end{example}
 
+
+\begin{example}[Element of Vector-Type Attribute]
+The ACTUS attribute \textit{Array Cycle Anchor Date of Principal Redemption} is a vector-type attribute and represented as \attr{ARPRANX}. The $i$-th element of the vector is referenced by $\attr{ARPRANX}_i$.
+\end{example}
 
 \subsection{$\undef$-Operator}
 
