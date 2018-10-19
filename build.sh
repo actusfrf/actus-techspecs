@@ -13,7 +13,7 @@ rm -rf build_options.tex
 
 if [ -d ".git" ]; then
 
-TAG=`git describe --tags` || true
+TAG=`git describe --tags --abbrev=0` || true
 SHA=`git rev-parse --short --verify HEAD`
 DATE=`git show -s --format="%cd" --date=short HEAD`
 REV="$TAG-$SHA-$DATE"
