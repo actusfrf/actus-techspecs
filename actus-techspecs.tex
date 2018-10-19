@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%                THIS IS THE                           %%%%%%%%%%%%%%
 %%%%%%%%%%%%     ACTUS TECHNICAL SPECIFICATION DOCUMENT           %%%%%%%%%%%%%%
-%%%%%%%%%%%%                   v1.0                               %%%%%%%%%%%%%%
+%%%%%%%%%%%%                                                      %%%%%%%%%%%%%%
 %%%%%%%%%%%%              ----------------                        %%%%%%%%%%%%%%
 %%%%%%%%%%%%        Copyright (C) 2016 - present by               %%%%%%%%%%%%%%
 %%%%%%%%%%%%      ACTUS Financial Research Foundation             %%%%%%%%%%%%%%
@@ -166,14 +166,14 @@
 
 \section*{About this document}\label{sec:about}
 
-This Document defines provides high-level documentation regarding the Algorithmic Contract Types Unified Standards (ACTUS).  It is provided to the ACTUS Users Association by the ACTUS Financial Research Foundation under the terms of the open source, public good contribution of the ACTUS body of work by the ACTUS Financial Research Foundation.
+This Document provides the technical specifications of the Algorithmic Contract Types Unified Standards (ACTUS). It is developed, maintained, and released by the ACTUS Financial Research Foundation and provided by the same to the ACTUS Users Association under the terms of the open source license with which the document is published from time to time.
 
 
 %%%%%%%%%%%%%%%%%%%%  Versions  %%%%%%%%%%%%%%%%%%%%
 
 \section*{Versions}\label{sec:version}
 
-The version of this document (cf. titlepage) has following format: [major].[minor]-[revision]-[date] where [major] and [minor] are integers marking major and minor release, [revision] indicates an unreleased revision in form of the short form of the respective git commit hash, and [date] the respective date of the revision. Releases are recorded in the following table with minor releases increasing the version number by 0.1; major releases by 1.0.
+The version of this document has following format: [major].[minor]-[rc]-[revision]-[date] where [major] and [minor] are integers marking major and minor release, [rc] is an optional label "RC" indicating whether a certain [major].[minor]-release is in \textit{candidate}-status, [revision] indicates the current revision in form of the respective git commit hash (short form), and [date] gives the respective date of the revision. Releases are recorded in the following table.
 
 \begin{table}[H]
   \centering
@@ -181,11 +181,7 @@ The version of this document (cf. titlepage) has following format: [major].[mino
   \hline
   Date & Version & Description \\ 
   \hline
-  2016-06-17 & 0.1 & Initial Draft of the ACTUS High Level Description \\
-  \hline
-  2017-04-06 & 0.2 & Various conceptual refinements, introduced PP (Principal Prepayment), and PY   (Penalty Payment) event types, introduced Contract Types Call Money (CLM), Cash (CSH), Commodity (COM), Foreign Exchange Outright (FXOUT) \\
-  \hline
-  2018-09-30 & 1.0 & General overhaul of the specifications including introduction of various interfaces, additional rate-reset related attributes and Undefined Maturity Profile (UMP) Contract Type.\\
+  2018-10-29 & 1.0 & First version of the technical specification document containing specifications for the "initial" 18 contracts.\\
   \hline
   \end{tabular}
 \end{table}
