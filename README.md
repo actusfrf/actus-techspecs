@@ -4,7 +4,7 @@
 
 The ACTUS Technical Specification Document provides a formal specification of the ACTUS standard for the algorithmic representation of financial contracts.
 
-It comes as a single ``latex`` file ``actus-techspecs.tex``. The latest version is generally available as a PDF at https://actusfrf.org/actus-techspecs.pdf.
+It comes as a single ``latex`` file ``actus-techspecs.tex``. The latest release is generally available as a PDF at https://actusfrf.org/actus-techspecs.pdf.
 
 The ACTUS Technical Specification Document is freely available and licensed under Creative Commons Attribution Share-Alike (CC-BY-SA) version 4.0.
 
