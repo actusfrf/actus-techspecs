@@ -9,6 +9,10 @@
 %%%%%%%%%%%%      Please see distribution for license             %%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+%%%%%%%%%%%%%%%%%%%%%%% settings %%%%%%%%%%%%%%%%%%%%%%
+
+% ---------------------- general ----------------------
 \documentclass[9pt,oneside]{amsart}
 \usepackage{multicol}
 \usepackage[a4paper,
@@ -24,26 +28,27 @@
             pdfborder={0 0 0.5 [1 3]}]{hyperref}
 
 
-% ---------------------- Language --------------------------------
+% ---------------------- language ----------------------
 \usepackage[english]{babel}
 
 
-% ---------------------- floats and figures --------------------------------
+% ---------------------- floats ----------------------
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{longtable}
 
 
-% ---------------------- math --------------------------------
+% ---------------------- math ----------------------
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage{amsthm} % for theorem-style environments
+\usepackage{amsthm}
 \newtheorem{example}{Example}
 
 
-% ------------------- special tables -----------------------------
+% ---------------------- custom tables ----------------------
 \newenvironment{states}[1]{
-	\begin{longtable}[H]{| p{0.05\textwidth} | p{0.48\textwidth} |  p{0.43\textwidth} |}
+	\hfill % force subsection before longtable
+	\begin{longtable}{| p{0.05\textwidth} | p{0.48\textwidth} |  p{0.43\textwidth} |}
 	\multicolumn{3}{c}{\textbf{#1: State Variables Initialization}}\\
 	\hline
 	\textbf{State} & \textbf{Initialization per $t_0$} & \textbf{Comments} \\
@@ -64,7 +69,8 @@
 }
 
 \newenvironment{schedule}[1]{
-	\begin{longtable}[H]{| p{0.05\textwidth} | p{0.5\textwidth} |  p{0.4\textwidth} |}
+	\hfill % force subsection before longtable
+	\begin{longtable}{| p{0.05\textwidth} | p{0.5\textwidth} |  p{0.4\textwidth} |}
 	\multicolumn{3}{c}{\textbf{#1: Contract Schedule}}\\
 	\hline
 	\textbf{Event} & \textbf{Schedule} & \textbf{Comments} \\
@@ -85,7 +91,8 @@
 }
 
 \newenvironment{functions}[1]{
-    	\begin{longtable}[H]{| p{0.05\textwidth} | p{0.42\textwidth} |  p{0.48\textwidth} |}
+	\hfill % force subsection before longtable
+    	\begin{longtable}{| p{0.05\textwidth} | p{0.42\textwidth} |  p{0.48\textwidth} |}
 	\multicolumn{3}{c}{\textbf{#1: State Transition Functions and Payoff Functions}}\\
 	\hline
 	\textbf{Event} & \textbf{Payoff Function} & \textbf{State Transition Function}\\
@@ -105,10 +112,8 @@
     	\end{longtable}
 }
 
-% ---------------------- misc --------------------------------
-\usepackage{verbatim}
-\usepackage{natbib}
-\setlength\parindent{0pt}
+
+% ---------------------- custom notation ----------------------
 \newcommand{\Real}{\mathbb{R}}
 \newcommand{\Nat}{\mathbb{N}}
 \newcommand{\svar}[2]{\textbf{#1}_{#2}}
@@ -135,13 +140,18 @@
 \newcommand{\fev}[1]{f(#1)}
 
 
-% ---------------------- Input options --------------------------------
+% ---------------------- misc ----------------------
+\usepackage{verbatim}
+\usepackage{natbib}
+\setlength\parindent{0pt}
+
+
+% ---------------------- versioning ----------------------
 \newcommand{\VersionNumber}{unknown revision}
 \IfFileExists{build_options.tex}{\input{build_options.tex}}
 
 
-%%%%%%%%%%%%%%%%%%%%        Titlepage          %%%%%%%%%%%%%%%%%%%%
-
+%%%%%%%%%%%%%%%%%%%%%%% titlepage %%%%%%%%%%%%%%%%%%%%%%
 \title{ACTUS: The algorithmic representation of financial contracts \\
       {\smaller \textbf{Version \VersionNumber}}}
 
@@ -150,7 +160,8 @@
     info@actusfrf.org
 }
 
-%%%%%%%%%%%%%%%%%%%% Document code starts here %%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%% front matter %%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
@@ -161,16 +172,13 @@
 \maketitle
 
 
-
-%%%%%%%%%%%%%%%%%%%  About  %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- about ----------------------
 \section*{About this document}\label{sec:about}
 
 This Document provides the technical specifications of the Algorithmic Contract Types Unified Standards (ACTUS). It is developed, maintained, and released by the ACTUS Financial Research Foundation and provided by the same to the ACTUS Users Association under the terms of the open source license with which the document is published from time to time.
 
 
-%%%%%%%%%%%%%%%%%%%%  Versions  %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- versions ----------------------
 \section*{Versions}\label{sec:version}
 
 The version of this document has following format: [major].[minor]-[rc]-[revision]-[date] where [major] and [minor] are integers marking major and minor release, [rc] is an optional label "RC" indicating whether a certain [major].[minor]-release is in \textit{candidate}-status, [revision] indicates the current revision in form of the respective git commit hash (short form), and [date] gives the respective date of the revision. Releases are recorded in the following table.
@@ -187,27 +195,25 @@ The version of this document has following format: [major].[minor]-[rc]-[revisio
 \end{table}
 
 
-%%%%%%%%%%%%  Starting new page here %%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%% table of contents %%%%%%%%%%%%%%%%%%%%%%
 
+% ---------------------- new page ----------------------
 \newpage
-
-
-%%%%%%%%%%%%  Table Of Contents %%%%%%%%%%%%%%
-
 \tableofcontents
 
 
-%%%%%%%%%%%%  Starting new page here %%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%% main body %%%%%%%%%%%%%%%%%%%%
+
+% ---------------------- new page ----------------------
 \newpage
 
-
-%%%%%%%%%%%%%%%%%%%% 2-columns starts here %%%%%%%%%%%%%%%%%%%%
+% ---------------------- 2-columns ----------------------
 \setlength{\columnsep}{20pt}
 \begin{multicols}{2}
 
 
-%%%%%%%%%%%%%%%%%%%%  Introduction  %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% section: introduction %%%%%%%%%%%%%%%%%%%%
 
 \section{Introduction}\label{sec:intro}
 
@@ -222,15 +228,14 @@ Financial contracts represent the deterministic part of finance. This offers a s
 A variable rate instrument has a current coupon that is known and therefore part of the contract attributes. It also has a rule, how to derive new rates such as \textit{Libor plus x basis points}. These rules are contract terms and therefore also part of the contract attributes. However, ACTUS is agnostic towards the external market link (or Risk Factor) from which the new rate is fed upon a rate reset.
 
 
-%%%%%%%%%%%%%%%%%%%%  Taxonomy  %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% section: taxonomy %%%%%%%%%%%%%%%%%%%%
 
-\section{Financial contract taxonomy}
+\section{Financial contract taxonomy}\label{sec:taxonomy}
 
 Below an overview of the ACTUS Contract Types taxonomy.
 
 
-%%%%%%%%%%%%%%%%%%%% Figure/Image No: 2 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- figure: taxonomy ----------------------
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.45\textwidth]{./media/taxonomy.png}
@@ -239,16 +244,13 @@ Below an overview of the ACTUS Contract Types taxonomy.
 \end{figure}
 
 
-%%%%%%%%%%%%%%%%%%%% Figure/Image No: 2 Ends here %%%%%%%%%%%%%%%%%%%%
-
-
 Table \ref{tbl:taxonomy} provides further details on the ACTUS Taxonomy including the real-world financial contracts covered through the various ACTUS Contract Types.
 
 
+% ---------------------- table: taxonomy ----------------------
+
+% ---------------------- 1-column ----------------------
 \end{multicols}
-
-%%%%%%%%%%%%%%%%%%%% Table No: 3 starts here %%%%%%%%%%%%%%%%%%%%
-
 
 \begin{longtable}{| p{0.07\textwidth}p{0.07\textwidth}p{0.1\textwidth}p{0.45\textwidth}p{0.2\textwidth} |}
 	\hline
@@ -336,19 +338,17 @@ Table \ref{tbl:taxonomy} provides further details on the ACTUS Taxonomy includin
 	\label{tbl:taxonomy}
 \end{longtable}
 
-%%%%%%%%%%%%%%%%%%%% Table No: 3 ends here %%%%%%%%%%%%%%%%%%%%
 
-
-%%%%%%%%%%%%%%%%%%%% 2-columns starts here %%%%%%%%%%%%%%%%%%%%
+% ---------------------- 2-columns ----------------------
 \setlength{\columnsep}{20pt}
 \begin{multicols}{2}
 
 
-%%%%%%%%%%%%%%%%%%%% Notations %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% section: notations %%%%%%%%%%%%%%%%%%%%
 
 \section{Notations}\label{sec:notations}
 
-\subsection{Contract Attributes }
+\subsection{Contract Attributes}\label{sec:attributes}
 
 Contract Attributes (attributes) represent the legal contractual terms that define the exchange of cash-flows of a financial contract. Attributes are introduced by the ACTUS data standard and described in the ACTUS Data Dictionary (DD). Different data types exist and are defined in the DD. In particular, scalar-type and vector-type attributes are defined. Throughout this document the attribute short name is used according to the DD. Further, vector-type attributes may be indexed with a subscript indicating that a specific vector-element is referenced.
 
@@ -361,7 +361,8 @@ The ACTUS attribute \textit{Initial Exchange Date} is represented in short form 
 The ACTUS attribute \textit{Array Cycle Anchor Date of Principal Redemption} is a vector-type attribute and represented as \attr{ARPRANX}. The $i$-th element of the vector is referenced by $\attr{ARPRANX}_i$.
 \end{example}
 
-\subsection{$\undef$-Operator}
+
+\subsection{$\undef$-Operator}\label{sec:undef}
 
 The $\undef$-operator is used to indicate that a certain property is undefined or, in other words, that no value has been assigned to the respective property. In particular, for optional contract attributes it means that the attribute is not defined and for schedule times (see section \ref{sec:schedules}) it means that the respective schedule is empty, i.e. no schedule time defined.
 
@@ -379,7 +380,7 @@ $\vec{t}^{IP}=\undef$ means the same as $\vec{t}^{IP}=\{\}$, with $\{\}$ the emp
 $t_0$ marks the time as per which the state of a contract is represented in form of the respective set of attributes. Status Date \attr{SD} itself is an attribute of the contract. In general, from the contractual logic we are able to derive any contractual events and contract states for any time $t>t_0$.
 
 
-\subsection{State Variables}
+\subsection{State Variables}\label{sec:statevars}
 
 State Variables describe the inner state of a financial contract at a certain point in time $t$ during its lifetime such as (outstanding) Nominal Value, applicable Interest Rate, or the contract performance through Contract Status. State Variables are written in the short form as defined in table \ref{tbl:statevars} with first letter capitalized, printed in bold, and indexed with time.
 
@@ -388,7 +389,7 @@ $\svar{Nvl}{t}$ refers to the State Variable \textit{Nominal Value} observed at 
 \end{example}
 
 
-\subsection{Contract Events}
+\subsection{Contract Events}\label{sec:events}
 
 A contract event $e_t^k$ refers to any contractually scheduled or un-scheduled event at a certain time $t$ and of a certain type $k$. Contract events mark specific points in time during the lifetime of a financial contract at which a cash flow is being exchanged (see section \ref{sec:pof}) or the State Variables of the contract are being updated (see section \ref{sec:stf}). Contract Events types $k$ are written in the short form as defined in table \ref{tbl:events}.\\
 
@@ -426,7 +427,7 @@ The POF for an IP event $e_t^{IP}$ and PAM contract is written as \pof{IP}{PAM} 
 \end{example}
 
 
-\subsection{Date/Time}
+\subsection{Date/Time}\label{sec:time}
 
 ACTUS builds on the ISO 8601 date/time format. Hence, dates are generally expressed in the following format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].
 
@@ -437,12 +438,12 @@ A special case is \textit{midnight}. ISO 8601 recognizes both times 00:00:00 and
 For brevity, we use the term \textit{time} for a specific date-time variable and in particular abbreviation Tev for the date of a Contract Event.
 
 
-\subsection{Event Sequence}
+\subsection{Event Sequence}\label{sec:eventseq}
 
 Contract Events of different types may occur at the same time, i.e. exactly the same point in time. In this case, the sequence of evaluating their State Transition and Payoff Functions is decisive for the resulting cash flows and state updates. The Event Sequence given for all events in table \ref{tbl:events} defines the order in which these functions are evaluated for the respective event types.
 
 
-\subsection{Contract Lifetime}
+\subsection{Contract Lifetime}\label{sec:lifetime}
 
 The lifetime of an ACTUS contract is the time period of its existence from the perspective of the analyzing user. For every point in time during its lifetime, an ACTUS contract can be analyzed in terms of current State Variables and future cash flows.\\
 
@@ -451,11 +452,12 @@ The lifetime of a contract starts with its \attr{SD} and ends with $\min(MD, AMD
 Note that $PR^*$ refers to the PR event of a maturity contract after which \textbf{Nvl}=0.0 (i.e. at which the remaining outstanding principal is redeemed). Further, \attr{MD}, \attr{AMD}, and PR(\textbf{Nvl}=0.0) in the definition above do only apply for maturity contracts but have to be considered infinity in all other cases. Similarly, \attr{STD} only applies for certain contracts and is considered infinity for all others. Finally, $\tmax$ is a parameter that may be used to restrict the considered lifetime in an analysis. In particular, this parameter is used for contracts that do not have a \textit{natural} end to their lifetime such as STK.
 
 
-%%%%%%%%%%%%%%%%%%%% Utility Functions %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% section: utility functions %%%%%%%%%%%%%%%%%%%%
 
-\section{Utility Functions}
+\section{Utility Functions}\label{sec:utils}
 
-\subsection{Schedules}\label{sec:schedules}
+
+\subsection{Schedule}\label{sec:schedule}
 
 A schedule is a function $S$ mapping times $s,T$ with $s<T$ and cycle $c$ onto a sequence $\vec{t}$ of cyclic times
 
@@ -497,7 +499,7 @@ The sequence of schedule times $\vec{t}^k$ may also be influenced by the \attr{E
 Note that for brevity we will omit the \attr{EOMC} and \attr{BDC} function arguments throughout this document.
 
 
-\subsection{Array Schedules}
+\subsection{Array Schedule}\label{sec:arrayschedule}
 
 Array Schedules are defined by vector-valued inputs $\vec{s}=(s_0,s_1,...,s_m)$ and $\vec{c}=(c_0,c_1,...,c_m)$ to the regular schedule function
 
@@ -510,7 +512,7 @@ Array Schedules are defined by vector-valued inputs $\vec{s}=(s_0,s_1,...,s_m)$ 
 Hence, array schedules are a generalization for regular schedules which coincide for $m=1$. In accordance with regular schedules \attr{EOMC} and \attr{BDC} conventions also apply here.
 
 
-\subsection{End Of Month effects}
+\subsection{End Of Month Shift Convention}\label{sec:eomc}
 
 For schedules $\vec{t}^k$ starting at time $s$ which marks the end of a month with 30 or less days, e.g. April 30, and with a cycle $c$ being a multiple of 1M- attribute \attr{EOM} defines whether the schedule times are to fall on the 30th of all months (same day) or the 31st (end of month).\\ 
 
@@ -530,7 +532,7 @@ As per the DD \attr{EOM} can take one of the following values:
 \end{itemize}
 
 
-\subsection{Business Day effects}
+\subsection{Business Day Shift Convention}\label{sec:bdc}
 
 In general, contract events are scheduled for business days only. Therefore, the \attr{BDC} convention defines how scheduled times $t_i,i=1,2,...,n-1$ are shifted in case they fall on a non-business day:
 
@@ -555,8 +557,7 @@ In general, contract events are scheduled for business days only. Therefore, the
 \end{itemize}
 
 
-
-\subsection{Business Day Function}
+\subsection{Business Day Calendar}\label{sec:bdcal}
 
 Whether a specific day is a business day (cf. previous section) is defined by attribute \attr{CLDR}. Such conventions generally depend on regional official holiday calendars. The Business Day Function interface allows determining for some \attr{CLDR} whether any time $t$ is a business day or not
 
@@ -577,7 +578,7 @@ Two standard \attr{CLDR} implementations are the following
 \end{example}
 
 
-\subsection{Year Fraction Function}
+\subsection{Year Fraction Convention}\label{sec:yearfrac}
 
 Interest income and other calculations are based on \textit{per annum} interest rates. Therefore, the year-fraction function interface $Y$ is used to calculate the \textit{fraction of a year} between any two times $s$ and $t$ with $t>s$ for which e.g. an (per annum) interest rate applies according to some day count convention \attr{DCC}
 
@@ -590,7 +591,7 @@ Note, the year fraction function interface only defines the structure of year fr
 For brevity we will omit the \attr{DCC} function argument wherever this does not lead to confusion.
 
 
-\subsection{Contract Role Sign}
+\subsection{Contract Role Sign Convention}\label{sec:cntrl}
 
 The two counterparties to a financial contract are defined through attributes \attr{LEIRC} and \attr{LEICP}. The first is the party initially \textit{creating} the contract and the second is the counterparty, respectively. Thereby, both \attr{LEIRC}/\attr{LEICP} can take any \textit{role} in the contract or, more specifically, they can be the lender or borrower in a loan (PAM), fixed receiver or payer in an interest rate swap (SWAPS), etc.\\
 
@@ -613,9 +614,7 @@ When multiplying with a cash flow $x$ the Contract Role Sign function thereby de
 Table \ref{tbl:cntrl} defines the domain of the Contract Role Sign function, i.e. the range of attribute \attr{CNTRL}, with meaning and Contract Role Sign to which the function maps.
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 4 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: contract roles ----------------------
 \begin{table}[H]
 	\centering
 	\begin{tabular}{| p{0.5in}p{1.5in}p{0.2in} |}
@@ -654,10 +653,7 @@ Table \ref{tbl:cntrl} defines the domain of the Contract Role Sign function, i.e
 \end{table}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 4 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-\subsection{Contract Default Convention}
+\subsection{Contract Default Convention}\label{sec:default}
 
 Performance of a contract indicates whether as per a certain time all parties involved adhere to their obligations arising from the contract. Attribute \attr{CTS} captures a contract's performance as per $t_0$. For any time $t>t_0$ and depending on the behavior of the parties involved the contract can migrate into different contract (performance) statuses from \textit{'performing'} to \textit{'default'}. State variable $\svar{Prf}{t}$ (cf. table \ref{tbl:statevars}) captures these dynamics and the performance as per any time $t>t_0$.\\
 
@@ -669,7 +665,7 @@ The Contract Default Convention is a function $D$ that maps the $\svar{Prf}{t}$ 
 \]
 
 
-\subsection{Annuity Amount Function}
+\subsection{Annuity Amount Function}\label{sec:annamount}
 
 In an \textit{Annuity} contract (ANN) the annuity amount is paid regularly from the \textit{borrower} to the \textit{lender}. Thereby, the annuity amount is comprised of a principal repayment portion and an interest portion and and dimensioned such that the total nominal amount $n$ at time $t$ is fully repaid at maturity $T$ of the annuity. The Annuity Amount function $\ann$ computes the annuity amount as follows
 
@@ -681,7 +677,7 @@ with $a$ the accrued interest as per time $s$, $r$ the actual interest rate, $t_
 
 
 
-%%%%%%%%%%%%%%%%%%%% Contract State Variables %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% section: state variables %%%%%%%%%%%%%%%%%%%%
 
 \section{Contract State Variables}\label{sec:statevars}
 
@@ -690,10 +686,7 @@ Driven by Contract Events (see section \ref{sec:events}) certain contractual dim
 By definition, State Variables are updated through Contract Events only. The value of State Variables always shows the state of the contract \textbf{after} the respective Contract Event.
 
 
-
-%%%%%%%%%%%%%%%%%%%% Table No: 5 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: state variables ----------------------
 \begin{table}[H]
 	\centering
 	\begin{tabular}{| p{0.8in}p{0.4in}p{1.6in} |}
@@ -729,21 +722,15 @@ By definition, State Variables are updated through Contract Events only. The val
 \end{table}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 5 ends here %%%%%%%%%%%%%%%%%%%%
 
-
-
-
-%%%%%%%%%%%%%%%%%%%% Contract Events %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% section: events %%%%%%%%%%%%%%%%%%%%
 
 \section{Contract Event Types}\label{sec:events}
 
 An overview and description of various event types can be found in table \ref{tbl:events}. 
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 6 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: events ----------------------
 \begin{table}[H]
 	\begin{tabular}{| p{0.23in}p{0.7in}p{1.4in}p{0.2in} |}
 	\hline
@@ -798,12 +785,10 @@ An overview and description of various event types can be found in table \ref{tb
 \end{table}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 6 ends here %%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%% section: risk factor observer %%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%% Risk Factor Observer %%%%%%%%%%%%%%%%%%%%
-
-\section{Risk Factor Observer}\label{rfobs}
+\section{Risk Factor Observer}\label{sec:rfobserver}
 
 The payoff of financial contracts always depends on the context in which it is evaluated and which is comprised of the following dimensions; counterparties, markets, and behavioral factors. We refer to these as the \textit{risk factors} to which financial contracts are exposed to. This indicates that these factors are source of uncertainty because financial contracts only reference the factors but their dynamics is outside the control of any contractual agreement. Thus, such factors have to be \textit{observed} and their changing states accounted for when evaluating the payoff of financial contracts. Therefore, we consider a standardized interface $\obsfull{o}{i}{t}{S}{M}$ that allows for \textit{observing}; (1) the state of a certain risk factor $i$ at any time $t$ if $o=$'rf'
 
@@ -841,9 +826,9 @@ For brevity we will omit the $S$ and $M$ function arguments wherever this does n
 
 
 
-%%%%%%%%%%%%%%%%%%%% Child Contract Observer %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% section: child observer %%%%%%%%%%%%%%%%%%%%
 
-\section{Child Contract Observer}\label{cldobs}
+\section{Child Contract Observer}\label{sec:cldobserver}
 
 The payoff of certain contracts, i.e. of \textit{Combined Contracts} according to the taxonomy in \ref{fig:taxonomy}, is derived from certain quantities of child contracts. Often times, such contracts are referred to as \textit{underlying instruments} or simply \textit{underlyers} as they build the basis for the payoff of the \textit{parent} contract. Therefore, we consider a standardized interface $\cldfunc{o}$ that allows for \textit{observing} on the parent level; (1) all future events, w.r.t. time $t$, if $o=$'ev'
 
@@ -893,23 +878,24 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 
 
-%%%%%%%%%%%%%%%%%%%% End first part here %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% section: contract types %%%%%%%%%%%%%%%%%%%%
 
+% ---------------------- 1-column ----------------------
 \end{multicols}
+
+% ---------------------- newpage ----------------------
 \newpage
 
+\section{Contract Types}\label{sec:contracts}
 
 
-%%%%%%%%%%%%%%%%%%%% Start Contract Types here %%%%%%%%%%%%%%%%%%%%
 
-\section{Contract Types}
-
+%%%%%%%%%%%%%%%%%%%% subsection: pam %%%%%%%%%%%%%%%%%%%%
 
 \subsection{PAM: Principal At Maturity}\label{sec:pam}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: pam schedule ----------------------
 \begin{schedule}{PAM}
 	AD & $\vec{t}^{AD} = \left(t_0,t_1,...,t_n\right)$ & With $t_i,i=1,2,...$ a custom input \\
 	\hline
@@ -976,14 +962,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: pam states ----------------------
 \begin{states}{PAM}
 	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \attr{MD}$ & \\
 	\hline
@@ -1017,13 +996,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: pam functions ----------------------
 \begin{functions}{PAM}
 	AD & 0.0 & {$\begin{aligned} 
 				\svar{Nac}{t^+} &= \svar{Nac}{t^-} + \yfr{\svar{Led}{t^-1}}{t}\svar{Nrt}{t^-}\svar{Nvl}{t^-}\\
@@ -1185,15 +1158,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
+%%%%%%%%%%%%%%%%%%%% subsection: lam %%%%%%%%%%%%%%%%%%%%
 
 \subsection{LAM: Linear Amortizer}\label{sec:lam}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: lam schedule ----------------------
 \begin{schedule}{LAM}
 	AD & & Same as PAM \\
 	\hline
@@ -1234,14 +1205,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: lam states ----------------------
 \begin{states}{LAM}
 	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\begin{cases} 
 						\attr{MD} & \text{if} \attr{MD}\neq\undef\\
@@ -1281,13 +1245,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: lam functions ----------------------
 \begin{functions}{LAM}
 	AD & \pof{AD}{PAM} & \stf{AD}{PAM} \\
 	\hline
@@ -1446,15 +1404,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
+%%%%%%%%%%%%%%%%%%%% subsection: lax %%%%%%%%%%%%%%%%%%%%
 
 \subsection{LAX: Exotic Linear Amortizer}\label{sec:lax}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: lax schedule ----------------------
 \begin{schedule}{LAX}
 	AD & & Same as PAM \\
 	\hline
@@ -1520,14 +1476,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: lax states ----------------------
 \begin{states}{LAX}
 	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\begin{cases} 
 						\attr{MD} & \text{if}\quad \attr{MD}\neq\undef\\
@@ -1570,13 +1519,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: lax functions ----------------------
 \begin{functions}{LAX}
 	AD & \pof{AD}{PAM} & \stf{AD}{PAM} \\
 	\hline
@@ -1660,15 +1603,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
+%%%%%%%%%%%%%%%%%%%% subsection: nam %%%%%%%%%%%%%%%%%%%%
 
 \subsection{NAM: Negative Amortizer}\label{sec:nam}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: nam schedule ----------------------
 \begin{schedule}{NAM}
 	AD & & Same as PAM \\
 	\hline
@@ -1714,14 +1655,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: nam states ----------------------
 \begin{states}{NAM}
 	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\begin{cases} 
 						\attr{MD} & \text{if}\quad \attr{MD}\neq\undef\\
@@ -1753,13 +1687,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: nam functions ----------------------
 \begin{functions}{NAM}
 	AD & \pof{AD}{PAM} & \stf{AD}{PAM} \\
 	\hline
@@ -1817,16 +1745,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
-
+%%%%%%%%%%%%%%%%%%%% subsection: ann %%%%%%%%%%%%%%%%%%%%
 
 \subsection{ANN: Annuity}\label{sec:ann}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: ann schedule ----------------------
 \begin{schedule}{ANN}
 	AD & & Same as PAM \\
 	\hline
@@ -1860,14 +1785,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: ann states ----------------------
 \begin{states}{ANN}
 	$\svar{Tmd}{}$ & & Same as NAM \\
 	\hline
@@ -1894,13 +1812,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: ann functions ----------------------
 \begin{functions}{ANN}
 	AD & \pof{AD}{PAM} & \stf{AD}{PAM} \\
 	\hline
@@ -1967,15 +1879,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
+%%%%%%%%%%%%%%%%%%%% subsection: clm %%%%%%%%%%%%%%%%%%%%
 
 \subsection{CLM: Call Money}\label{sec:clm}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: clm schedule ----------------------
 \begin{schedule}{CLM}
 	AD & & Same as PAM \\
 	\hline
@@ -2002,14 +1912,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: clm states ----------------------
 \begin{states}{CLM}
 	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \begin{cases} \attr{MD} & \text{if}\quad \attr{MD}\neq\undef \\
 							s & \text{else if}\quad \obs{ev}{\attr{CID}}{t_0}\neq\{\} \\
@@ -2031,13 +1934,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: clm functions ----------------------
 \begin{functions}{CLM}
 	AD & \pof{AD}{PAM} & \stf{AD}{PAM} \\
 	\hline
@@ -2067,15 +1964,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
+%%%%%%%%%%%%%%%%%%%% subsection: ump %%%%%%%%%%%%%%%%%%%%
 
 \subsection{UMP: Undefined Maturity Profile}\label{sec:ump}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: ump schedule ----------------------
 \begin{schedule}{UMP}
 	AD & & Same as PAM \\
 	\hline
@@ -2100,14 +1995,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: ump states ----------------------
 \begin{states}{UMP}
 	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \begin{cases} s & \text{if}\quad \obs{ev}{\attr{CID}}{t_0}\neq\{\} \\
 							\tmax & \text{else} \end{cases}$ 
@@ -2128,13 +2016,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: ump functions ----------------------
 \begin{functions}{UMP}
 	AD & \pof{AD}{PAM} & \stf{AD}{PAM} \\
 	\hline
@@ -2164,29 +2046,19 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
-
+%%%%%%%%%%%%%%%%%%%% subsection: csh %%%%%%%%%%%%%%%%%%%%
 
 \subsection{CSH: Cash}\label{sec:csh}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: csh schedule ----------------------
 \begin{schedule}{CSH}
 	AD & & Same as PAM \\
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: csh states ----------------------
 \begin{states}{CSH}
   	$\svar{Nvl}{}$ & $\svar{Nvl}{t_0}=\sgn\attr{NT}$ & \\
 	\hline
@@ -2194,28 +2066,19 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: csh functions ----------------------
 \begin{functions}{CSH}
 	AD & \pof{AD}{PAM} & $\svar{Led}{t^+}=t$ \\
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
-
+%%%%%%%%%%%%%%%%%%%% subsection: stk %%%%%%%%%%%%%%%%%%%%
 
 \subsection{STK: Stock}\label{sec:stk}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: stk schedule ----------------------
 \begin{schedule}{STK}
 	AD & & Same as PAM \\
 	\hline
@@ -2238,14 +2101,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: stk states ----------------------
 \begin{states}{STK}
   	$\svar{Prf}{}$ & & Same as PAM \\
 	\hline
@@ -2253,13 +2109,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: stk functions ----------------------
 \begin{functions}{STK}
 	AD & \pof{AD}{PAM} & $\svar{Led}{t^+}=t$ \\
 	\hline
@@ -2281,15 +2131,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
+%%%%%%%%%%%%%%%%%%%% subsection: com %%%%%%%%%%%%%%%%%%%%
 
 \subsection{COM: Commodity}\label{sec:com}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: com schedule ----------------------
 \begin{schedule}{COM}
 	AD & & Same as PAM \\
 	\hline
@@ -2299,26 +2147,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: com states ----------------------
 \begin{states}{COM}
 	$\svar{Led}{}$ & & Same as STK \\
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: com functions ----------------------
 \begin{functions}{COM}
 	AD & \pof{AD}{PAM} & \stf{AD}{STK} \\
 	\hline
@@ -2328,16 +2163,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
-
+%%%%%%%%%%%%%%%%%%%% subsection: fxout %%%%%%%%%%%%%%%%%%%%
 
 \subsection{FXOUT: Foreign Exchange Outright}\label{sec:fxout}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: fxout schedule ----------------------
 \begin{schedule}{FXOUT}
 	AD & & Same as PAM \\
 	\hline
@@ -2361,14 +2193,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: fxout states ----------------------
 \begin{states}{FXOUT}
 	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \begin{cases} \attr{MD} & \text{if}\quad \attr{STD}=\undef\\
 							\attr{STD} & \text{else} \end{cases}$ & \\
@@ -2379,13 +2204,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: fxout functions ----------------------
 \begin{functions}{FXOUT}
 	AD & \pof{AD}{PAM} & \stf{AD}{STK} \\
 	\hline
@@ -2408,15 +2227,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
+%%%%%%%%%%%%%%%%%%%% subsection: swppv %%%%%%%%%%%%%%%%%%%%
 
 \subsection{SWPPV: Plain Vanilla Interest Rate Swap}\label{sec:swppv}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: swppv schedule ----------------------
 \begin{schedule}{SWPPV}
 	AD & & Same as PAM \\
 	\hline
@@ -2455,13 +2272,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: swppv states ----------------------
 \begin{states}{SWPPV}
 	$\svar{Tmd}{}$ &  & Same as PAM \\
 	\hline
@@ -2484,12 +2295,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: swppv functions ----------------------
 \begin{functions}{SWPPV}
 	AD & \pof{AD}{PAM} & {$\begin{aligned} 
 				\svar{Nac}{t^+} &= \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t_0}(\attr{IPNR}-\svar{Nrt}{t_0}) \\
@@ -2553,16 +2359,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
+%%%%%%%%%%%%%%%%%%%% subsection: swaps %%%%%%%%%%%%%%%%%%%%
 
 \subsection{SWAPS: Swap}\label{sec:swaps}
 
 
-
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: swaps schedule ----------------------
 \begin{schedule}{SWAPS}
 	AD & & Same as PAM \\
 	\hline
@@ -2589,13 +2392,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: swaps states ----------------------
 \begin{states}{SWAPS}
 	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\max(\cldsvs{FirstLeg}{t_0}{Tmd},\cldsvs{SecondLeg}{t_0}{Tmd})$ & \\
 	\hline
@@ -2614,12 +2411,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: swaps functions ----------------------
 \begin{functions}{SWAPS}
 	AD & \pof{AD}{PAM} & {$\begin{aligned} 
 				\svar{Nac}{t^+} &= \cldsv{FirstLeg}{t_0}{Nac}{\attr{CNTRL}=r^{(1)}} \\						&+ \cldsv{SecondLeg}{t_0}{Nac}{\attr{CNTRL}=r^{(2)}} \\
@@ -2634,16 +2426,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
-
+%%%%%%%%%%%%%%%%%%%% subsection: optns %%%%%%%%%%%%%%%%%%%%
 
 \subsection{OPTNS: Option}\label{sec:optns}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: optns schedule ----------------------
 \begin{schedule}{OPTNS}
 	AD & & Same as PAM \\
 	\hline
@@ -2660,13 +2449,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: optns states ----------------------
 \begin{states}{OPTNS}
 	$\svar{Pos}{}$ & $\svar{Pos}{t_0} = \begin{cases} 
 							0.0 & \text{if}\quad t_0\leq\attr{MD} \\
@@ -2681,12 +2464,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: optns functions ----------------------
 \begin{functions}{OPTNS}
 	AD & \pof{AD}{PAM} & {$\begin{aligned} 
 					\svar{Pos}{t^+} &= \begin{cases} 
@@ -2718,15 +2496,13 @@ with\par
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
+%%%%%%%%%%%%%%%%%%%% subsection: futur %%%%%%%%%%%%%%%%%%%%
 
 \subsection{FUTUR: Future}\label{sec:futur}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: futur schedule ----------------------
 \begin{schedule}{FUTUR}
 	AD & & Same as PAM \\
 	\hline
@@ -2742,13 +2518,7 @@ with\par
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: futur states ----------------------
 \begin{states}{FUTUR}
 	$\svar{Pos}{}$ & $\svar{Pos}{t_0} = \begin{cases} 0.0 & \text{if}\quad t_0\leq\attr{MD} \\
 							S_{t_0}-\attr{PFUT} & \text{else} \end{cases}$ & with\par
@@ -2760,12 +2530,7 @@ with\par
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: futur functions ----------------------
 \begin{functions}{FUTUR}
 	AD & \pof{AD}{PAM} & {$\begin{aligned} 
 					\svar{Pos}{t^+} &= S_t-\attr{PFUT} \\
@@ -2789,15 +2554,13 @@ with\par
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
-
+%%%%%%%%%%%%%%%%%%%% subsection: ceg %%%%%%%%%%%%%%%%%%%%
 
 \subsection{CEG: Credit Enhancement Guarantee}\label{sec:ceg}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: ceg schedule ----------------------
 \begin{schedule}{CEG}
 	AD & & Same as PAM \\
 	\hline
@@ -2823,13 +2586,7 @@ with\par
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: ceg states ----------------------
 \begin{states}{CEG}
 	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\begin{cases} \attr{MD} & \text{if}\quad \attr{CECLEI}\neq\undef \\
 				\max(\tev{\{e_t^k\}}) & \text{else} \end{cases}$ 
@@ -2867,12 +2624,7 @@ with\par
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: ceg functions ----------------------
 \begin{functions}{CEG}
 	AD & \pof{AD}{PAM} & {$\begin{aligned} 
 					\svar{Pos}{t^+} &= \begin{cases} 
@@ -2933,14 +2685,13 @@ with\par
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%% subsection: cec %%%%%%%%%%%%%%%%%%%%
 
 \subsection{CEC: Credit Enhancement Collateral}\label{sec:cec}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 starts here %%%%%%%%%%%%%%%%%%%%
-
+% ---------------------- table: cec schedule ----------------------
 \begin{schedule}{CEC}
 	AD & & Same as PAM \\
 	\hline
@@ -2954,13 +2705,7 @@ with\par
 \end{schedule}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 7 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 8 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: cec states ----------------------
 \begin{states}{CEC}
 	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \max(\tev{\{e_t^k\}})$
 				& with\par
@@ -2986,12 +2731,7 @@ with\par
 \end{states}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 8 ends here %%%%%%%%%%%%%%%%%%%%
-
-
-%%%%%%%%%%%%%%%%%%%% Table No: 9 starts here %%%%%%%%%%%%%%%%%%%%
-
-
+% ---------------------- table: cec functions ----------------------
 \begin{functions}{CEC}
 	AD & \pof{AD}{PAM} & {$\begin{aligned} 
 					\svar{Pos}{t^+} &= \begin{cases} 
@@ -3031,9 +2771,12 @@ with\par
 \end{functions}
 
 
-%%%%%%%%%%%%%%%%%%%% Table No: 9 ends here %%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%% section: bibliography %%%%%%%%%%%%%%%%%%%%
 
 \bibliography{bibliography}
+
+
+%%%%%%%%%%%%%%%%%%%% end doc %%%%%%%%%%%%%%%%%%%%
 
 \end{document}
