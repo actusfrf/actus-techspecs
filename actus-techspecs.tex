@@ -61,7 +61,6 @@
 	\endhead
 	\hline \multicolumn{3}{r}{\textit{Continued on next page}} \\
 	\endfoot
-	\hline
 	\endlastfoot
 }{%
 	\hline
@@ -83,7 +82,6 @@
 	\endhead
 	\hline \multicolumn{2}{r}{\textit{Continued on next page}} \\
 	\endfoot
-	\hline
 	\endlastfoot
 }{%
 	\hline
@@ -105,7 +103,6 @@
 	\endhead
 	\hline \multicolumn{2}{r}{\textit{Continued on next page}} \\
 	\endfoot
-	\hline
 	\endlastfoot
 }{%
 	\hline
@@ -175,13 +172,13 @@
 % ---------------------- about ----------------------
 \section*{About this document}\label{sec:about}
 
-This Document provides the technical specifications of the Algorithmic Contract Types Unified Standards (ACTUS). It is developed, maintained, and released by the ACTUS Financial Research Foundation and provided by the same to the ACTUS Users Association under the terms of the open source license with which the document is published from time to time.
+This document provides the technical specifications of the Algorithmic Contract Types Unified Standards (ACTUS). It is developed, maintained, and released by the ACTUS Financial Research Foundation and provided by the same to the ACTUS Users Association under the terms of the open source license with which the document is published from time to time.
 
 
 % ---------------------- versions ----------------------
 \section*{Versions}\label{sec:version}
 
-The version of this document has following format: [major].[minor]-[rc]-[revision]-[date] where [major] and [minor] are integers marking major and minor release, [rc] is an optional label "RC" indicating whether a certain [major].[minor]-release is in \textit{candidate}-status, [revision] indicates the current revision in form of the respective git commit hash (short form), and [date] gives the respective date of the revision. Releases are recorded in the following table.
+This document is versioned according to the following pattern: [major].[minor]-[rc]-[revision]-[date] where [major] and [minor] are integers marking major and minor release, [rc] is an optional label "RC" indicating whether a certain [major].[minor]-release is in \textit{candidate}-status, [revision] indicates the current revision in form of the respective git commit hash (short form), and [date] gives the respective date of the revision. Releases are recorded in the following table.
 
 \begin{table}[H]
   \centering
@@ -217,15 +214,15 @@ The version of this document has following format: [major].[minor]-[rc]-[revisio
 
 \section{Introduction}\label{sec:intro}
 
-Financial contracts are legal agreements between two (or more) counterparties on the exchange of future cash flows. Such legal agreements are defined unambiguously by means of a set of contractual terms and logic. As a result, financial contracts can be described mathematically and represented as computer readable algorithms.
+Financial contracts are legal agreements between two (or more) counterparties on the exchange of future cash flows. Such legal agreements are defined unambiguously by means of a set of contractual terms and logic. As a result, financial contracts can be described mathematically and represented digitally as machine readable algorithms.
 
-The exchange of cash flows between counterparties follows certain patterns. Each pattern is called ContractType (CT) within the ACTUS framework. A typical CT or exchange pattern of cash flows is what we could call the bond pattern where principal is exchanged initially followed by a period of cyclical interest payments and finally the principal is reversed at maturity date. Interest rates could be fixed or variable with certain interest rate reset cycles. This pattern is used also for many types of loans. Within ACTUS this CT is called PrincipalAtMaturity or PAM for short.
+The benefits of representing financial contracts digitally are manifold; Traditionally, transaction processing has been a field in which tremendous efficiency gains could be realized by the introduction of \textit{machines} and machine readable contracts. Or, financial analytics by nature of the domain builds on the availability of computable representations of these agreements where for reasons of tractability often times analytical approximations are used. Recently, the rise of distributed ledger and blockchain technologies and the various use cases for \textit{smart contracts} has opened up new possibilities for \textit{natively digital} financial contracts.
 
-Another popular pattern is used for mortgages in many countries. Principal is also exchanged initially followed however by regular payments which combine interest and principal redemption at the same time. Since the total payment is given, the split between the principal portion and the interest portion varies over time. This CT is called Annuity or ANN. PAM and ANN are two examples of CT´s. As we will see below, there are about thirty CT´s to describe the overwhelming bulk of all cash flow exchange patterns found in the financial world.
+In general, the exchange of cash flows between counterparties follows certain patterns. A typical cash flow exchange pattern is a \textit{bullet loan} contract where principal is exchanged initially followed by cyclical interest payments and the principal is paid back (in a lump sum) at maturity of the contract. While the principal payments are fixed a variety of flavours exist for how the cyclical interest payments are determined and/or paid. As an example, interest payments may be due monthly, annually or according to arbitrary periods, they may be determined based on fixed or variable rates, different year fraction calculation methods may be used or there might be no interest due at all. Another popular pattern is that of \textit{amortizing loans} for which, as opposed to bullet loans, principal may be paid out and paid back in portions of fixed or variable amounts and according to cyclical or custom schedules. Other types of financial contracts include but are not limited to \textit{shares}, \textit{forwards}, \textit{options}, \textit{swaps}, \textit{credit enhancements}, \textit{repurchase agreements}, \textit{securitization}, etc. By focusing on the main distinguishing features, ACTUS describes the vast majority of all financial contracts with a set of about 32 generalized cash flow exchange patterns or Contract Types (CTs), respectively.
 
-Financial contracts represent the deterministic part of finance. This offers a strict definition for what belongs to a contract and what not. It especially excludes any stochastic element which are called risk factors within the ACTUS framework. ACTUS has a clearly defined interface to these risk factor (see the specific chapter below) but it does not model these risk factors. The link between ACTUS and the risk factors can best be explained with the variable side of a swap or any variable rate instrument that resets its rate periodically.
+On the other hand, the legal agreements in financial contracts represent purely deterministic logic or the \textit{mechanics of finance}, in other words. That is, a financial contract defines a fixed set of rules and conditions under which, given any external variables, the cash flow obligations can be determined unambiguously. For instance, in a \textit{fixed rate loan} the cash flow obligations are defined explicitly. At the same time, a \textit{variable rate loan} defines explicitly the rules under which the variable rate is fixed going forward such that the cash flow obligations can be derived unambiguously going forward. The same holds true for \textit{derivative contracts} where the cash flow obligations arise given some underlying \textit{reference instrument}. Similarly, for analytical purposes, given some assumption of the evolution of this reference instrument the cash flow obligations \textit{conditioned on} this assumption can be derived unabiguously. 
 
-A variable rate instrument has a current coupon that is known and therefore part of the contract attributes. It also has a rule, how to derive new rates such as \textit{Libor plus x basis points}. These rules are contract terms and therefore also part of the contract attributes. However, ACTUS is agnostic towards the external market link (or Risk Factor) from which the new rate is fed upon a rate reset.
+The properties of financial contracts described above build the foundation for a standardized, deterministic algorithmic description of the cash flow obligations arising from such agreements. Thereby, this description is technology agnostic and supports all use cases necessary for this very standard to be used throughout all finance functions from front office to back office and covering pricing, deal origination, transaction processing, as well as analytics, in general, and liquidity projections, valuation, P\&L calculations and projections, and risk measurement and aggregation, in particular. Furthermore, this standard builds a formidable basis for distributed ledger-powered, natively digital \textit{financial state machines} or \textit{smart contracts}, in other words.
 
 
 %%%%%%%%%%%%%%%%%%%% section: taxonomy %%%%%%%%%%%%%%%%%%%%
@@ -264,7 +261,6 @@ Table \ref{tbl:taxonomy} provides further details on the ACTUS Taxonomy includin
 	\endhead
 	\hline \multicolumn{4}{r}{\textit{Continued on next page}} \\
 	\endfoot
-	\hline
 	\endlastfoot
 	Basic CT & Maturity & PAM: Principal at Maturity & Principal payment fully at Initial Exchange Date (IED) and repaid at Maturity Date (MD). Fixed and variable rates. & All kind of bonds, term deposits, bullet loans and mortgages etc. \\
 	\hline
@@ -689,7 +685,7 @@ By definition, State Variables are updated through Contract Events only. The val
 % ---------------------- table: state variables ----------------------
 \begin{table}[H]
 	\centering
-	\begin{tabular}{| p{0.8in}p{0.4in}p{1.6in} |}
+	\begin{tabular}{| p{0.8in}p{0.3in}p{1.8in} |}
 	\hline
 	\textbf{Name} & \textbf{Abbrv.} & \textbf{Explanation} \\
 	\hline
@@ -729,13 +725,22 @@ By definition, State Variables are updated through Contract Events only. The val
 
 An overview and description of various event types can be found in table \ref{tbl:events}. 
 
+\end{multicols}
 
 % ---------------------- table: events ----------------------
-\begin{table}[H]
-	\begin{tabular}{| p{0.23in}p{0.7in}p{1.4in}p{0.2in} |}
+\begin{longtable}{| p{0.07\textwidth}p{0.3\textwidth}p{0.51\textwidth}p{0.05\textwidth} |}
 	\hline
 	\textbf{Type} & \textbf{Name} & \textbf{Explanation} & \textbf{Seq.} \\
 	\hline
+	\endfirsthead
+	\multicolumn{4}{c}{\textit{Continued from previous page}} \\
+	\hline
+	\textbf{Type} & \textbf{Name} & \textbf{Explanation} & \textbf{Seq.} \\
+	\hline
+	\endhead
+	\hline \multicolumn{4}{r}{\textit{Continued on next page}} \\
+	\endfoot
+	\endlastfoot	
 	IED & Initial Exchange Date & Scheduled date of first principal event, start of accrual calculation & 1 \\
 	\hline
 	IPCI & Interest Capitalization & Scheduled interest payment which is capitalized instead of paid out & 2 \\
@@ -749,6 +754,7 @@ An overview and description of various event types can be found in table \ref{tb
 	PI & Principal Increase & Scheduled principal increase payments & 6 \\	
 	\hline
 	PRF & Principal Payment Amount Fixing & Scheduled re-fixing of principal payment (PR or PI) amount & 7 \\
+	\hline
 	PY & Penalty Payment & Payment of a penalty (e.g. due to early repayment of principal outstanding) & 8 \\
 	\hline
 	PP & Principal Prepayment & Unscheduled (early) repayment of principal outstanding & 9 \\
@@ -775,15 +781,19 @@ An overview and description of various event types can be found in table \ref{tb
 	\hline
 	STD & Settlement Date & Date when payment for derivatives is settled & 20 \\
 	\hline
-	MD & Scheduled maturity or expiry of a contract & 21 \\
+	MD & Maturity Date & Scheduled maturity or expiry of a contract & 21 \\
 	\hline	
 	AD & Analysis Event & Retrieves current contract states without alter these & 22 \\
 	\hline
-	\end{tabular}
+	%\end{tabular}
 	\caption{Contract Events Definitions.}
 	\label{tbl:events}
-\end{table}
+\end{longtable}
 
+
+% ---------------------- 2-columns ----------------------
+\setlength{\columnsep}{20pt}
+\begin{multicols}{2}
 
 
 %%%%%%%%%%%%%%%%%%%% section: risk factor observer %%%%%%%%%%%%%%%%%%%%
