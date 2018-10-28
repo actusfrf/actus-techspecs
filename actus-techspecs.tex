@@ -631,9 +631,9 @@ Table \ref{tbl:cntrl} defines the domain of the Contract Role Sign function, i.e
 	\hline
 	ST & Short position & -1 \\
 	\hline
-	BUYER & Protection buyer & +1 \\
+	BUY & Protection buyer & +1 \\
 	\hline
-	SELLER & Protection seller & -1 \\
+	SEL & Protection seller & -1 \\
 	\hline
 	RFL & Receive first leg & +1 \\
 	\hline
@@ -2379,6 +2379,10 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \begin{schedule}{SWAPS}
 	AD & & Same as PAM \\
 	\hline
+	PRD & & Same as PAM \\
+	\hline
+	TD & & Same as PAM \\
+	\hline
 	$k$ & $\{e_t^k\} = \begin{cases}
 				\{e_t^{k,1}\}\cup \{e_s^{l,2}\} & \text{if}\quad \attr{DS}=\text{'D'} \\
 				\{e_t^{k,1}\} + \{e_s^{l,2}\} & \text{else} \end{cases}$ \par
@@ -2389,7 +2393,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		U &= \{e_t^{k,1}\} \triangle \{e_s^{l,2}\}\\
 		V &= \{x_\tau^m+y_\tau^m\}
 	\end{aligned}$} \par
-	where for any two events $x_t^k\in\{e_t^{k,1}\}$, $y_s^l\in\{e_s^{l,1}\}$ we have $x_t^k=y_s^l \iff t=s \land k=l$, $\triangle$ is the \textit{distinct union}-operator, and $x_t^k+y_s^l=z_\tau^m$ with $\tau=t=s$, $m=k=l\in\{\text{IED,IP,PR}\}$ indicates that any two congruent events of type IED, IP, or PR are \textit{merged} into a new \textit{aggregate} event (see payoff and state transition function below).
+	where for any two events $x_t^k\in\{e_t^{k,1}\}$, $y_s^l\in\{e_s^{l,2}\}$ we have $x_t^k=y_s^l \iff t=s \land k=l$, $\triangle$ is the \textit{distinct union}-operator, and $x_t^k+y_s^l=z_\tau^m$ with $\tau=t=s$, $m=k=l\in\{\text{IED,IP,PR}\}$ indicates that any two congruent events of type IED, IP, or PR are \textit{merged} into a new \textit{aggregate} event (see payoff and state transition function below).
 		& with\par
 			{$\begin{aligned}
 				\{e_t^{k,1}\} &= \cldev{FirstLeg}{t_0}{\attr{CNTRL}=r^{(1)}} \\
@@ -2424,17 +2428,100 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 % ---------------------- table: swaps functions ----------------------
 \begin{functions}{SWAPS}
 	AD & \pof{AD}{PAM} & {$\begin{aligned} 
-				\svar{Nac}{t^+} &= \cldsv{FirstLeg}{t_0}{Nac}{\attr{CNTRL}=r^{(1)}} \\						&+ \cldsv{SecondLeg}{t_0}{Nac}{\attr{CNTRL}=r^{(2)}} \\
+				\svar{Nac}{t^+} &= \cldsv{FirstLeg}{t}{Nac}{\attr{CNTRL}=r^{(1)}} \\
+						&+ \cldsv{SecondLeg}{t}{Nac}{\attr{CNTRL}=r^{(2)}} \\
 				\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Led}{t^-}}{t}\svar{Nvl}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
 					\frac{\yfr{t^-}{t}}{\yfr{t^-}{t^+}}\attr{FER} & \text{else} \end{cases} \\
 				\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
+	PRD & $\dfl{t^-} ( (-1)\attr{PPRD}$ \par 
+				 $\qquad + \cldsv{FirstLeg}{t}{Nac}{\attr{CNTRL}=r^{(1)}}$ \par
+				 $\qquad + \cldsv{SecondLeg}{t}{Nac}{\attr{CNTRL}=r^{(2)}})$
+		& {$\begin{aligned} 
+				\svar{Nac}{t^+} &= \cldsv{FirstLeg}{t}{Nac}{\attr{CNTRL}=r^{(1)}} \\
+						&+ \cldsv{SecondLeg}{t}{Nac}{\attr{CNTRL}=r^{(2)}} \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	TD & $\dfl{t^-} (\attr{PTD}$ \par 
+				 $\qquad + \cldsv{FirstLeg}{t}{Nac}{\attr{CNTRL}=r^{(1)}}$ \par
+				 $\qquad + \cldsv{SecondLeg}{t}{Nac}{\attr{CNTRL}=r^{(2)}})$
+		& {$\begin{aligned} 
+				\svar{Nac}{t^+} &= 0.0 \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
 	$z_\tau^m$ & $\fev{x_\tau^m}+\fev{y_\tau^m}$ 
 		& {$\begin{aligned} 
-				\svar{Nac}{t^+} &= \cldsv{FirstLeg}{t^+}{Nac}{\attr{CNTRL}=r^{(1)}} \\						&+ \cldsv{SecondLeg}{t_0}{Nac}{\attr{CNTRL}=r^{(2)}} \\
+				\svar{Nac}{t^+} &= \cldsv{FirstLeg}{t}{Nac}{\attr{CNTRL}=r^{(1)}} \\						&+ \cldsv{SecondLeg}{t}{Nac}{\attr{CNTRL}=r^{(2)}} \\
 				\svar{Led}{t^+} &= t \end{aligned}$} \\
 \end{functions}
 
+
+%%%%%%%%%%%%%%%%%%%% subsection: capfl %%%%%%%%%%%%%%%%%%%%
+
+\subsection{CAPFL: Cap-Floor}\label{sec:capfl}
+
+
+% ---------------------- table: capfl schedule ----------------------
+\begin{schedule}{CAPFL}
+	AD & & Same as PAM \\
+	\hline
+	PRD & & Same as PAM \\
+	\hline
+	TD & & Same as PAM \\
+	\hline
+	$k$ & $\{e_t^k\} = \{x_t^k+y_s^l\}$ \par
+	for all events $x_t^k\in\cldev{Child}{t_0}{\attr{CNTRL}=RPA}$, $y_s^l\in\cldev{Child}{t_0}{\attr{CNTRL}=RPA,\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}$ with $t=s \land k=l=IP$. That is, any two congruent events of the child-contract schedule, evaluated once without $\attr{RRLC},\attr{RRLF}$ defined and once with the attributes defined, which are of type IP are \textit{merged} into a new \textit{aggregate} event (see payoff and state transition function below). & \\
+\end{schedule}
+
+
+% ---------------------- table: capfl states ----------------------
+\begin{states}{CAPFL}
+	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\max(\cldsv{Child}{t_0}{Tmd}{\attr{CNTRL}=RPA},$ \par 
+			$\qquad \cldsv{Child}{t_0}{Tmd}{\attr{CNTRL}=RPA,\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}})$ & \\
+	\hline
+  	$\svar{Nac}{}$ & $\svar{Nac}{t_0} = \sgn abs($ \par
+			$\qquad\cldsv{Child}{t_0}{Nac}{\attr{CNTRL}=r^{(1)}}$\par
+			$\qquad - \cldsv{Child}{t_0}{Nac}{\attr{CNTRL}=RPA,\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}})$ 
+			& \\
+	\hline
+  	$\svar{Prf}{}$ & & Same as PAM \\
+	\hline
+	$\svar{Led}{}$ & & Same as PAM \\
+\end{states}
+
+
+% ---------------------- table: capfl functions ----------------------
+\begin{functions}{CAPFL}
+	AD & \pof{AD}{PAM} & {$\begin{aligned} 
+				\svar{Nac}{t^+} &= \sgn abs(\cldsv{Child}{t}{Nac}{\attr{CNTRL}=RPA} \\						
+						&- \cldsv{Child}{t}{Nac}{\attr{CNTRL}=RPA, \\
+						&\qquad \attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}) \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	PRD & $\dfl{t^-} ( (-1)\attr{PPRD} + \sgn abs($ \par 
+				 $\qquad \cldsv{Child}{t}{Nac}{\attr{CNTRL}=RPA} - $ \par
+				 $\qquad \cldsv{Child}{t}{Nac}{\attr{CNTRL}=RPA,$ \par
+					$\qquad\qquad\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}))$
+		& {$\begin{aligned} 
+				\svar{Nac}{t^+} &= \sgn abs(\cldsv{Child}{t}{Nac}{\attr{CNTRL}=RPA} \\						
+						&- \cldsv{Child}{t}{Nac}{\attr{CNTRL}=RPA, \\
+						&\qquad \attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}) \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	TD & $\dfl{t^-} (\attr{PTD}$ + \sgn abs( \par 
+				 $\qquad \cldsv{Child}{t}{Nac}{\attr{CNTRL}=RPA} - $ \par
+				 $\qquad \cldsv{Child}{t}{Nac}{\attr{CNTRL}=RPA,$ \par
+					$\qquad\qquad\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}))$
+		& {$\begin{aligned} 
+				\svar{Nac}{t^+} &= 0.0 \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	$z_\tau^m$ & $\sgn abs(\fev{x_\tau^m}-\fev{y_\tau^m})$ \par
+			where $abs(u)$ defines that the absolute value of $u$ is taken.
+		& {$\begin{aligned} 
+				\svar{Nac}{t^+} &= 0.0 \\
+				\svar{Led}{t^+} &= t \end{aligned}$} \\
+\end{functions}
 
 
 %%%%%%%%%%%%%%%%%%%% subsection: optns %%%%%%%%%%%%%%%%%%%%
