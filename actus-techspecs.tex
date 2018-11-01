@@ -149,7 +149,8 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%% titlepage %%%%%%%%%%%%%%%%%%%%%%
-\title{ACTUS: The algorithmic representation of financial contracts \\
+\def\doctitle{ACTUS: The algorithmic representation of financial contracts}
+\title{\doctitle \\
       {\smaller \textbf{Version \VersionNumber}}}
 
 \author{
@@ -157,6 +158,18 @@
 	ACTUS Financial Research Foundation\\
 	info@actusfrf.org
 }
+
+
+%%%%%%%%%%%%%%%%%%%%%%% headers and footers %%%%%%%%%%%%%%%%%%%%%%
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{} % clear header
+\fancyfoot{} % clear footer
+\renewcommand{\headrulewidth}{0pt} % no header rule
+\lhead{\doctitle}
+\rhead{\thepage}
+\lfoot{Copyright \copyright\space 2018--present by ACTUS Financial Research Foundation}
+\rfoot{\VersionNumber}
 
 
 %%%%%%%%%%%%%%%%%%%%%%% front matter %%%%%%%%%%%%%%%%%%%%%%
@@ -187,7 +200,7 @@ This document is versioned according to the following pattern: [major].[minor]-[
   \hline
   Date & Version & Description \\ 
   \hline
-  2018-10-29 & 1.0 & First version of the technical specification document containing specifications for the "initial" 18 contracts.\\
+  to be released & 1.0 & First version of the technical specification document containing specifications for the "initial" 18 contracts.\\
   \hline
   \end{tabular}
 \end{table}
