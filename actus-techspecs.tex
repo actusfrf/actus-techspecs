@@ -380,7 +380,7 @@ The ACTUS attribute \textit{Array Cycle Anchor Date of Principal Redemption} is 
 
 \subsection{$\undef$-Operator}\label{sec:undef}
 
-The $\undef$-operator is used to indicate that a certain property is undefined or, in other words, that no value has been assigned to the respective property. In particular, for optional contract attributes it means that the attribute is not defined and for schedule times (see section \ref{sec:schedules}) it means that the respective schedule is empty, i.e. no schedule time defined.
+The $\undef$-operator is used to indicate that a certain property is undefined or, in other words, that no value has been assigned to the respective property. In particular, for optional contract attributes it means that the attribute is not defined and for schedule times (see section \ref{sec:schedule}) it means that the respective schedule is empty, i.e. no schedule time defined.
 
 \begin{example}[Undefined Attribute]
 $\attr{IPANX}=\undef$ indicates that attribute \attr{IPANX} is undefined.
@@ -391,12 +391,12 @@ $\vec{t}^{IP}=\undef$ means the same as $\vec{t}^{IP}=\{\}$, with $\{\}$ the emp
 \end{example}
 
 
-\subsection{$t_0$-Time}
+\subsection{$t_0$-Time}\label{sec:t0time}
 
 $t_0$ marks the time as per which the state of a contract is represented in form of the respective set of attributes. Status Date \attr{SD} itself is an attribute of the contract. In general, from the contractual logic we are able to derive any contractual events and contract states for any time $t>t_0$.
 
 
-\subsection{State Variables}\label{sec:statevars}
+\subsection{State Variables}\label{sec:statevarsnotat}
 
 State Variables describe the inner state of a financial contract at a certain point in time $t$ during its lifetime such as (outstanding) Nominal Value, applicable Interest Rate, or the contract performance through Contract Status. State Variables are written in the short form as defined in table \ref{tbl:statevars} with first letter capitalized, printed in bold, and indexed with time.
 
@@ -741,7 +741,7 @@ By definition, State Variables are updated through Contract Events only. The val
 
 %%%%%%%%%%%%%%%%%%%% section: events %%%%%%%%%%%%%%%%%%%%
 
-\section{Contract Event Types}\label{sec:events}
+\section{Contract Event Types}\label{sec:eventtypes}
 
 An overview and description of various event types can be found in table \ref{tbl:events}. 
 
