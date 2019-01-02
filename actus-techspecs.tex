@@ -856,12 +856,99 @@ Note that the observer interface only defines the structure of an actual observe
 For brevity we will omit the $S$ and $M$ function arguments wherever this does not lead to confusion.
 
 
+%%%%%%%%%%%%%%%%%%%% section: contract composition %%%%%%%%%%%%%%%%%%%%
+
+\section{Contract Composition}\label{sec:composition}
+
+The payoff of \textit{Combined Contracts}, see the taxonomy in \ref{fig:taxonomy}, is derived from certain quantities of child contracts (also called \textit{underlying instruments} or simply \textit{underlyers}). In general, such child contracts can be any ACTUS contract - Basic or Combined - as well as any number of contracts - a single contract or a set of contracts. Indeed, in reality this is what Option, Swap, Swaption, but also any kind of Asset/Mortgage/etc. backed securities represent; \textit{a hierarchical composition of different contracts linked by means of functional reationships}. This compositional approach provides maximum flexibility and, hence, allows capturing any real world use case. We here refer to a \textit{referenced} (i.e. of lower hierarchical level) contract as a \textit{child contract} and to a referencing (i.e. of higher hierarchical level) contract as a \textit{parent contract}.\\
+
+The ACTUS DD defines attribute $\attr{CTST}$ which captures the child contract(s) as part of the parent contract's set of attributes. Thereby, attribute $\attr{CTST}$ is of type \textit{ContractStructure} which is a simple structure of the form (in JSON notation)
+
+\begin{verbatim}
+{
+"ContractReference":[ r1, r2, ... ]
+}
+\end{verbatim}
+
+where the \verb'r1', \verb'r2', ... refer to objects of type \textit{ContractReference} (in JSON notation)
+
+\begin{verbatim}
+{
+"Object": ,
+"Type": ,
+"Role":
+}
+\end{verbatim}
+
+with fields
+
+\begin{itemize}
+	\item[] \verb'Object': an object representing the reference
+	\item[] \verb'Type': one of the values listed in table \ref{tbl:struct-types}
+	\item[] \verb'Role': one of the values listed in table \ref{tbl:struct-roles}
+\end{itemize}
+
+
+% ---------------------- table: contract structure types ----------------------
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| p{1.0in}p{1.9in} |}
+	\hline
+	\textbf{Type} & \textbf{Explanation} \\
+	\hline
+	Contract & The reference represents an actual contract \\
+	\hline
+	ContractIdentifier & The reference represents an identifier of an actual contract \\
+	\hline
+	MarketObject & The reference represents a MarketObject \\
+	\hline	
+	LegalEntity & The reference represents a LegalEntity \\
+	\hline	
+	ContractStructure & The reference represents a ContractStructure \\	
+	\hline
+	\end{tabular}
+	\caption{ContractReference types}
+	\label{tbl:struct-types}
+\end{table}
+
+
+% ---------------------- table: contract structure roles ----------------------
+\begin{table}[H]
+	\centering
+	\begin{tabular}{| p{1.0in}p{1.4in}p{0.5in} |}
+	\hline
+	\textbf{Role} & \textbf{Explanation} & \textbf{Contract} \\
+	\hline
+	Underlying & The reference represents a simple underlyer contract & FUTUR, OPTNS \\
+	\hline
+	FirstLeg & The reference represents the first leg contract & SWAPS \\
+	\hline
+	SecondLeg & The reference represents the second leg contract & SWAPS \\
+	\hline
+	CoveredContract & The reference represents a contract that is covered under the parent contract & CEG, CEC \\
+	\hline
+	CoveringContract & The reference represents a contract that covers for covering contracts under the parent contract & CEC \\
+	\hline
+	\end{tabular}
+	\caption{ContractReference roles}
+	\label{tbl:struct-roles}
+\end{table}
+
+
+We will use the following notation to query reference objects from the $\attr{CTST}$ attribute
+
+\[
+	\attr{CTST}_{role}^{type}(i)
+\]
+
+where $type$ identifies the references (\verb'r1', \verb'r2', ...) with \verb'type'=$type$, $role$ the reference with \verb'Role'=$role$, and $i$ identifies the $i$'th element of the queried references.
+
 
 %%%%%%%%%%%%%%%%%%%% section: child observer %%%%%%%%%%%%%%%%%%%%
 
 \section{Child Contract Observer}\label{sec:cldobserver}
 
-The payoff of certain contracts, i.e. of \textit{Combined Contracts} according to the taxonomy in \ref{fig:taxonomy}, is derived from certain quantities of child contracts. Often times, such contracts are referred to as \textit{underlying instruments} or simply \textit{underlyers} as they build the basis for the payoff of the \textit{parent} contract. Therefore, we consider a standardized interface $\cldfunc{o}$ that allows for \textit{observing} on the parent level; (1) all future events, w.r.t. time $t$, if $o=$'ev'
+In order to evaluate the derived payoff of combined contracts, we consider a standardized interface $\cldfunc{o}$ that allows for \textit{observing} on the parent level; (1) all future events, w.r.t. time $t$, if $o=$'ev'
 
 \[
 	\cldfunc{ev}: i,t,a \mapsto \{e_v^{k},e_w^{l},...\}
@@ -896,13 +983,13 @@ The parameters to the Child Contract Observer interface are as follows:
 
 Note that the observer interface only defines the structure of an actual observer function but not the actual implementation. Thus, the interface allows for user-defined implementations of observer functions allowing e.g. for using arbitrary data structures.
 
-\begin{example}['ev'-Observer] The future events, w.r.t. time $t$, of the \textit{first leg} (i.e. child contract identified by $\texttt{FirstLeg}$) of a SWAPS contract with $\attr{CNTRL}=PFL$ (i.e. \textit{pay first leg}) can be evaluated as $\cldev{FirstLeg}{t}{\attr{CNTRL}=RPL}$.
+\begin{example}['ev'-Observer] The future events, w.r.t. time $t$, of the \textit{first leg} (i.e. child contract with \verb'Role'=$\texttt{FirstLeg}$) of a SWAPS contract with $\attr{CNTRL}=PFL$ (i.e. \textit{pay first leg}) can be evaluated as $\cldev{\attr{CTST}_{FirstLeg}^{Contract}}{t}{\attr{CNTRL}=RPL}$.
 \end{example}
 
-\begin{example}['sv'-Observer] The current state, w.r.t. time $t$, of state variable $\svar{Nvl}{}$ of the \textit{first leg} (i.e. child contract identified by $\texttt{FirstLeg}$) of a SWAPS contract with \attr{CNTRL}=RFL (i.e. \textit{receive first leg}) can be evaluated as $\cldsv{FirstLeg}{t}{Nvl}{\attr{CNTRL}=RPA}$.
+\begin{example}['sv'-Observer] The current state, w.r.t. time $t$, of state variable $\svar{Nvl}{}$ of the \textit{first leg} (i.e. child contract with \verb'Role'=$\texttt{FirstLeg}$) of a SWAPS contract with \attr{CNTRL}=RFL (i.e. \textit{receive first leg}) can be evaluated as $\cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Nvl}{\attr{CNTRL}=RPA}$.
 \end{example}
 
-\begin{example}['ca'-Observer] The contract attribute \attr{MOC} of the child contract \textit{Child} (i.e. child contract identified by $\texttt{Child}$) of an OPTNS contract can be evaluated as $\cldca{Child}{\attr{MOC}}$.
+\begin{example}['ca'-Observer] The contract attribute \attr{MOC} of the child contract \textit{Child} (i.e. child contract with \verb'Role'=$\texttt{Underlying}$) of an OPTNS contract can be evaluated as $\cldca{\attr{CTST}_{Underlying}^{Contract}}{\attr{MOC}}$.
 \end{example}
 
 For brevity we will omit the $x$ and $a$ function arguments wherever this does not lead to confusion.
