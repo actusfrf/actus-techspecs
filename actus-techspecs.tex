@@ -817,45 +817,6 @@ An overview and description of various event types can be found in table \ref{tb
 \begin{multicols}{2}
 
 
-%%%%%%%%%%%%%%%%%%%% section: risk factor observer %%%%%%%%%%%%%%%%%%%%
-
-\section{Risk Factor Observer}\label{sec:rfobserver}
-
-The payoff of financial contracts always depends on the context in which it is evaluated and which is comprised of the following dimensions; counterparties, markets, and behavioral factors. We refer to these as the \textit{risk factors} to which financial contracts are exposed to. This indicates that these factors are source of uncertainty because financial contracts only reference the factors but their dynamics is outside the control of any contractual agreement. Thus, such factors have to be \textit{observed} and their changing states accounted for when evaluating the payoff of financial contracts. Therefore, we consider a standardized interface $\obsfull{o}{i}{t}{S}{M}$ that allows for \textit{observing}; (1) the state of a certain risk factor $i$ at any time $t$ if $o=$'rf'
-
-\[
-	\obsfunc{rf}: i,t,S,M \mapsto \Real
-\]
-
-and (2) contractual but non-scheduled events if $o=$'ev'
-
-\[
-	\obsfunc{ev}: i,t,S,M \mapsto \{e_t^{k},e_s^{l},...\}
-\]
-
-The parameters to the Risk Factor Observer interface are as follows:
-
-\begin{itemize}
-	\item[$i$]: the identifier of the risk factor \textit{observed}
-
-	\item[$t$]: the time for which the risk factor’s state should be evaluated
-
-	\item [$S$]: the inner states of the contract at time $t$
-
-	\item [$M$]: the contract terms of the contract as per time $t$
-\end{itemize}
-
-Note that the observer interface only defines the structure of an actual observer function but not the actual implementation. Thus, the interface allows for user-defined implementations of observer functions allowing e.g. for representing arbitrary assumptions on the evolution of future risk factor states which is key for any type of forward-looking analysis.
-
-\begin{example}['rf'-Observer] The market-driven 3-month USD-Libor reference rate used as the variable rate in a variable rate loan contract is observed at any time $t$ through $\obs{rf}{\attr{MarketObjectCodeRateReset}}{t}$.
-\end{example}
-
-\begin{example}['rf'-Observer] Unscheduled (pre-) repayments of outstanding notional in a mortgage contract is observed at any time $t$ through $\obs{ev}{\attr{CID}}{t}$.
-\end{example}
-
-For brevity we will omit the $S$ and $M$ function arguments wherever this does not lead to confusion.
-
-
 %%%%%%%%%%%%%%%%%%%% section: contract composition %%%%%%%%%%%%%%%%%%%%
 
 \section{Contract Composition}\label{sec:composition}
@@ -892,7 +853,7 @@ with fields
 % ---------------------- table: contract structure types ----------------------
 \begin{table}[H]
 	\centering
-	\begin{tabular}{| p{1.0in}p{1.9in} |}
+	\begin{tabular}{| p{1.2in}p{1.7in} |}
 	\hline
 	\textbf{Type} & \textbf{Explanation} \\
 	\hline
@@ -900,9 +861,9 @@ with fields
 	\hline
 	ContractIdentifier & The reference represents an identifier of an actual contract \\
 	\hline
-	MarketObject & The reference represents a MarketObject \\
+	MarketObjectIdentifier & The reference represents the identifier of a market object (e.g. price feed) \\
 	\hline	
-	LegalEntity & The reference represents a LegalEntity \\
+	LegalEntityIdentifier & The reference represents the identifier of a legal entity \\
 	\hline	
 	ContractStructure & The reference represents a ContractStructure \\	
 	\hline
@@ -941,7 +902,52 @@ We will use the following notation to query reference objects from the $\attr{CT
 	\attr{CTST}_{role}^{type}(i)
 \]
 
-where $type$ identifies the references (\verb'r1', \verb'r2', ...) with \verb'type'=$type$, $role$ the reference with \verb'Role'=$role$, and $i$ identifies the $i$'th element of the queried references.
+where $type$ identifies the references (\verb'r1', \verb'r2', ...) with \verb'type'=$type$, $role$ the reference with \verb'Role'=$role$, and $i$ identifies the $i$'th element of the queried references. For brevity, we will omit the index parameter $i$ which indicates that we address the first (and usually only) reference object queried.
+
+\begin{example}[Underlying MarketObject-reference] The MarketObject reference of a simple Underlying e.g. to an Option contract is referenced as $\attr{CTST}_{Underlying}^{MarketObjectIdentifier}(1)$ or, in short form, as $\attr{CTST}_{Underlying}^{MarketObjectIdentifier}$.
+\end{example}
+
+\begin{example}[FirstLeg Contract-reference] The Contract object representing the first leg e.g. to a Swaps contract is referenced as $\attr{CTST}_{FirstLeg}^{Contract}(1)$ or, in short form, as $\attr{CTST}_{FirstLeg}^{Contract}$.
+\end{example}
+
+
+%%%%%%%%%%%%%%%%%%%% section: risk factor observer %%%%%%%%%%%%%%%%%%%%
+
+\section{Risk Factor Observer}\label{sec:rfobserver}
+
+The payoff of financial contracts always depends on the context in which it is evaluated and which is comprised of the following dimensions; counterparties, markets, and behavioral factors. We refer to these as the \textit{risk factors} to which financial contracts are exposed to. This indicates that these factors are source of uncertainty because financial contracts only reference the factors but their dynamics is outside the control of any contractual agreement. Thus, such factors have to be \textit{observed} and their changing states accounted for when evaluating the payoff of financial contracts. Therefore, we consider a standardized interface $\obsfull{o}{i}{t}{S}{M}$ that allows for \textit{observing}; (1) the state of a certain risk factor $i$ at any time $t$ if $o=$'rf'
+
+\[
+	\obsfunc{rf}: i,t,S,M \mapsto \Real
+\]
+
+and (2) contractual but non-scheduled events if $o=$'ev'
+
+\[
+	\obsfunc{ev}: i,t,S,M \mapsto \{e_t^{k},e_s^{l},...\}
+\]
+
+The parameters to the Risk Factor Observer interface are as follows:
+
+\begin{itemize}
+	\item[$i$]: the identifier of the risk factor \textit{observed}
+
+	\item[$t$]: the time for which the risk factor’s state should be evaluated
+
+	\item [$S$]: the inner states of the contract at time $t$
+
+	\item [$M$]: the contract terms of the contract as per time $t$
+\end{itemize}
+
+Note that the observer interface only defines the structure of an actual observer function but not the actual implementation. Thus, the interface allows for user-defined implementations of observer functions allowing e.g. for representing arbitrary assumptions on the evolution of future risk factor states which is key for any type of forward-looking analysis.
+
+\begin{example}['rf'-Observer] The market-driven 3-month USD-Libor reference rate used as the variable rate in a variable rate loan contract is observed at any time $t$ through $\obs{rf}{\attr{MarketObjectCodeRateReset}}{t}$.
+\end{example}
+
+\begin{example}['rf'-Observer] Unscheduled (pre-) repayments of outstanding notional in a mortgage contract is observed at any time $t$ through $\obs{ev}{\attr{CID}}{t}$.
+\end{example}
+
+For brevity we will omit the $S$ and $M$ function arguments wherever this does not lead to confusion.
 
 
 %%%%%%%%%%%%%%%%%%%% section: child observer %%%%%%%%%%%%%%%%%%%%
