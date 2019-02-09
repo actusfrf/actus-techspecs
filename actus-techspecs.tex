@@ -2672,6 +2672,62 @@ with\par
 \end{functions}
 
 
+%%%%%%%%%%%%%%%%%%%% subsection: margining %%%%%%%%%%%%%%%%%%%%
+
+\subsection{MRGNG: Margining}\label{sec:mrgng}
+
+
+% ---------------------- table: mrgng schedule ----------------------
+\begin{schedule}{MRGNG}
+	AD & & Same as PAM \\
+	\hline
+	TD & $t^{TD} = \cldca{Underlying}{TD}$ & \\
+	\hline
+	IMP & & single payment at MRANX \\
+	\hline
+	MP & &  \\
+	\hline
+	STD & $t^{STD} = \max t^{MP}$ & \\
+	\hline
+	CD & & Same as PAM \\
+\end{schedule}
+
+
+% ---------------------- table: mrgng states ----------------------
+\begin{states}{MRGNG}
+	$\svar{Mrvm}{}$ & $\svar{Mrvm}{t_0} = \attr{MRVM}$ \\
+	\hline	
+	$\svar{Prf}{}$ & & Same as PAM \\
+	\hline
+	$\svar{Led}{}$ & & Same as PAM \\
+\end{states}
+
+
+% ---------------------- table: mrgng functions ----------------------
+\begin{functions}{MRGNG}
+	AD & \pof{AD}{PAM} & {$\begin{aligned} 
+					\svar{Mrvm}{t^+} &= \cldsv{Underlying}{\svar{Pos}}{t} TODO!!! \\
+					\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	TD & $\svar{Mrvm}{t}$ & {$\begin{aligned} 
+					\svar{Mrvm}{t^+} &= 0.0 \\
+					\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	IMP & $\attr{MRIM}$ & {$\begin{aligned} 
+					\svar{Mrvm}{t^+} &= TODO!!! \\
+					\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	MP & TODO!!! & {$\begin{aligned} 
+					\svar{Mrvm}{t^+} &= \svar{Mrvm}{t^-} - TODO!!! \\
+					\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	STD & $\svar{Mrvm}{t}$ & {$\begin{aligned} 
+					\svar{Mrvm}{t^+} &= 0.0 \\
+					\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	CD & \pof{CD}{PAM} & \stf{CD}{STK} \\
+\end{functions}
+
 
 %%%%%%%%%%%%%%%%%%%% subsection: ceg %%%%%%%%%%%%%%%%%%%%
 
