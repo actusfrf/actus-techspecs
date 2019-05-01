@@ -2774,13 +2774,14 @@ with\par
 \begin{schedule}{MRGNG}
 	AD & & Same as PAM \\
 	\hline
-	TD & $t^{TD} = \cldca{Underlying}{TD}$ & \\
+	IMP & $t^{IMP} = MRANX$ &  \\
 	\hline
-	IMP & & single payment at MRANX \\
+	MP & $\vec{t}^{MP} = \begin{cases}
+					\svar{Tmd}{t_0} & \text{if} \quad \attr{MRCL}=\undef \\
+					\sdl{s}{\attr{MRCL}}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ & \\
 	\hline
-	MP & &  \\
-	\hline
-	STD & $t^{STD} = \max t^{MP}$ & \\
+	STD & $t^{STD} = \begin{cases} \svar{Tmd}{t_0} & \text{if}\quad \attr{STD}=\undef \\
+					\attr{STD} & \text{else} \end{cases}$ &  \\
 	\hline
 	CD & & Same as PAM \\
 \end{schedule}
@@ -2788,8 +2789,17 @@ with\par
 
 % ---------------------- table: mrgng states ----------------------
 \begin{states}{MRGNG}
-	$\svar{Mrvm}{}$ & $\svar{Mrvm}{t_0} = \attr{MRVM}$ \\
-	\hline	
+  $\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \begin{cases}
+        \attr{STD} & \text{if} \quad \attr{STD}\neq\undef \wedge \attr{STD}<t^{MD} \\
+        t^{MD} & \text{else} \end{cases}$ \newline
+        with $t^{MD}=\cldca{\attr{CTST}_{Underlying}^{Contract}}{MD}$ & \\
+  \hline
+  $\svar{Pos}{}$ & $\svar{Pos}{t_0} = \sum\cldev{\attr{CTST}_{Underlying}^{Contract}}{t_0}{}$ & \\
+  \hline
+  $\svar{Mrvm}{}$ & $\svar{Mrvm}{t_0} = \begin{cases}
+					0 & \text{if} \quad\attr{MRVM}=\undef \\
+					\attr{MRVM} & \text{else} \end{cases}$ & \\
+	\hline
 	$\svar{Prf}{}$ & & Same as PAM \\
 	\hline
 	$\svar{Led}{}$ & & Same as PAM \\
@@ -2798,23 +2808,27 @@ with\par
 
 % ---------------------- table: mrgng functions ----------------------
 \begin{functions}{MRGNG}
-	AD & \pof{AD}{PAM} & {$\begin{aligned} 
-					\svar{Mrvm}{t^+} &= \cldsv{Underlying}{\svar{Pos}}{t} TODO!!! \\
+	AD & \pof{AD}{PAM} & {$\begin{aligned}
+          \svar{Pos}{t^+} &= \sum\cldev{\attr{CTST}_{Underlying}^{Contract}}{t}{}\\
+          \svar{Mrvm}{t^+} &= \svar{Mrvm}{t^-}+\svar{Pos}{t^+} \\
 					\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
-	TD & $\svar{Mrvm}{t}$ & {$\begin{aligned} 
-					\svar{Mrvm}{t^+} &= 0.0 \\
+	IMP & $\attr{MRIM}$ & {$\begin{aligned}
+          \svar{Pos}{t^+} &= \sum\cldev{\attr{CTST}_{Underlying}^{Contract}}{t}{}\\
+          \svar{Mrvm}{t^+} &= \attr{MRIM} \\
+          \svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	MP & $x$ where\newline
+        {$x= \begin{cases}
+            0 & \text{if}\quad S \in (\attr{MRMML},\attr{MRMMU}) \\
+            S - \attr{MRIM} & \text{else} \end{cases}$} \newline
+        with $S = \svar{Mrvm}{t^-} + \sum\cldev{\attr{CTST}_{Underlying}^{Contract}}{t}$
+         & {$\begin{aligned}
+          \svar{Pos}{t^+} &= \sum\cldev{\attr{CTST}_{Underlying}^{Contract}}{t}{}\\
+          \svar{Mrvm}{t^+} &= \attr{MRIM} \\
 					\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
-	IMP & $\attr{MRIM}$ & {$\begin{aligned} 
-					\svar{Mrvm}{t^+} &= TODO!!! \\
-					\svar{Led}{t^+} &= t \end{aligned}$} \\
-	\hline
-	MP & TODO!!! & {$\begin{aligned} 
-					\svar{Mrvm}{t^+} &= \svar{Mrvm}{t^-} - TODO!!! \\
-					\svar{Led}{t^+} &= t \end{aligned}$} \\
-	\hline
-	STD & $\svar{Mrvm}{t}$ & {$\begin{aligned} 
+	STD & $\svar{Mrvm}{t}$ & {$\begin{aligned}
 					\svar{Mrvm}{t^+} &= 0.0 \\
 					\svar{Led}{t^+} &= t \end{aligned}$} \\
 	\hline
