@@ -120,6 +120,7 @@
 \newcommand{\dfl}[1]{D(\textbf{Prf}_{#1})}
 \newcommand{\sgn}{R(\attr{CNTRL})}
 \newcommand{\sdl}[3]{S(#1,#2,#3)}
+\newcommand{\vsdl}[3]{\vec{S}(#1,#2,#3)}
 \newcommand{\yfr}[2]{Y(#1,#2)}
 \newcommand{\yfrfunc}{Y}
 \newcommand{\ann}[5]{A(#1,#2,#3,#4,#5)}
@@ -519,10 +520,10 @@ Note that for brevity we will omit the \attr{EOMC} and \attr{BDC} function argum
 
 \subsection{Array Schedule}\label{sec:arrayschedule}
 
-Array Schedules are defined by vector-valued inputs $\vec{s}=(s_0,s_1,...,s_m)$ and $\vec{c}=(c_0,c_1,...,c_m)$ to the regular schedule function
+Array Schedules are defined by vector-valued inputs $\vec{s}=(s_0,s_1,...,s_m)$ and $\vec{c}=(c_0,c_1,...,c_m)$ to the array schedule function
 
 \begin{multline*}
-	\sdl{\vec{s}}{\vec{c}}{T} = (\sdl{s_0}{c_0}{s_1-c_0},\\
+	\vsdl{\vec{s}}{\vec{c}}{T} = (\sdl{s_0}{c_0}{s_1-c_0},\\
 					\sdl{s_1}{c_1}{s_2-c_1},...,\sdl{s_m}{c_m}{T})
 \end{multline*}
 
@@ -720,17 +721,25 @@ By definition, State Variables are updated through Contract Events only. The val
 	\hline
 	\textbf{Name} & \textbf{Abbrv.} & \textbf{Explanation} \\
 	\hline
+	Maturity & $\svar{Tmd}{t}$ & The contract maturity date \\
+	\hline
 	Performance & $\svar{Prf}{t}$ & Contract performance \\
 	\hline
 	Last Event Date & $\svar{Led}{t}$ & The date of the most recent Contract Event \\
 	\hline
 	Nominal Value & $\svar{Nvl}{t}$ & The outstanding nominal value \\
 	\hline
-	Secondary Nominal Value & $\svar{Nv2}{t}$ & The outstanding nominal value of the second leg \\
+	Secondary Nominal Value & $\svar{Nvl2}{t}$ & The outstanding nominal value of the second leg \\
 	\hline
 	Nominal Rate & $\svar{Nrt}{t}$ & The applicable nominal rate \\
 	\hline
-	Nominal Accrued & $\svar{Nac}{t}$ & The current value of nominal accrued interest at the Nominal Rate \\
+	Nominal Accrued & $\svar{Nac}{t}$ & The current value of interest accrued \\
+	\hline
+	Nominal Accrued Leg 1 & $\svar{Nac1}{t}$ & The current value of interest accrued for leg 1 \\
+	\hline
+	Nominal Accrued Leg 2 & $\svar{Nac2}{t}$ & The current value of interest accrued for leg 2 \\
+	\hline
+	Fees Accrued & $\svar{Fac}{t}$ & The current value of fees accrued \\
 	\hline
 	Interest Calculation Base & $\svar{Icb}{t}$ & The basis at which interest is being accrued if different from $\svar{Nvl}{t}$ \\
 	\hline
@@ -1582,7 +1591,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	TD & & Same as PAM \\
 	\hline
-	IP & $\vec{t}^{IP} = \sdl{\attr{ARIPANX}}{\attr{ARIPCL}}{\svar{Tmd}{t_0}}$ & \\
+	IP & $\vec{t}^{IP} = \vsdl{\attr{ARIPANX}}{\attr{ARIPCL}}{\svar{Tmd}{t_0}}$ & \\
 	\hline
 	IPCI & & Same as PAM \\
   	\hline
