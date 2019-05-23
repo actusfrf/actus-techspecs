@@ -710,17 +710,25 @@ By definition, State Variables are updated through Contract Events only. The val
 	\hline
 	\textbf{Name} & \textbf{Abbrv.} & \textbf{Explanation} \\
 	\hline
+	Maturity & $\svar{Tmd}{t}$ & The contract maturity date \\
+	\hline
 	Performance & $\svar{Prf}{t}$ & Contract performance \\
 	\hline
 	Last Event Date & $\svar{Led}{t}$ & The date of the most recent Contract Event \\
 	\hline
 	Nominal Value & $\svar{Nvl}{t}$ & The outstanding nominal value \\
 	\hline
-	Secondary Nominal Value & $\svar{Nv2}{t}$ & The outstanding nominal value of the second leg \\
+	Secondary Nominal Value & $\svar{Nvl2}{t}$ & The outstanding nominal value of the second leg \\
 	\hline
 	Nominal Rate & $\svar{Nrt}{t}$ & The applicable nominal rate \\
 	\hline
-	Nominal Accrued & $\svar{Nac}{t}$ & The current value of nominal accrued interest at the Nominal Rate \\
+	Nominal Accrued & $\svar{Nac}{t}$ & The current value of interest accrued \\
+	\hline
+	Nominal Accrued Leg 1 & $\svar{Nac1}{t}$ & The current value of interest accrued for leg 1 \\
+	\hline
+	Nominal Accrued Leg 2 & $\svar{Nac2}{t}$ & The current value of interest accrued for leg 2 \\
+	\hline
+	Fees Accrued & $\svar{Fac}{t}$ & The current value of fees accrued \\
 	\hline
 	Interest Calculation Base & $\svar{Icb}{t}$ & The basis at which interest is being accrued if different from $\svar{Nvl}{t}$ \\
 	\hline
