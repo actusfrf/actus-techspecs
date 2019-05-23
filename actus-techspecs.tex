@@ -136,6 +136,7 @@
 \newcommand{\tmax}{t^{max}}
 \newcommand{\tev}[1]{\tau(#1)}
 \newcommand{\fev}[1]{f(#1)}
+\newcommand{\payoff}[2]{F(#1,#2)}
 
 
 % ---------------------- misc ----------------------
@@ -694,6 +695,15 @@ In an \textit{Annuity} contract (ANN) the annuity amount is paid regularly from 
 with $a$ the accrued interest as per time $s$, $r$ the actual interest rate, $t_i, i=1,2,...,m$ the schedule times $\inf t, t\in\vec{t}^{PR}\land t>s$, $m$ the number of times $t_i$, and $\vec{t}^{PR}$ the PR-event schedule times of the Annuity contract as described in section \ref{sec:ann}.
 
 
+\subsection{Canonical Contract Payoff Function}
+
+The canonical payoff of a contract $x$ is defined as the sum of all future event payoffs evaluated under current risk factor conditions, or
+
+\[
+  \payoff{x}{t} = \sum_{c\in C} c
+\]
+
+with $C=\fev{\cldev{x}{t}{\obs{rf}{\attr{i}}{s}=\obs{rf}{\attr{i}}{t}\forall i \wedge s>t}}$.
 
 %%%%%%%%%%%%%%%%%%%% section: state variables %%%%%%%%%%%%%%%%%%%%
 
@@ -799,21 +809,23 @@ An overview and description of various event types can be found in table \ref{tb
 	\hline
 	PRD & Purchase Date & Purchase date of a contract bought in the secondary market & 14 \\
 	\hline
-	MR & Margin Call Date & Scheduled margin call event & 15 \\
+  IMP & Initial Margin Payment & Initial margin call event  & 15 \\
 	\hline
-	TD & Termination Date & Sell date of a contract sold in the secondary market & 16 \\
+	MP & Margin Payment & Scheduled margin call event & 16 \\
 	\hline
-	SC & Scaling Index Revision & Scheduled re-fixing of a scaling index & 17 \\
+	TD & Termination Date & Sell date of a contract sold in the secondary market & 17 \\
 	\hline
-	IPCB & Interest Payment Calculation Base & Scheduled update to the calculation base for IP accruing & 18 \\
+	SC & Scaling Index Revision & Scheduled re-fixing of a scaling index & 18 \\
 	\hline
-	XD & Execution Date & Scheduled or unscheduled execution of e.g. an OPTNS or FUTUR contract & 19 \\
+	IPCB & Interest Payment Calculation Base & Scheduled update to the calculation base for IP accruing & 19 \\
 	\hline
-	STD & Settlement Date & Date when payment for derivatives is settled & 20 \\
+	XD & Execution Date & Scheduled or unscheduled execution of e.g. an OPTNS or FUTUR contract & 20 \\
 	\hline
-	MD & Maturity Date & Scheduled maturity or expiry of a contract & 21 \\
+	STD & Settlement Date & Date when payment for derivatives is settled & 21 \\
 	\hline
-	AD & Analysis Event & Retrieves current contract states without alter these & 22 \\
+	MD & Maturity Date & Scheduled maturity or expiry of a contract & 22 \\
+	\hline
+	AD & Analysis Event & Retrieves current contract states without alter these & 23 \\
 	\hline
 	%\end{tabular}
 	\caption{Contract Events Definitions.}
@@ -2773,6 +2785,79 @@ with\par
 	CD & \pof{CD}{PAM} & \stf{CD}{STK} \\
 \end{functions}
 
+
+%%%%%%%%%%%%%%%%%%%% subsection: margining %%%%%%%%%%%%%%%%%%%%
+
+\subsection{MRGNG: Margining}\label{sec:mrgng}
+
+
+% ---------------------- table: mrgng schedule ----------------------
+\begin{schedule}{MRGNG}
+	AD & & Same as PAM \\
+	\hline
+	IMP & $t^{IMP} = MRANX$ &  \\
+	\hline
+	MP & $\vec{t}^{MP} = \begin{cases}
+					\svar{Tmd}{t_0} & \text{if} \quad \attr{MRCL}=\undef \\
+					\sdl{s}{\attr{MRCL}}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ & \\
+	\hline
+	STD & $t^{STD} = \begin{cases} \svar{Tmd}{t_0} & \text{if}\quad \attr{STD}=\undef \\
+					\attr{STD} & \text{else} \end{cases}$ &  \\
+	\hline
+	CD & & Same as PAM \\
+\end{schedule}
+
+
+% ---------------------- table: mrgng states ----------------------
+\begin{states}{MRGNG}
+  $\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \begin{cases}
+        \attr{STD} & \text{if} \quad \attr{STD}\neq\undef \wedge \attr{STD}<t^{MD} \\
+        t^{MD} & \text{else} \end{cases}$ \newline
+        with $t^{MD}=\cldca{\attr{CTST}_{Underlying}^{Contract}}{MD}$ & \\
+  \hline
+  $\svar{Pos}{}$ & $\svar{Pos}{t_0} = \payoff{\attr{CTST}_{Underlying}^{Contract}}{t_0}$ & \\
+  \hline
+  $\svar{Nvl}{}$ & $\svar{Nvl}{t_0} = \begin{cases}
+					0 & \text{if} \quad\attr{MRVM}=\undef \\
+					\sgn\attr{MRVM} & \text{else} \end{cases}$ & \\
+	\hline
+	$\svar{Prf}{}$ & & Same as PAM \\
+	\hline
+	$\svar{Led}{}$ & & Same as PAM \\
+\end{states}
+
+
+% ---------------------- table: mrgng functions ----------------------
+\begin{functions}{MRGNG}
+	AD & \pof{AD}{PAM} & {$\begin{aligned}
+          \svar{Pos}{t^+} &= \payoff{\attr{CTST}_{Underlying}^{Contract}}{t}\\
+          \svar{Nvl}{t^+} &= \svar{Nvl}{t^-}+\sgn (\svar{Pos}{t^+}-\svar{Pos}{t^-}) \\
+					\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	IMP & $\dfl{t^-}\sgn (-1)\attr{MRIM}$ & {$\begin{aligned}
+          \svar{Pos}{t^+} &= \payoff{\attr{CTST}_{Underlying}^{Contract}}{t}\\
+          \svar{Nvl}{t^+} &= \sgn\attr{MRIM} \\
+          \svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	MP & $\dfl{t^-}\sgn x$ where\newline
+        {$x= \begin{cases}
+            0 & \text{if}\quad S \in (\attr{MRMML},\attr{MRMMU}) \\
+            S - \attr{MRIM} & \text{else} \end{cases}$} \newline
+        with $S = \sgn\svar{Nvl}{t^-} + ( \payoff{\attr{CTST}_{Underlying}^{Contract}}{t} - \svar{Pos}{t^-}) )$
+         & {$\begin{aligned}
+          \svar{Pos}{t^+} &= \payoff{\attr{CTST}_{Underlying}^{Contract}}{t}\\
+          \svar{Nvl}{t^+} &= \begin{cases}
+              \sgn S & \text{if}\quad S \in (\attr{MRMML},\attr{MRMMU}) \\
+              \sgn\attr{MRIM} & \text{else} \end{cases} \\
+					\svar{Led}{t^+} &= t \end{aligned}$}\newline
+          with $S=\sgn\svar{Nvl}{t^-}+ (\svar{Pos}{t^+}-\svar{Pos}{t^-})$ \\
+	\hline
+	STD & $\svar{Nvl}{t}$ & {$\begin{aligned}
+					\svar{Nvl}{t^+} &= 0.0 \\
+					\svar{Led}{t^+} &= t \end{aligned}$} \\
+	\hline
+	CD & \pof{CD}{PAM} & \stf{CD}{STK} \\
+\end{functions}
 
 
 %%%%%%%%%%%%%%%%%%%% subsection: ceg %%%%%%%%%%%%%%%%%%%%
