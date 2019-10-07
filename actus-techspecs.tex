@@ -209,8 +209,9 @@ This document is versioned according to the following pattern: [major].[minor]-[
 	\begin{itemize}
 		\item Fixed various naming conventions
 		\item Aligned state variable names with dictionary
-		\item Added \attr{ContractStructure}
+		\item Added \attr{ContractStructure} and "Composition"-section
 		\item Added \attr{settlementCurrency} attribute and updated \attr{POF} accordingly
+		\item Removed default convention and updated POF
 		\item Moved Taxonomy, Event, State, Contract Role definitions to dictionary
 	\end{itemize} \\
   \hline
@@ -567,18 +568,6 @@ Table \ref{tbl:cntrl} defines the domain of the Contract Role Sign function, i.e
 \end{table}
 
 
-\subsection{Contract Default Convention}\label{sec:default}
-
-Performance of a contract indicates whether as per a certain time all parties involved adhere to their obligations arising from the contract. Attribute \attr{PRF} captures a contract's performance as per $t_0$. For any time $t>t_0$ and depending on the behavior of the parties involved with the contract can migrate into different performance states from \textit{'performing'} to \textit{'default'}. State variable $\svar{Prf}{t}$ (cf. table \ref{tbl:statevars}) captures these dynamics and the performance as per any time $t>t_0$.\\
-
-The Contract Default Convention is a function $D$ that maps the $\svar{Prf}{t}$ state variable into $+1$ indicating that the contract is performing or $0$ which reflects default and, from an analytical perspective, means that future cash flows \textit{cancel out}:
-
-\[
-\dfl{t} = \begin{cases} 1 & \text{if} \quad \svar{Prf}{t}\neq \text{'D'} \\
-				0 & \text{else} \end{cases}
-\]
-
-
 \subsection{Annuity Amount Function}\label{sec:annamount}
 
 In an \textit{Annuity} contract (ANN) the annuity amount is paid regularly from the \textit{borrower} to the \textit{lender}. Thereby, the annuity amount is comprised of a principal repayment portion and an interest portion and and dimensioned such that the total nominal amount $n$ at time $t$ is fully repaid at maturity $T$ of the annuity. The Annuity Amount function $\ann$ computes the annuity amount as follows
@@ -911,7 +900,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 				\svar{Sd}{t^+} &= t
 			\end{aligned}$} \\
 	\hline
-	IED & $\dfl{t^-}\sgn(-1)(\attr{NT}+\attr{PDIED})$
+	IED & $\obs{rf}{\attr{CURS}}{t}\sgn(-1)(\attr{NT}+\attr{PDIED})$
 		& {$\begin{aligned}
 			\svar{Nt}{t^+} &=\sgn\attr{NT} \\
 			\svar{Ipnr}{t^+} &= \begin{cases} 0.0 & \text{if} \quad \attr{IPNR}=\undef \\
@@ -923,13 +912,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		with\par
 		$y=\yfr{\attr{IPANX}}{t}$ \\
 	\hline
-	PR & $\dfl{t^-}\svar{Nsc}{t^-}\svar{Nt}{t^-}$
+	PR & $\obs{rf}{\attr{CURS}}{t}\svar{Nsc}{t^-}\svar{Nt}{t^-}$
 		& {$\begin{aligned}
 			\svar{Nt}{t^+} &= 0.0 \\
 			\svar{Ipnr}{t^+} &= 0.0 \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-	PP & $\dfl{t^-}\obs{rf}{\attr{OPMO}}{t}$
+	PP & $\obs{rf}{\attr{CURS}}{t}\obs{rf}{\attr{OPMO}}{t}$
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
@@ -942,11 +931,11 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
 	\hline
 	PY & {$\begin{aligned}
-			&\dfl{t^-}\sgn\attr{PYRT} &\text{if} \quad \attr{PYTP}=\text{'A'}\\
+			&\obs{rf}{\attr{CURS}}{t}\sgn\attr{PYRT} &\text{if} \quad \attr{PYTP}=\text{'A'}\\
 			&c\attr{PYRT} &\text{if} \quad \attr{PYTP}=\text{'N'}\\
 			&c\max(0,\svar{Ipnr}{t^-}-\obs{rf}{\attr{RRMO}}{t}) &\text{if} \quad \attr{PYTP}=\text{'I'} \end{aligned}$}\par
 		with\par
-		$c=\dfl{t^-}\sgn\yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}$
+		$c=\obs{rf}{\attr{CURS}}{t}\sgn\yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}$
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
@@ -961,13 +950,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			&c &\text{if} \quad \attr{FEB}=\text{'A'}\\
 			&c\yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}+\svar{Fac}{t^-} &\text{if} \quad \attr{FEB}=\text{'N'} \end{aligned}$}\par
 		with\par
-		$c=\dfl{t^-}\sgn\attr{FER}$
+		$c=\obs{rf}{\attr{CURS}}{t}\sgn\attr{FER}$
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-} \\
 			\svar{Fac}{t^+} &= 0.0 \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-  	PRD & $\dfl{t^-}\sgn (-1)(\attr{PPRD} + \svar{Ipac}{t^-} +$ \par
+  	PRD & $\obs{rf}{\attr{CURS}}{t}\sgn (-1)(\attr{PPRD} + \svar{Ipac}{t^-} +$ \par
 		$\qquad\qquad \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-})$
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-} \\
@@ -979,7 +968,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
 			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
 	\hline
-  	TD & $\dfl{t^-}\sgn (\attr{PTD} + \svar{Ipac}{t^-} +$ \par
+  	TD & $\obs{rf}{\attr{CURS}}{t}\sgn (\attr{PTD} + \svar{Ipac}{t^-} +$ \par
 		$\qquad\qquad \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-})$
 		& {$\begin{aligned}
 			\svar{Nt}{t^+} &= 0.0 \\
@@ -988,7 +977,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Ipnr}{t^+} &= 0.0 \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-	IP & $\dfl{t^-}\svar{Isc}{t^-}(\svar{Ipac}{t^-} +$\par
+	IP & $\obs{rf}{\attr{CURS}}{t}\svar{Isc}{t^-}(\svar{Ipac}{t^-} +$\par
 		$\qquad\qquad \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-})$
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= 0.0 \\
@@ -1168,7 +1157,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Ipcb}{t^+} &= \begin{cases} \sgn\attr{NT} & \text{if}\quad \attr{IPCB}=\text{'NT'} \\
 							\sgn\attr{IPCBA} & \text{else} \end{cases} \end{aligned}$} \\
 	\hline
-	PR & $\dfl{t^-}\sgn\svar{Nsc}{t^-}\svar{Prnxt}{t^-}$
+	PR & $\obs{rf}{\attr{CURS}}{t}\sgn\svar{Nsc}{t^-}\svar{Prnxt}{t^-}$
 		& {$\begin{aligned}
 			\svar{Nt}{t^+} &= \svar{Nt}{t^-}-\sgn\svar{Prnxt}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
@@ -1212,7 +1201,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Fac}{t^+} &= 0.0 \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-  	PRD & $\dfl{t^-}\sgn (-1)(\attr{PPRD} + \svar{Ipac}{t^-} +$ \par
+  	PRD & $\obs{rf}{\attr{CURS}}{t}\sgn (-1)(\attr{PPRD} + \svar{Ipac}{t^-} +$ \par
 		$\qquad\qquad \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-})$
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
@@ -1224,11 +1213,11 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
 			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
 	\hline
-  	TD & $\dfl{t^-}\sgn (\attr{PTD} + \svar{Ipac}{t^-} +$ \par
+  	TD & $\obs{rf}{\attr{CURS}}{t}\sgn (\attr{PTD} + \svar{Ipac}{t^-} +$ \par
 		$\qquad\qquad \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-})$
 		& \stf{TD}{PAM} \\
 	\hline
-	IP & $\dfl{t^-}\svar{Isc}{t^-}(\svar{Ipac}{t^-} +$ \par
+	IP & $\obs{rf}{\attr{CURS}}{t}\svar{Isc}{t^-}(\svar{Ipac}{t^-} +$ \par
 		$\qquad\qquad \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-})$
 		& \stf{IP}{PAM} \\
 	\hline
@@ -1435,7 +1424,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	PR & \pof{PR}{LAM} & \stf{PR}{LAM} \\
 	\hline
-	PI & $\dfl{t^-}\sgn(-1)\svar{Nsc}{t^-}\svar{Prnxt}{t^-}$ & {$\begin{aligned}
+	PI & $\obs{rf}{\attr{CURS}}{t}\sgn(-1)\svar{Nsc}{t^-}\svar{Prnxt}{t^-}$ & {$\begin{aligned}
 			\svar{Nt}{t^+} &= \svar{Nt}{t^-}+\sgn\svar{Prnxt}{t^-} \\
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
@@ -1601,7 +1590,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	IED & \pof{IED}{PAM} & \stf{IED}{LAM} \\
 	\hline
-	PR & $\dfl{t^-}\svar{Nsc}{t^-}(\svar{Prnxt}{t^-}-\svar{Ipac}{t^-}-$\par $\qquad\qquad \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-})$
+	PR & $\obs{rf}{\attr{CURS}}{t}\svar{Nsc}{t^-}(\svar{Prnxt}{t^-}-\svar{Ipac}{t^-}-$\par $\qquad\qquad \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-})$
 		& {$\begin{aligned}
 			\svar{Nt}{t^+} &= \svar{Nt}{t^-}-(\svar{Prnxt}{t^-}-\svar{Ipac}{t^+}) \\
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
@@ -1846,14 +1835,14 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \begin{functions}{CLM}
 	AD & \pof{AD}{PAM} & \stf{AD}{PAM} \\
 	\hline
-	IED & $\dfl{t^-}\sgn (-1)\attr{NT}$ & \stf{IED}{PAM} \\
+	IED & $\obs{rf}{\attr{CURS}}{t}\sgn (-1)\attr{NT}$ & \stf{IED}{PAM} \\
 	\hline
 	PR & \pof{PR}{PAM} & \stf{PR}{PAM} \\
 	\hline
 	FP & \pof{FP}{PAM}
 		& \stf{FP}{PAM} \\
 	\hline
-	IP & $\dfl{t^-}(\svar{Ipac}{t^-}+\yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-})$
+	IP & $\obs{rf}{\attr{CURS}}{t}(\svar{Ipac}{t^-}+\yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-})$
 		& {$\begin{aligned}
 				\svar{Ipac}{t^+} &= 0.0 \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
@@ -2022,15 +2011,15 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \begin{functions}{STK}
 	AD & \pof{AD}{PAM} & $\svar{Sd}{t^+}=t$ \\
 	\hline
-	PRD & $\dfl{t^-}\sgn (-1) \attr{PPRD}$
+	PRD & $\obs{rf}{\attr{CURS}}{t}\sgn (-1) \attr{PPRD}$
 		& $\svar{Sd}{t^+}=t$ \\
 	\hline
-	TD & $\dfl{t^-}\sgn \attr{PTD}$
+	TD & $\obs{rf}{\attr{CURS}}{t}\sgn \attr{PTD}$
 		& $\svar{Sd}{t^+}=t$ \\
 	\hline
-	DV$^{(fix)}$ & $\dfl{t^-}\sgn\attr{DVNP}$ & $\svar{Sd}{t^+}=t$ \\
+	DV$^{(fix)}$ & $\obs{rf}{\attr{CURS}}{t}\sgn\attr{DVNP}$ & $\svar{Sd}{t^+}=t$ \\
 	\hline
-	DV & $\dfl{t^-}\sgn \obs{rf}{\attr{DVMO}}{t}$
+	DV & $\obs{rf}{\attr{CURS}}{t}\sgn \obs{rf}{\attr{DVMO}}{t}$
 		& $\svar{Sd}{t^+}=t$ \\
 	\hline
 	CD & \pof{CD}{PAM}
@@ -2121,15 +2110,15 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	TD & \pof{TD}{STK} & \stf{TD}{STK} \\
 	\hline
-	STD & $\dfl{t^-}\sgn (\attr{NT}-\obs{rf}{i}{\svar{Tmd}{t}}\attr{NT2})$\par
+	STD & $\obs{rf}{\attr{CURS}}{t}\sgn (\attr{NT}-\obs{rf}{i}{\svar{Tmd}{t}}\attr{NT2})$\par
 		where\par
 		$i=concat(\text{\attr{CUR2},"/",\attr{CUR}})$\par
 		and $concat(x,y,z)$ indicates the string concatenation function
 		& $\svar{Sd}{t^+}=t$ \\
 	\hline
-	STD$^{(1)}$ & $\dfl{t^-}\sgn\attr{NT}$ & $\svar{Sd}{t^+}=t$ \\
+	STD$^{(1)}$ & $\obs{rf}{\attr{CURS}}{t}\sgn\attr{NT}$ & $\svar{Sd}{t^+}=t$ \\
 	\hline
-	STD$^{(2)}$ & $\dfl{t^-}\sgn (-1)\attr{NT2}$ & $\svar{Sd}{t^+}=t$ \\
+	STD$^{(2)}$ & $\obs{rf}{\attr{CURS}}{t}\sgn (-1)\attr{NT2}$ & $\svar{Sd}{t^+}=t$ \\
 	\hline
 	CD & \pof{CD}{PAM}
 		& \stf{CD}{STK} \\
@@ -2239,15 +2228,15 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 				\svar{Ipnr}{t^+} &= 0.0 \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-	IP & $\dfl{t^-}\sgn (\svar{Ipac}{t^-}+\yfr{\svar{Sd}{t^-}}{t}(\attr{IPNR}-\svar{Ipnr}{t^-})\svar{Nt}{t^-})$ & {$\begin{aligned}
+	IP & $\obs{rf}{\attr{CURS}}{t}\sgn (\svar{Ipac}{t^-}+\yfr{\svar{Sd}{t^-}}{t}(\attr{IPNR}-\svar{Ipnr}{t^-})\svar{Nt}{t^-})$ & {$\begin{aligned}
 				\svar{Ipac}{t^+} &= 0.0 \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-	IP$^{(fix})$ & $\dfl{t^-}\sgn (\svar{Ipac1}{t^-}+\yfr{\svar{Sd}{t^-}}{t}\attr{IPNR}\svar{Nt}{t^-})$ & {$\begin{aligned}
+	IP$^{(fix})$ & $\obs{rf}{\attr{CURS}}{t}\sgn (\svar{Ipac1}{t^-}+\yfr{\svar{Sd}{t^-}}{t}\attr{IPNR}\svar{Nt}{t^-})$ & {$\begin{aligned}
 				\svar{Ipac1}{t^+} &= 0.0 \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-	IP$^{(var)}$ & $\dfl{t^-}\sgn (\svar{Ipac2}{t^-}-\yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-})$ & {$\begin{aligned}
+	IP$^{(var)}$ & $\obs{rf}{\attr{CURS}}{t}\sgn (\svar{Ipac2}{t^-}-\yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-})$ & {$\begin{aligned}
 				\svar{Ipac2}{t^+} &= 0.0 \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
@@ -2333,7 +2322,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 					\frac{\yfr{t^-}{t}}{\yfr{t^-}{t^+}}\attr{FER} & \text{else} \end{cases} \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-	PRD & $\dfl{t^-} ( (-1)\attr{PPRD}$ \par
+	PRD & $\obs{rf}{\attr{CURS}}{t} ( (-1)\attr{PPRD}$ \par
 				 $\qquad + \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(1)}}$ \par
 				 $\qquad + \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(2)}})$
 		& {$\begin{aligned}
@@ -2341,7 +2330,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 						&+ \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(2)}} \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-	TD & $\dfl{t^-} (\attr{PTD}$ \par
+	TD & $\obs{rf}{\attr{CURS}}{t} (\attr{PTD}$ \par
 				 $\qquad + \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(1)}}$ \par
 				 $\qquad + \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(2)}})$
 		& {$\begin{aligned}
@@ -2397,7 +2386,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 						&\qquad \attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}) \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-	PRD & $\dfl{t^-} ( (-1)\attr{PPRD} + \sgn  abs($ \par
+	PRD & $\obs{rf}{\attr{CURS}}{t} ( (-1)\attr{PPRD} + \sgn  abs($ \par
 				 $\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Nac}{\attr{CNTRL}=RPA} - $ \par
 				 $\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Nac}{\attr{CNTRL}=RPA,$ \par
 					$\qquad\qquad\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}))$
@@ -2407,7 +2396,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 						&\qquad \attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}) \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-	TD & $\dfl{t^-} (\attr{PTD}$ + \sgn abs( \par
+	TD & $\obs{rf}{\attr{CURS}}{t} (\attr{PTD}$ + \sgn abs( \par
 				 $\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Nac}{\attr{CNTRL}=RPA} - $ \par
 				 $\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Nac}{\attr{CNTRL}=RPA,$ \par
 					$\qquad\qquad\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}))$
@@ -2471,9 +2460,9 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 with\par
 			$S_t=\obs{rf}{\cldca{\attr{CTST}_{Underlying}^{Contract}}{MOC}}{t}$ \\
 	\hline
-	PRD & $\dfl{t^-}(-1)\attr{PPRD}$ & \stf{PRD}{STK} \\
+	PRD & $\obs{rf}{\attr{CURS}}{t}(-1)\attr{PPRD}$ & \stf{PRD}{STK} \\
 	\hline
-	TD & $\dfl{t^-}\attr{PTD}$ & \stf{TD}{STK} \\
+	TD & $\obs{rf}{\attr{CURS}}{t}\attr{PTD}$ & \stf{TD}{STK} \\
 	\hline
 	XD & 0.0 & {$\begin{aligned}
 					\svar{Pos}{t^+} &= \begin{cases}
@@ -2484,7 +2473,7 @@ with\par
 with\par
 			$S_t=\obs{rf}{\cldca{\attr{CTST}_{Underlying}^{Contract}}{MOC}}{t}$ \\
 	\hline
-	STD & $\dfl{t^-}\sgn\svar{Pos}{t^-}$ & {$\begin{aligned}
+	STD & $\obs{rf}{\attr{CURS}}{t}\sgn\svar{Pos}{t^-}$ & {$\begin{aligned}
 					\svar{Pos}{t^+} &= 0.0 \\
 					\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
