@@ -211,9 +211,10 @@ This document is versioned according to the following pattern: [major].[minor]-[
 		\item Aligned state variable names with dictionary
 		\item Added \attr{ContractStructure} and "Composition"-section
 		\item Added \attr{settlementCurrency} attribute and updated \attr{POF} accordingly
-		\item Removed default convention and updated POF
+		\item Removed default convention and updated \attr{POF} accordingly
 		\item Moved Taxonomy, Event, State, Contract Role definitions to dictionary
-	\end{itemize} \\
+	\end{itemize} \par
+		Fixed various bugs and inconsistencies. \\
   \hline
   \end{tabular}
 \end{table}
@@ -374,7 +375,7 @@ The lifetime of an ACTUS contract is the time period of its existence from the p
 
 The lifetime of a contract starts with its \attr{SD} and ends with $\min(MD, AMD, PR^*, STD, TD,\tmax)$.\\
 
-Note that $PR^*$ refers to the PR event of a maturity contract after which \textbf{Nvl}=0.0 (i.e. at which the remaining outstanding principal is redeemed). Further, \attr{MD}, \attr{AMD}, and PR(\textbf{Nvl}=0.0) in the definition above do only apply for maturity contracts but have to be considered infinity in all other cases. Similarly, \attr{STD} only applies for certain contracts and is considered infinity for all others. Finally, $\tmax$ is a parameter that may be used to restrict the considered lifetime in an analysis. In particular, this parameter is used for contracts that do not have a \textit{natural} end to their lifetime such as STK.
+Note that $PR^*$ refers to the PR event of a maturity contract after which \textbf{Nt}=0.0 (i.e. at which the remaining outstanding principal is redeemed). Further, \attr{MD}, \attr{AMD}, and PR(\textbf{Nt}=0.0) in the definition above do only apply for maturity contracts but have to be considered infinity in all other cases. Similarly, \attr{STD} only applies for certain contracts and is considered infinity for all others. Finally, $\tmax$ is a parameter that may be used to restrict the considered lifetime in an analysis. In particular, this parameter is used for contracts that do not have a \textit{natural} end to their lifetime such as STK.
 
 
 %%%%%%%%%%%%%%%%%%%% section: utility functions %%%%%%%%%%%%%%%%%%%%
@@ -561,6 +562,12 @@ Table \ref{tbl:cntrl} defines the domain of the Contract Role Sign function, i.e
 	RFL & Receive first (or fixed) leg & +1 \\
 	\hline
 	PFL & Pay first (or fixed) leg & -1 \\
+	\hline
+	COL & Collateral instrument & +1 \\
+	\hline
+	GUA & The guarantor in a Guarantee & -1 \\
+	\hline
+	OBL & The obligee in a Guarantee & +1 \\
 	\hline
 	\end{tabular}
 	\caption{Contract Role definitions.}
@@ -767,7 +774,7 @@ Note that the observer interface only defines the structure of an actual observe
 \begin{example}['ev'-Observer] The future events, w.r.t. time $t$, of the \textit{first leg} (i.e. child contract with \verb'Role'=$\texttt{FirstLeg}$) of a SWAPS contract with $\attr{CNTRL}=PFL$ (i.e. \textit{pay first leg}) can be evaluated as $\cldev{\attr{CTST}_{FirstLeg}^{Contract}}{t}{\attr{CNTRL}=RPL}$.
 \end{example}
 
-\begin{example}['sv'-Observer] The current state, w.r.t. time $t$, of state variable $\svar{Nt}{}$ of the \textit{first leg} (i.e. child contract with \verb'Role'=$\texttt{FirstLeg}$) of a SWAPS contract with \attr{CNTRL}=RFL (i.e. \textit{receive first leg}) can be evaluated as $\cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Nvl}{\attr{CNTRL}=RPA}$.
+\begin{example}['sv'-Observer] The current state, w.r.t. time $t$, of state variable $\svar{Nt}{}$ of the \textit{first leg} (i.e. child contract with \verb'Role'=$\texttt{FirstLeg}$) of a SWAPS contract with \attr{CNTRL}=RFL (i.e. \textit{receive first leg}) can be evaluated as $\cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Nt}{\attr{CNTRL}=RPA}$.
 \end{example}
 
 \begin{example}['ca'-Observer] The contract attribute \attr{MOC} of the child contract \textit{Child} (i.e. child contract with \verb'Role'=$\texttt{Underlying}$) of an OPTNS contract can be evaluated as $\cldca{\attr{CTST}_{Underlying}^{Contract}}{\attr{MOC}}$.
@@ -856,6 +863,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& with\par $s = \begin{cases} \undef & \text{if} \quad \attr{SCANX}=\undef \land \attr{SCCL}=\undef\\
 					   \attr{IED}+\attr{SCCL} & \text{else if} \quad \attr{SCANX} = \undef \\
 					   \attr{SCANX} & \text{else} \end{cases}$ \\
+	\hline
+	CE & $\vec{t}^{CE} = t(e^{k}) | \svar{Prf}{t^-} \neq \svar{Prf}{t^+}, \forall k$  & \\
 \end{schedule}
 
 
@@ -922,7 +931,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Nt}{t^+} &= \svar{Nt}{t^-} - \obs{rf}{\attr{OPMO}}{t} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
@@ -939,7 +948,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
 		{$\begin{aligned}
@@ -947,10 +956,10 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
 	\hline
 	FP & {$\begin{aligned}
-			&c &\text{if} \quad \attr{FEB}=\text{'A'}\\
+			&\sgn c &\text{if} \quad \attr{FEB}=\text{'A'}\\
 			&c\yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}+\svar{Fac}{t^-} &\text{if} \quad \attr{FEB}=\text{'N'} \end{aligned}$}\par
 		with\par
-		$c=\obs{rf}{\attr{CURS}}{t}\sgn\attr{FER}$
+		$c=\obs{rf}{\attr{CURS}}{t}\attr{FER}$
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-} \\
 			\svar{Fac}{t^+} &= 0.0 \\
@@ -961,7 +970,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
 		{$\begin{aligned}
@@ -982,7 +991,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= 0.0 \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
 		{$\begin{aligned}
@@ -994,7 +1003,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Nt}{t^+} &= \svar{Nt}{t^-} + \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\svar{Ipnr}{t^-}\\
 			\svar{Ipac}{t^+} &= 0.0 \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
 		{$\begin{aligned}
@@ -1005,7 +1014,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipnr}{t^+} &= \min(\max(\svar{Ipnr}{t^-}+\Delta r,\attr{RRLF}),\attr{RRLC}) \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
@@ -1018,7 +1027,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipnr}{t^+} &= \attr{RRNXT} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
@@ -1030,7 +1039,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Nsc}{t^+} &= \begin{cases} \svar{Nsc}{t^-} & \text{if} \quad \attr{SCEF} = [x]0[x] \\
 							\frac{\obs{rf}{\attr{SCMO}}{t} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
 			\svar{Isc}{t^+} &= \begin{cases} \svar{Isc}{t^-} & \text{if} \quad \attr{SCEF} = 0[x][x] \\
@@ -1041,17 +1050,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
 			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
 	\hline
-	CD & 0.0
-		& {$\begin{aligned}
-			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-} \\
-			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
-			\svar{Prf}{t^+} &= \text{'D'}\\
-			\svar{Sd}{t^+} &= t \end{aligned}$} \par
-		with\par
-		{$\begin{aligned}
-			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
-			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
+	CE & 0.0 & \stf{AD}{PAM} \\
 \end{functions}
 
 
@@ -1098,7 +1097,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
   	\hline
 	SC & & Same as PAM \\
 	\hline
-	CD & & Same as PAM \\
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -1161,7 +1160,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Nt}{t^+} &= \svar{Nt}{t^-}-\sgn\svar{Prnxt}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipcb}{t^+} &= \begin{cases} \svar{Ipcb}{t^-} & \text{if}\quad \attr{IPCB}\neq\text{'NT'} \\
 							\svar{Nt}{t^+} & \text{else} \end{cases}\\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
@@ -1174,7 +1173,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Nt}{t^+} &= \svar{Nt}{t^-} - \obs{rf}{\attr{OPMO}}{t} \\
 			\svar{Ipcb}{t^+} &= \begin{cases} \svar{Ipcb}{t^-} & \text{if}\quad \attr{IPCB}\neq\text{'NT'} \\
 							\svar{Nt}{t^+} & \text{else} \end{cases}\\
@@ -1188,7 +1187,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
 		{$\begin{aligned}
@@ -1206,7 +1205,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
 		{$\begin{aligned}
@@ -1226,7 +1225,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Nt}{t^+} &= \svar{Nt}{t^-} + \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-}\\
 			\svar{Ipac}{t^+} &= 0.0 \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipcb}{t^+} &= \begin{cases} \svar{Ipcb}{t^-} & \text{if}\quad \attr{IPCB}\neq\text{'NT'} \\
 							\svar{Nt}{t^+} & \text{else} \end{cases}\\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
@@ -1240,7 +1239,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Ipcb}{t^+} &= \svar{Nt}{t^-} \\
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
 		{$\begin{aligned}
@@ -1251,7 +1250,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipnr}{t^+} &= \min(\max(\svar{Ipnr}{t^-}+\Delta r,\attr{RRLF}),\attr{RRLC}) \\
 			\svar{Sd}{t^+} &= t \end{aligned}$}\par
 		with\par
@@ -1264,7 +1263,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipnr}{t^+} &= \attr{RRNXT} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
@@ -1276,7 +1275,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Nsc}{t^+} &= \begin{cases} \svar{Nsc}{t^-} & \text{if} \quad \attr{SCEF} = [x]0[x] \\
 							\frac{\obs{rf}{\attr{SCMO}}{t} - \attr{SCIED}}{\attr{SCIED}} & \text{else} \end{cases} \\
 			\svar{Isc}{t^+} &= \begin{cases} \svar{Isc}{t^-} & \text{if} \quad \attr{SCEF} = 0[x][x] \\
@@ -1287,17 +1286,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
 			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
 	\hline
-	CD & \pof{CD}{PAM}
-		& {$\begin{aligned}
-			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
-			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
-			\svar{Prf}{t^+} &= \text{'D'}\\
-			\svar{Sd}{t^+} &= t \end{aligned}$} \par
-		with\par
-		{$\begin{aligned}
-			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
-			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
+	CE & \pof{CE}{PAM} & \stf{AD}{PAM} \\
 \end{functions}
 
 
@@ -1369,7 +1358,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	SC & & Same as PAM \\
 	\hline
-	CD & & Same as PAM \\
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -1428,7 +1417,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Nt}{t^+} &= \svar{Nt}{t^-}+\sgn\svar{Prnxt}{t^-} \\
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipcb}{t^+} &= \begin{cases} \svar{Ipcb}{t^-} & \text{if}\quad \attr{IPCB}\neq\text{'NT'} \\
 							\svar{Nt}{t^+} & \text{else} \end{cases}\\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
@@ -1441,7 +1430,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Prnxt}{t^+} &= \attr{ARPRNXT}_i \\
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipcb}{t^+} &= \begin{cases} \svar{Ipcb}{t^-} & \text{if}\quad \attr{IPCB}\neq\text{'NT'} \\
 							\svar{Nt}{t^+} & \text{else} \end{cases}\\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
@@ -1471,7 +1460,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipnr}{t^+} &= \min(\max(\svar{Ipnr}{t^-}+\Delta r,\attr{RRLF}),\attr{RRLC}) \\
 			\svar{Sd}{t^+} &= t \end{aligned}$}\par
 		with\par
@@ -1485,7 +1474,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipnr}{t^+} &= \attr{ARRATE}_i \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
@@ -1496,7 +1485,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	SC & \pof{SC}{PAM} & \stf{SC}{LAM} \\
 	\hline
-	CD & \pof{CD}{PAM} & \stf{CD}{LAM} \\
+	CE & \pof{CE}{PAM} & \stf{AD}{PAM} \\
 \end{functions}
 
 
@@ -1548,7 +1537,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
   	\hline
 	SC & & Same as PAM \\
 	\hline
-	CD & & Same as PAM \\
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -1595,7 +1584,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Nt}{t^+} &= \svar{Nt}{t^-}-(\svar{Prnxt}{t^-}-\svar{Ipac}{t^+}) \\
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipcb}{t^+} &= \begin{cases} \svar{Ipcb}{t^-} & \text{if}\quad \attr{IPCB}\neq\text{'NT'} \\
 							\svar{Nt}{t^+} & \text{else} \end{cases}\\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
@@ -1637,8 +1626,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	SC & \pof{SC}{PAM}
 		& \stf{SC}{LAM} \\
 	\hline
-	CD & \pof{CD}{PAM}
-		& \stf{CD}{LAM} \\
+	CE & \pof{CE}{PAM} & \stf{AD}{PAM} \\
 \end{functions}
 
 
@@ -1678,7 +1666,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
   	\hline
 	SC & & Same as PAM \\
 	\hline
-	CD & & Same as PAM \\
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -1745,7 +1733,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipnr}{t^+} &= \min(\max(\svar{Ipnr}{t^-}+\Delta r,\attr{RRLF}),\attr{RRLC}) \\
 			\svar{Prnxt}{t^+} &= \ann{t}{\svar{Tmd}{t^+}}{\svar{Nt}{t^+}}{\svar{Ipac}{t^+}}{\svar{Ipnr}{t^+}} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$}\par
@@ -1759,7 +1747,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipnr}{t^+} &= \attr{RRNXT} \\
 			\svar{Prnxt}{t^+} &= \ann{t}{\svar{Tmd}{t^+}}{\svar{Nt}{t^+}}{\svar{Ipac}{t^+}}{\svar{Ipnr}{t^+}} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
@@ -1771,8 +1759,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	SC & \pof{SC}{PAM}
 		& \stf{SC}{LAM} \\
 	\hline
-	CD & \pof{CD}{PAM}
-		& \stf{CD}{LAM} \\
+	CE & \pof{CE}{PAM} & \stf{AD}{PAM} \\
 \end{functions}
 
 
@@ -1805,7 +1792,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	RRF & & Same as PAM \\
 	\hline
-	CD & & Same as PAM \\
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -1856,8 +1843,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	RRF & \pof{RRF}{PAM}
 		& \stf{RRF}{PAM} \\
 	\hline
-	CD & \pof{CD}{PAM}
-		& \stf{CD}{PAM} \\
+	CE & \pof{CE}{PAM} & \stf{AD}{PAM} \\
 \end{functions}
 
 
@@ -1888,7 +1874,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	RRF & & Same as PAM \\
 	\hline
-	CD & & Same as PAM \\
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -1939,8 +1925,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	RRF & \pof{RRF}{PAM}
 		& \stf{RRF}{PAM} \\
 	\hline
-	CD & \pof{CD}{PAM}
-		& \stf{CD}{PAM} \\
+	CE & \pof{CE}{PAM} & \stf{AD}{PAM} \\
 \end{functions}
 
 
@@ -1995,7 +1980,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		$s=\begin{cases} \attr{DVANX} & \text{if}\quad \attr{DVNP}=\undef \\
 				\attr{DVANX}+\attr{DVCL} & \text{else} \end{cases}$ \\
 	\hline
-	CD & & Same as PAM \\
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -2022,10 +2007,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	DV & $\obs{rf}{\attr{CURS}}{t}\sgn \obs{rf}{\attr{DVMO}}{t}$
 		& $\svar{Sd}{t^+}=t$ \\
 	\hline
-	CD & \pof{CD}{PAM}
-		& {$\begin{aligned}
-			\svar{Prf}{t^+} &= \obs{rf}{\attr{LEICP}}{t} \\
-			\svar{Sd}{t^+} &= t \end{aligned}$} \\
+	CE & \pof{CE}{PAM} & \stf{AD}{STK} \\
 \end{functions}
 
 
@@ -2087,7 +2069,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 					\undef & \text{if}\quad \attr{DS}=\text{'S'} \\
 					\svar{Tmd}{t_0} & \text{else} \end{cases}$ & \\
 	\hline
-	CD & & Same as PAM \\
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -2120,8 +2102,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	STD$^{(2)}$ & $\obs{rf}{\attr{CURS}}{t}\sgn (-1)\attr{NT2}$ & $\svar{Sd}{t^+}=t$ \\
 	\hline
-	CD & \pof{CD}{PAM}
-		& \stf{CD}{STK} \\
+	CE & \pof{CE}{PAM} & \stf{CD}{STK} \\
 \end{functions}
 
 
@@ -2166,7 +2147,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 				$s=\begin{cases} \attr{RRANX} & \text{if}\quad \attr{RRANX}\neq\undef \\
 						\attr{IED}+\attr{RRCL} & \text{else} \end{cases}$ \\
 	\hline
-	CD & & Same as PAM \\
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -2247,13 +2228,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 				\svar{Ipnr}{t^+} &= \attr{RRMLT}\obs{rf}{\attr{RRMO}}{t}+\attr{RRSP} \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 \hline
-	CD & \pof{CD}{PAM}
-		& {$\begin{aligned}
-				\svar{Ipac}{t^+} &= \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t_0}(\attr{IPNR}-\svar{Ipnr}{t_0}) \\
-				\svar{Ipac1}{t^+} &= \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t_0}\attr{IPNR} \\
-				\svar{Ipac2}{t^+} &= \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t_0}\svar{Ipnr}{t_0} \\
-				\svar{Prf}{t^+} &= \text{'D'} \\
-				\svar{Sd}{t^+} &= t \end{aligned}$} \\
+	CE & \pof{CE}{PAM} & \stf{AD}{SWPPV} \\
 \end{functions}
 
 
@@ -2291,6 +2266,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 				r^{(2)} &= \begin{cases} RPL & \text{if}\quad \attr{CNTRL}=RFL \\
 					RPA & \text{else} \end{cases}
 			\end{aligned}$} \\
+	\hline
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -2298,7 +2275,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 \begin{states}{SWAPS}
 	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\max(\cldsvs{\attr{CTST}_{FirstLeg}^{Contract}}{t_0}{Tmd}, \cldsvs{\attr{CTST}_{SecondLeg}^{Contract}}{t_0}{Tmd})$ & \\
 	\hline
-  	$\svar{Ipac}{}$ & $\svar{Ipac}{t_0} = \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t_0}{Nac}{\attr{CNTRL}=r^{(1)}} + \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t_0}{Nac}{\attr{CNTRL}=r^{(2)}}$
+  	$\svar{Ipac}{}$ & $\svar{Ipac}{t_0} = \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t_0}{Ipac}{\attr{CNTRL}=r^{(1)}} + \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t_0}{Ipac}{\attr{CNTRL}=r^{(2)}}$
 			& with\par
 			{$\begin{aligned}
 				r^{(1)} &= \begin{cases} RPA & \text{if}\quad \attr{CNTRL}=RFL \\
@@ -2316,31 +2293,33 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 % ---------------------- table: swaps functions ----------------------
 \begin{functions}{SWAPS}
 	AD & \pof{AD}{PAM} & {$\begin{aligned}
-				\svar{Ipac}{t^+} &= \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(1)}} \\
-						&+ \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(2)}} \\
+				\svar{Ipac}{t^+} &= \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Ipac}{\attr{CNTRL}=r^{(1)}} \\
+						&+ \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t}{Ipac}{\attr{CNTRL}=r^{(2)}} \\
 				\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
 					\frac{\yfr{t^-}{t}}{\yfr{t^-}{t^+}}\attr{FER} & \text{else} \end{cases} \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
 	PRD & $\obs{rf}{\attr{CURS}}{t} ( (-1)\attr{PPRD}$ \par
-				 $\qquad + \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(1)}}$ \par
-				 $\qquad + \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(2)}})$
+				 $\qquad + \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Ipac}{\attr{CNTRL}=r^{(1)}}$ \par
+				 $\qquad + \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t}{Ipac}{\attr{CNTRL}=r^{(2)}})$
 		& {$\begin{aligned}
-				\svar{Ipac}{t^+} &= \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(1)}} \\
-						&+ \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(2)}} \\
+				\svar{Ipac}{t^+} &= \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Ipac}{\attr{CNTRL}=r^{(1)}} \\
+						&+ \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t}{Ipac}{\attr{CNTRL}=r^{(2)}} \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
 	TD & $\obs{rf}{\attr{CURS}}{t} (\attr{PTD}$ \par
-				 $\qquad + \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(1)}}$ \par
-				 $\qquad + \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(2)}})$
+				 $\qquad + \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Ipac}{\attr{CNTRL}=r^{(1)}}$ \par
+				 $\qquad + \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t}{Ipac}{\attr{CNTRL}=r^{(2)}})$
 		& {$\begin{aligned}
 				\svar{Ipac}{t^+} &= 0.0 \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
 	$z_\tau^m$ & $\fev{x_\tau^m}+\fev{y_\tau^m}$
 		& {$\begin{aligned}
-				\svar{Ipac}{t^+} &= \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Nac}{\attr{CNTRL}=r^{(1)}} \\						&+ \cldsv{SecondLeg}{t}{Nac}{\attr{CNTRL}=r^{(2)}} \\
+				\svar{Ipac}{t^+} &= \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t}{Ipac}{\attr{CNTRL}=r^{(1)}} \\						&+ \cldsv{SecondLeg}{t}{Ipac}{\attr{CNTRL}=r^{(2)}} \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
+	\hline
+	CE & \pof{CE}{PAM} & \stf{AD}{SWAPS} \\
 \end{functions}
 
 
@@ -2359,6 +2338,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	$k$ & $\{e_t^k\} = \{x_t^k+y_s^l\}$ \par
 	for all events $x_t^k\in\cldev{\attr{CTST}_{Underlying}^{Contract}}{t_0}{\attr{CNTRL}=RPA}$, $y_s^l\in\cldev{\attr{CTST}_{Underlying}^{Contract}}{t_0}{\attr{CNTRL}=RPA,\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}$ with $t=s \land k=l=IP$. That is, any two congruent events of the child-contract schedule, evaluated once without $\attr{RRLC},\attr{RRLF}$ defined and once with the attributes defined, which are of type IP are \textit{merged} into a new \textit{aggregate} event (see payoff and state transition function below). & \\
+	\hline
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -2368,8 +2349,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			$\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t_0}{Tmd}{\attr{CNTRL}=RPA,\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}})$ & \\
 	\hline
   	$\svar{Ipac}{}$ & $\svar{Ipac}{t_0} = \sgn abs($ \par
-			$\qquad\cldsv{\attr{CTST}_{Underlying}^{Contract}}{t_0}{Nac}{\attr{CNTRL}=r^{(1)}}$\par
-			$\qquad - \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t_0}{Nac}{\attr{CNTRL}=RPA,\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}})$
+			$\qquad\cldsv{\attr{CTST}_{Underlying}^{Contract}}{t_0}{Ipac}{\attr{CNTRL}=r^{(1)}}$\par
+			$\qquad - \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t_0}{Ipac}{\attr{CNTRL}=RPA,\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}})$
 			& \\
 	\hline
   	$\svar{Prf}{}$ & & Same as PAM \\
@@ -2381,24 +2362,24 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 % ---------------------- table: capfl functions ----------------------
 \begin{functions}{CAPFL}
 	AD & \pof{AD}{PAM} & {$\begin{aligned}
-				\svar{Ipac}{t^+} &= \sgn  abs(\cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Nac}{\attr{CNTRL}=RPA} \\
-						&- \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Nac}{\attr{CNTRL}=RPA, \\
+				\svar{Ipac}{t^+} &= \sgn  abs(\cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Ipac}{\attr{CNTRL}=RPA} \\
+						&- \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Ipac}{\attr{CNTRL}=RPA, \\
 						&\qquad \attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}) \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
 	PRD & $\obs{rf}{\attr{CURS}}{t} ( (-1)\attr{PPRD} + \sgn  abs($ \par
-				 $\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Nac}{\attr{CNTRL}=RPA} - $ \par
-				 $\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Nac}{\attr{CNTRL}=RPA,$ \par
+				 $\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Ipac}{\attr{CNTRL}=RPA} - $ \par
+				 $\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Ipac}{\attr{CNTRL}=RPA,$ \par
 					$\qquad\qquad\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}))$
 		& {$\begin{aligned}
-				\svar{Ipac}{t^+} &= \sgn abs(\cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Nac}{\attr{CNTRL}=RPA} \\
-						&- \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Nac}{\attr{CNTRL}=RPA, \\
+				\svar{Ipac}{t^+} &= \sgn abs(\cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Ipac}{\attr{CNTRL}=RPA} \\
+						&- \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Ipac}{\attr{CNTRL}=RPA, \\
 						&\qquad \attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}) \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
 	TD & $\obs{rf}{\attr{CURS}}{t} (\attr{PTD}$ + \sgn abs( \par
-				 $\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Nac}{\attr{CNTRL}=RPA} - $ \par
-				 $\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Nac}{\attr{CNTRL}=RPA,$ \par
+				 $\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Ipac}{\attr{CNTRL}=RPA} - $ \par
+				 $\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t}{Ipac}{\attr{CNTRL}=RPA,$ \par
 					$\qquad\qquad\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}}))$
 		& {$\begin{aligned}
 				\svar{Ipac}{t^+} &= 0.0 \\
@@ -2409,6 +2390,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		& {$\begin{aligned}
 				\svar{Ipac}{t^+} &= 0.0 \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
+	\hline
+	CE & \pof{CE}{PAM} & \stf{AD}{CAPFL} \\
 \end{functions}
 
 
@@ -2430,7 +2413,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	STD & $t^{STD} = \begin{cases} \attr{MD} & \text{if}\quad \attr{STD}=\undef \\
 					\attr{STD} & \text{else} \end{cases}$ &  \\
 	\hline
-	CD & & Same as PAM \\
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -2477,7 +2460,7 @@ with\par
 					\svar{Pos}{t^+} &= 0.0 \\
 					\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-	CD & \pof{CD}{PAM} & \stf{CD}{STK} \\
+	CE & \pof{CE}{PAM} & \stf{AD}{OPTNS} \\
 \end{functions}
 
 
@@ -2499,7 +2482,7 @@ with\par
 	\hline
 	STD & & Same as OPTNS \\
 	\hline
-	CD & & Same as PAM \\
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -2535,7 +2518,7 @@ with\par
 	\hline
 	STD & \pof{STD}{OPTNS} & \stf{STD}{OPTNS} \\
 	\hline
-	CD & \pof{CD}{PAM} & \stf{CD}{STK} \\
+	CE & \pof{CE}{PAM} & \stf{AD}{FUTUR} \\
 \end{functions}
 
 
@@ -2554,19 +2537,26 @@ with\par
 	\hline
 	TD & & Same as PAM \\
 	\hline
-	FP & & Same as PAM \\
+	FP & $\vec{t}^{FP} = \begin{cases} \undef & \text{if} \quad \attr{FER}=\undef \lor \attr{FER}=0 \\
+					\sdl{s}{\attr{FPCL}}{T} & \text{else} \end{cases}$
+		& with\par $s = \begin{cases} \undef & \text{if} \quad \attr{FPANX}=\undef \land \attr{FPCL}=\undef\\
+					   \attr{PRD}+\attr{FPCL} & \text{else if} \quad \attr{FPANX} = \undef \\
+					   \attr{FPANX} & \text{else} \end{cases}$ \par
+			$T = \begin{cases} \attr{MD} & \text{if}\quad t^{XD} = \undef \\
+					t^{XD} & \text{else} \end{cases}$ \\
 	\hline
 	XD & $t^{XD} = \inf \tev{e^{CE}}$ & with\par
 		$e^{CE} = e\in\obs{ev}{i,\attr{CE}}{t_0} | typ(e)==\attr{CET}\wedge$\par
 				\quad\quad $ \tev{e} \leq \svar{Tmd}{t_0}$\par
 		and\par
-		$i = \attr{CTST}_{CoveredContract}^{Contract}$  \\
+		$i = \attr{CTST}_{CoveredContract}^{Contract}(i)$  \\
 	\hline
 	STD & $t^{STD} = t^{XD}$  \\
 	\hline
-	MD & $t^{MD}=\svar{Tmd}{t_0}$ & \\
+	MD & $t^{MD}=\begin{cases} \svar{Tmd}{t_0} & \text{if}\quad t^{XD}=\undef \\
+				\undef & \text{else} \end{cases}$ & \\
 	\hline
-	CD & & Same as PAM \\
+	CE & & Same as PAM \\
 \end{schedule}
 
 
@@ -2580,29 +2570,26 @@ with\par
 						\{e_t^{k,i}\} &= \cldev{\attr{CTST}_{CoveredContract}^{Contract}(i)}{t_0}\\
 						n &= \mid \attr{CTST}_{CoveredContract}^{Contract} \mid \end{aligned}$} \\
 	\hline
-	$\svar{Fac}{}$ & $\svar{Fac}{t_0} = \begin{cases} 0.0 & \text{if} \quad \attr{FER}=\undef \\
-					\attr{FEAC} & \text{else if} \quad \attr{FEAC} \neq \undef \\
-					n\yfr{t^-}{t_0}\attr{FER} & \text{else if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t_0}}{\yfr{t^{FP-}}{t^{FP+}}}\times\attr{FER} & \text{else} \end{cases}$ &
-			with\par
-			{$\begin{aligned}  n &= \begin{cases} \attr{NT} & \text{if}\quad \attr{NT}\neq\undef \\
-								\sum_{i=1}^{\mid I\mid} \cldsv{I(i)}{\attr{CDD}}{Nvl}{x} & \text{else} \end{cases} \\
-						t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
-						t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$}\par
-where\par
-$I=\attr{CTST}_{CoveredContract}^{Contract}$\\
-  	\hline
-	$\svar{Pos}{}$ & $\svar{Pos}{t_0} = \begin{cases}
+	$\svar{Nt}{}$ & $\svar{Nt}{t_0} = \begin{cases}
 							0.0 & \text{if}\quad t_0\geq\svar{Tmd}{t_0} \\
-							\attr{CECV}\times\attr{NT} & \text{else if}\quad \attr{NT}\neq\undef \\
-							\attr{CECV}\sum_{i=1}^{\mid I\mid} n_i & \text{else} \end{cases}$ & with\par
-			$n_i=\begin{cases} \cldsv{I(i)}{t_0}{Nvl}{x} & \text{if}\quad \attr{CEGE}=NO \\
-					\cldsv{I(i)}{t_0}{Nvl}{x} & \text{else if}\quad \attr{CEGE}=NI \\
-					\quad + \cldsv{I(i)}{t_0}{Nac}{x} & \\
+							\attr{CECV}\sgn\attr{NT} & \text{else if}\quad \attr{NT}\neq\undef \\
+							\attr{CECV}\sgn\sum_{i=1}^{\mid I\mid} n_i & \text{else} \end{cases}$ & with\par
+			$n_i=\begin{cases} \cldsv{I(i)}{t_0}{Nt}{x} & \text{if}\quad \attr{CEGE}=NO \\
+					\cldsv{I(i)}{t_0}{Nt}{x} & \text{else if}\quad \attr{CEGE}=NI \\
+					\quad + \cldsv{I(i)}{t_0}{Ipac}{x} & \\
 					\obs{rf}{\cldca{I(i)}{MOC}}{t_0} & \text{else} \end{cases}$ \par
 	where\par
 	$I=\attr{CTST}_{CoveredContract}^{Contract}$ \\
 	\hline
+	$\svar{Fac}{}$ & $\svar{Fac}{t_0} = \begin{cases} 0.0 & \text{if} \quad \attr{FER}=\undef \\
+					\attr{FEAC} & \text{else if} \quad \attr{FEAC} \neq \undef \\
+					\svar{Nt}{t_0}\yfr{t^-}{t_0}\attr{FER} & \text{else if} \quad \attr{FEB}=\text{'N'} \\
+					\frac{\yfr{t^{FP-}}{t_0}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases}$ &
+			with\par
+			{$\begin{aligned}
+						t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
+						t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
+  	\hline
 	$\svar{Prf}{}$ & & Same as PAM \\
 	\hline
 	$\svar{Sd}{}$ & & Same as PAM \\
@@ -2612,63 +2599,84 @@ $I=\attr{CTST}_{CoveredContract}^{Contract}$\\
 % ---------------------- table: ceg functions ----------------------
 \begin{functions}{CEG}
 	AD & \pof{AD}{PAM} & {$\begin{aligned}
-					\svar{Pos}{t^+} &= \begin{cases}
+					\svar{Nt}{t^+} &= \begin{cases}
 							0.0 & \text{if}\quad t\geq\svar{Tmd}{t_0} \\
-							\attr{CECV}\times\attr{NT} & \text{else if}\quad \attr{NT}\neq\undef \\
+							\svar{Nt}{t^-} & \text{else if}\quad \attr{NT}\neq\undef \\
 							\attr{CECV}\sum_{i=1}^{\mid I\mid} n_i & \text{else} \end{cases} \\
 					\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 					\svar{Sd}{t^+} &= t \end{aligned}$}\par
 with\par
-			{$\begin{aligned} n_i &= \begin{cases} \cldsv{I(i)}{t}{Nvl}{x} & \text{if}\quad \attr{CEGE}=NO \\
-					\cldsv{I(i)}{t}{Nvl}{x} & \text{else if}\quad \attr{CEGE}=NI \\
-					\quad + \cldsv{I(i)}{t}{Nac}{x} & \\
+			{$\begin{aligned} n_i &= \begin{cases} \cldsv{I(i)}{t}{Nt}{} & \text{if}\quad \attr{CEGE}=NO \\
+					\cldsv{I(i)}{t}{Nt}{} & \text{else if}\quad \attr{CEGE}=NI \\
+					\quad + \cldsv{I(i)}{t}{Ipac}{} & \\
 					\obs{rf}{\cldca{I(i)}{MOC}}{t} & \text{else} \end{cases} \\
-					n &= \begin{cases} \attr{NT} & \text{if}\quad \attr{NT}\neq\undef \\
-								\sum_{i=1}^{\mid I\mid} \cldsv{I(i)}{\attr{CDD}}{Nvl}{x} & \text{else} \end{cases} \\
-					x &= \text{'\attr{CNTRL}=RPA'}\\
 					t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
 					t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$}\par
 					where\par
 	$I=\attr{CTST}_{CoveredContract}^{Contract}$ \\
-
 	\hline
-	PRD & \pof{PRD}{STK} & \stf{PRD}{STK} \\
-	\hline
-	FP & {$\begin{aligned} &\attr{FER} & \text{if} \quad \attr{FEB}=A \\
-				&\svar{Fac}{t^-} + n\yfr{t^-}{t}\attr{FER} & \text{else} \end{aligned}$}\par
-			with\par
-			$n = \begin{cases} \attr{NT} & \text{if}\quad \attr{NT}\neq\undef \\
-								\sum_{i=1}^{\mid I\mid} \cldsv{I(i)}{\attr{CDD}}{Nvl}{x} & \text{else} \end{cases}$
-			& {$\begin{aligned}
-					\svar{Fac}{t^+} &= 0.0 \\
-					\svar{Sd}{t^+} &= t \end{aligned}$} \\
-	\hline
-	XD & \pof{XD}{OPTNS} & {$\begin{aligned}
-					\svar{Pos}{t^+} &= \begin{cases}
-							\attr{CECV}\times\attr{NT} & \text{if}\quad \attr{NT}\neq\undef \\
+	PRD & \pof{PRD}{STK} & {$\begin{aligned}
+					\svar{Nt}{t^+} &= \begin{cases}
+							\svar{Nt}{t^-} & \text{if}\quad \attr{NT}\neq\undef \\
 							\attr{CECV}\sum_{i=1}^{\mid I\mid} n_i & \text{else} \end{cases} \\
-					\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\attr{FER} & \text{else} \end{cases} \\
+					\svar{Fac}{t^+} &= \sgn\attr{FEAC} \\
 					\svar{Sd}{t^+} &= t \end{aligned}$}\par
 with\par
-			{$\begin{aligned} n_i &= \begin{cases} \cldsv{I(i)}{t}{Nvl}{x} & \text{if}\quad \attr{CEGE}=NO \\
-					\cldsv{I(i)}{t}{Nvl}{x} & \text{else if}\quad \attr{CEGE}=NI \\
-					\quad + \cldsv{I(i)}{t}{Nac}{x} & \\
+			{$\begin{aligned} n_i &= \begin{cases} \cldsv{I(i)}{t}{Nt}{} & \text{if}\quad \attr{CEGE}=NO \\
+					\cldsv{I(i)}{t}{Nt}{} & \text{else if}\quad \attr{CEGE}=NI \\
+					\quad + \cldsv{I(i)}{t}{Ipac}{} & \\
 					\obs{rf}{\cldca{I(i)}{MOC}}{t} & \text{else} \end{cases} \\
-					n &= \begin{cases} \attr{NT} & \text{if}\quad \attr{NT}\neq\undef \\
-								\sum_{i=1}^{\mid I\mid} \cldsv{I(i)}{\attr{CDD}}{Nvl}{x} & \text{else} \end{cases} \\
-					x &= \text{'\attr{CNTRL}=RPA'}\\
 					t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
-					t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
+					t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$}\par
+					where\par
+	$I=\attr{CTST}_{CoveredContract}^{Contract}$ \\
 	\hline
-	STD & \pof{STD}{OPTNS} & \stf{STD}{OPTNS} \\
+	FP & {$\begin{aligned} &\obs{rf}{\attr{CURS}}{t}\sgn\attr{FER} & \text{if} \quad \attr{FEB}=A \\
+				&\obs{rf}{\attr{CURS}}{t}\left(\svar{Fac}{t^-} + \svar{Nt}{t^-}\yfr{t^-}{t}\attr{FER}\right) & \text{else} \end{aligned}$}
+			& {$\begin{aligned}
+					\svar{Nt}{t^+} &= \begin{cases}
+							\svar{Nt}{t^-} & \text{if}\quad \attr{NT}\neq\undef \\
+							\attr{CECV}\sum_{i=1}^{\mid I\mid} n_i & \text{else} \end{cases} \\
+					\svar{Fac}{t^+} &= 0.0 \\
+					\svar{Sd}{t^+} &= t \end{aligned}$}\par
+with\par
+			{$\begin{aligned} n_i &= \begin{cases} \cldsv{I(i)}{t}{Nt}{} & \text{if}\quad \attr{CEGE}=NO \\
+					\cldsv{I(i)}{t}{Nt}{} & \text{else if}\quad \attr{CEGE}=NI \\
+					\quad + \cldsv{I(i)}{t}{Ipac}{} & \\
+					\obs{rf}{\cldca{I(i)}{MOC}}{t} & \text{else} \end{cases} \\
+					t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
+					t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$}\par
+					where\par
+	$I=\attr{CTST}_{CoveredContract}^{Contract}$ \\
+	\hline
+	XD & \pof{XD}{OPTNS} & {$\begin{aligned}
+					\svar{Nt}{t^+} &= \begin{cases}
+							\svar{Nt}{t^-} & \text{else if}\quad \attr{NT}\neq\undef \\
+							\attr{CECV}\sum_{i=1}^{\mid I\mid} n_i & \text{else} \end{cases} \\
+					\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
+					\svar{Sd}{t^+} &= t \end{aligned}$}\par
+with\par
+			{$\begin{aligned} n_i &= \begin{cases} \cldsv{I(i)}{t}{Nt}{} & \text{if}\quad \attr{CEGE}=NO \\
+					\cldsv{I(i)}{t}{Nt}{} & \text{else if}\quad \attr{CEGE}=NI \\
+					\quad + \cldsv{I(i)}{t}{Ipac}{} & \\
+					\obs{rf}{\cldca{I(i)}{MOC}}{t} & \text{else} \end{cases} \\
+					t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
+					t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$}\par
+					where\par
+	$I=\attr{CTST}_{CoveredContract}^{Contract}$ \\
+	\hline
+	STD & $\obs{rf}{\attr{CURS}}{t}\left(\svar{Nt}{t^-}+\svar{Feac}{t^-}\right)$ & {$\begin{aligned}
+					\svar{Nt}{t^+} &= 0.0 \\
+					\svar{Feac}{t^+} &= 0.0 \\
+					\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
 	MD & 0.0 & {$\begin{aligned}
-				\svar{Pos}{t^+} &= 0.0 \\
+				\svar{Nt}{t^+} &= 0.0 \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-	CD & \pof{CD}{PAM} & \stf{CD}{STK} \\
+	CE & \pof{CE}{PAM} & \stf{AD}{CEG} \\
 \end{functions}
 
 
@@ -2687,8 +2695,6 @@ with\par
 	STD & & Same as CEG \\
 	\hline
 	MD & & Same as CEG \\
-	\hline
-	CD & & Same as PAM \\
 \end{schedule}
 
 
@@ -2702,17 +2708,17 @@ with\par
 						\{e_t^{k,i}\} &= \cldev{\attr{CTST}_{CoveredContract}^{Contract}(i)}{t_0} \\
 						n &= \mid \attr{CTST}_{CoveredContract}^{Contract} \mid \end{aligned}$} \\
 	\hline
-	$\svar{Pos}{}$ & $\svar{Pos}{t_0} = \begin{cases}
+	$\svar{Nt}{}$ & $\svar{Nt}{t_0} = \begin{cases}
 							0.0 & \text{if}\quad t_0\geq\svar{Tmd}{t_0} \\
-							\min\left(\sum_{i=1}^{\mid I\mid} v_i, \attr{CECV}\sum_{i=1}^{\mid I\mid} n_i\right) & \text{else} \end{cases}$ &  with\par
-			$n_i=\begin{cases} \cldsv{I(i)}{t_0}{Nvl}{x} & \text{if}\quad \attr{CEGE}=NO \\
-					\cldsv{I(i)}{t_0}{Nvl}{x} & \text{else if}\quad \attr{CEGE}=NI \\
-					\quad + \cldsv{I(i)}{t_0}{Nac}{x} & \\
-					\obs{rf}{\cldca{I(i)}{MOC}}{t_0} & \text{else} \end{cases}$ \par
-	where\par
-	$I=\attr{CTST}_{CoveredContract}^{Contract}$ \\
-	\hline
-	$\svar{Prf}{}$ & & Same as PAM \\
+							\min\left(\sum_{j=1}^{\mid J\mid} v_j, \attr{CECV}\sum_{i=1}^{\mid I\mid} n_i\right) & \text{else} \end{cases}$ &  with\par
+			{$\begin{aligned}
+				n_i &= \begin{cases} \cldsv{I(i)}{t_0}{Nt}{} & \text{if}\quad \attr{CEGE}=NO \\
+					\cldsv{I(i)}{t_0}{Nt}{} & \text{else if}\quad \attr{CEGE}=NI \\
+					\quad + \cldsv{I(i)}{t_0}{Ipac}{} & \\
+					\obs{rf}{\cldca{I(i)}{MOC}}{t_0} & \text{else} \end{cases} \\
+				v_j &= \obs{rf}{\cldca{J(j)}{MOC}}{t_0} \\
+				I &= \attr{CTST}_{CoveredContract}^{Contract} \\
+				J &= \attr{CTST}_{CoveringContract}^{Contract}\end{aligned}$} \\
 	\hline
 	$\svar{Sd}{}$ & & Same as PAM \\
 \end{states}
@@ -2721,38 +2727,40 @@ with\par
 % ---------------------- table: cec functions ----------------------
 \begin{functions}{CEC}
 	AD & \pof{AD}{PAM} & {$\begin{aligned}
-					\svar{Pos}{t^+} &= \begin{cases}
+					\svar{Nt}{t^+} &= \begin{cases}
 							0.0 & \text{if}\quad t\geq\svar{Tmd}{t_0} \\
-							\min\left(\sum_{i=1}^{\mid I\mid} v_i, \attr{CECV}\sum_{i=1}^{\mid I\mid} n_i\right) & \text{else} \end{cases} \\
+							\min\left(\sum_{j=1}^{\mid J\mid} v_j, \attr{CECV}\sum_{i=1}^{\mid I\mid} n_i\right) & \text{else} \end{cases} \\
 					\svar{Sd}{t^+} &= t \end{aligned}$}\par
  with\par
-			$n_i=\begin{cases} \cldsv{I(i)}{t_0}{Nvl}{x} & \text{if}\quad \attr{CEGE}=NO \\
-					\cldsv{I(i)}{t_0}{Nvl}{x} & \text{else if}\quad \attr{CEGE}=NI \\
-					\quad + \cldsv{I(i)}{t_0}{Nac}{x} & \\
-					\obs{rf}{\cldca{I(i)}{MOC}}{t_0} & \text{else} \end{cases}$ \par
-	where\par
-	$I=\attr{CTST}_{CoveredContract}^{Contract}$ \\
+			{$\begin{aligned}
+				n_i &= \begin{cases} \cldsv{I(i)}{t_0}{Nt}{} & \text{if}\quad \attr{CEGE}=NO \\
+					\cldsv{I(i)}{t_0}{Nt}{} & \text{else if}\quad \attr{CEGE}=NI \\
+					\quad + \cldsv{I(i)}{t_0}{Ipac}{} & \\
+					\obs{rf}{\cldca{I(i)}{MOC}}{t_0} & \text{else} \end{cases} \\
+				v_j &= \obs{rf}{\cldca{J(j)}{MOC}}{t_0} \\
+				I &= \attr{CTST}_{CoveredContract}^{Contract} \\
+				J &= \attr{CTST}_{CoveringContract}^{Contract}\end{aligned}$} \\
 	\hline
 	XD & \pof{XD}{OPTNS} & {$\begin{aligned}
-					\svar{Pos}{t^+} &= \begin{cases}
-							0.0 & \text{if}\quad t\geq\svar{Tmd}{t_0} \\
-							\min\left(\sum_{i=1}^{\mid I\mid} v_i, \attr{CECV}\sum_{i=1}^{\mid I\mid} n_i\right) & \text{else} \end{cases} \\
+					\svar{Nt}{t^+} &= \min\left(\sum_{j=1}^{\mid J\mid} v_j, \attr{CECV}\sum_{i=1}^{\mid I\mid} n_i\right) \\
 					\svar{Sd}{t^+} &= t \end{aligned}$}\par
  with\par
-			$n_i=\begin{cases} \cldsv{I(i)}{t_0}{Nvl}{x} & \text{if}\quad \attr{CEGE}=NO \\
-					\cldsv{I(i)}{t_0}{Nvl}{x} & \text{else if}\quad \attr{CEGE}=NI \\
-					\quad + \cldsv{I(i)}{t_0}{Nac}{x} & \\
-					\obs{rf}{\cldca{I(i)}{MOC}}{t_0} & \text{else} \end{cases}$ \par
-	where\par
-	$I=\attr{CTST}_{CoveredContract}^{Contract}$ \\
+			{$\begin{aligned}
+				n_i &= \begin{cases} \cldsv{I(i)}{t_0}{Nt}{} & \text{if}\quad \attr{CEGE}=NO \\
+					\cldsv{I(i)}{t_0}{Nt}{} & \text{else if}\quad \attr{CEGE}=NI \\
+					\quad + \cldsv{I(i)}{t_0}{Ipac}{} & \\
+					\obs{rf}{\cldca{I(i)}{MOC}}{t_0} & \text{else} \end{cases} \\
+				v_j &= \obs{rf}{\cldca{J(j)}{MOC}}{t_0} \\
+				I &= \attr{CTST}_{CoveredContract}^{Contract} \\
+				J &= \attr{CTST}_{CoveringContract}^{Contract}\end{aligned}$} \\
 	\hline
-	STD & \pof{STD}{OPTNS} & \stf{STD}{OPTNS} \\
+	STD & $\obs{rf}{\attr{CURS}}{t}\svar{Nt}{t^-}$ & {$\begin{aligned}
+					\svar{Nt}{t^+} &= 0.0 \\
+					\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
 	MD & 0.0 & {$\begin{aligned}
-				\svar{Pos}{t^+} &= 0.0 \\
+				\svar{Nt}{t^+} &= 0.0 \\
 				\svar{Sd}{t^+} &= t \end{aligned}$} \\
-	\hline
-	CD & \pof{CD}{PAM} & \stf{CD}{STK} \\
 \end{functions}
 
 
