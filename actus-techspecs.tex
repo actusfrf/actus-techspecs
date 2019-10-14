@@ -813,7 +813,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 					(\vec{u},\vec{v}) & \text{else} \end{cases}$
 		\par where \par
 		{$\begin{aligned} \vec{u} &= \sdl{s}{\attr{OPCL}}{T^{MD}} \\
-				\vec{v} &= \obs{rf}{\attr{PPMO}}{t} \end{aligned}$}
+				\vec{v} &= \obs{ev}{\attr{CID},\attr{PP}}{t} \end{aligned}$}
 		 & with\par $s = \begin{cases} \undef & \text{if} \quad \attr{OPANX}=\undef \land \attr{OPCL}=\undef\\
 					   \attr{IED}+\attr{OPCL} & \text{else if} \quad \attr{OPANX} = \undef \\
 					   \attr{OPANX} & \text{else} \end{cases}$ \\
@@ -822,16 +822,16 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 						\vec{t}^{PP} & \text{else} \end{cases}$ & \\
 	\hline
 	FP & $\vec{t}^{FP} = \begin{cases} \undef & \text{if} \quad \attr{FER}=\undef \lor \attr{FER}=0 \\
-					\sdl{s}{\attr{FPCL}}{T^{MD}} & \text{else} \end{cases}$
-		& with\par $s = \begin{cases} \undef & \text{if} \quad \attr{FPANX}=\undef \land \attr{FPCL}=\undef\\
-					   \attr{IED}+\attr{FPCL} & \text{else if} \quad \attr{FPANX} = \undef \\
-					   \attr{FPANX} & \text{else} \end{cases}$ \\
+					\sdl{s}{\attr{FECL}}{T^{MD}} & \text{else} \end{cases}$
+		& with\par $s = \begin{cases} \undef & \text{if} \quad \attr{FEANX}=\undef \land \attr{FECL}=\undef\\
+					   \attr{IED}+\attr{FECL} & \text{else if} \quad \attr{FEANX} = \undef \\
+					   \attr{FEANX} & \text{else} \end{cases}$ \\
 	\hline
 	PRD & $t^{PRD}= \attr{PRD}$  &  \\
 	\hline
 	TD & $t^{TD}= \attr{TD}$  &  \\
 	\hline
-	IP & $\vec{t}^{IP} = \begin{cases} \undef & \text{if} \quad \attr{IPNR}=\text{'O'} \\
+	IP & $\vec{t}^{IP} = \begin{cases} \undef & \text{if} \quad \attr{IPNR}=\undef \\
 						\sdl{s}{\attr{IPCL}}{T^{MD}} & \text{else} \end{cases}$
 		& with\par $s = \begin{cases} \undef & \text{if} \quad \attr{IPANX}=\undef \land \attr{IPCL}=\undef\\
 					\attr{IPCED} & \text{else if}\quad \attr{IPCED}\neq\undef \\
@@ -885,7 +885,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
   	$\svar{Fac}{}$ & $\svar{Fac}{t_0} = \begin{cases} 0.0 & \text{if} \quad \attr{FER}=\undef \\
 					\attr{FEAC} & \text{else if} \quad \attr{FEAC} \neq \undef \\
-					\yfr{t^-}{t_0}\times\svar{Nt}{t_0}\times\attr{FER} & \text{else if} \quad \attr{FEB}=\text{'N'} \\
+					\yfr{t^{FP-}}{t_0}\times\svar{Nt}{t_0}\times\attr{FER} & \text{else if} \quad \attr{FEB}=\text{'N'} \\
 					\frac{\yfr{t^{FP-}}{t_0}}{\yfr{t^{FP-}}{t^{FP+}}}\times\attr{FER} & \text{else} \end{cases}$ &
 			with {$\begin{aligned} t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
 						t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
@@ -927,12 +927,12 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Ipnr}{t^+} &= 0.0 \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
-	PP & $\obs{rf}{\attr{CURS}}{t}\obs{rf}{\attr{OPMO}}{t}$
+	PP & $\obs{rf}{\attr{CURS}}{t}\fev{\obs{ev}{\attr{CID},\attr{PP}}{t}}$
 		& {$\begin{aligned}
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Nt}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
 					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
-			\svar{Nt}{t^+} &= \svar{Nt}{t^-} - \obs{rf}{\attr{OPMO}}{t} \\
+			\svar{Nt}{t^+} &= \svar{Nt}{t^-} - \fev{\obs{ev}{\attr{CID},\attr{PP}}{t}} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
 		{$\begin{aligned}
@@ -1019,7 +1019,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
 		{$\begin{aligned}
-			\Delta r &= \min(\max(\obs{rf}{\attr{RRMO}}{t}\attr{RRMT}+\attr{RRSP} - \svar{Ipnr}{t^-},\attr{RRPF}),\attr{RRPC}) \\
+			\Delta r &= \min(\max(\obs{rf}{\attr{RRMO}}{t}\attr{RRMLT}+\attr{RRSP} - \svar{Ipnr}{t^-},\attr{RRPF}),\attr{RRPC}) \\
 			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
 			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
 	\hline
@@ -1174,7 +1174,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
 					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
-			\svar{Nt}{t^+} &= \svar{Nt}{t^-} - \obs{rf}{\attr{OPMO}}{t} \\
+			\svar{Nt}{t^+} &= \svar{Nt}{t^-} - \fev{\obs{ev}{\attr{CID},\attr{PP}}{t}} \\
 			\svar{Ipcb}{t^+} &= \begin{cases} \svar{Ipcb}{t^-} & \text{if}\quad \attr{IPCB}\neq\text{'NT'} \\
 							\svar{Nt}{t^+} & \text{else} \end{cases}\\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
@@ -1255,7 +1255,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Sd}{t^+} &= t \end{aligned}$}\par
 		with\par
 		{$\begin{aligned}
-			\Delta r &= \min(\max(\obs{rf}{\attr{RRMO}}{t}\attr{RRMT}+\attr{RRSP} - \svar{Ipnr}{t^-},\attr{RRPF}),\attr{RRPC}) \\
+			\Delta r &= \min(\max(\obs{rf}{\attr{RRMO}}{t}\attr{RRMLT}+\attr{RRSP} - \svar{Ipnr}{t^-},\attr{RRPF}),\attr{RRPC}) \\
 			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
 			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
 	\hline
@@ -1465,7 +1465,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Sd}{t^+} &= t \end{aligned}$}\par
 		with\par
 		{$\begin{aligned}
-			\Delta r &= \min(\max(\obs{rf}{\attr{RRMO}}{t}\attr{RRMT}+\attr{ARRATE}_i - \svar{Ipnr}{t^-},\attr{RRPF}),\attr{RRPC}) \\
+			\Delta r &= \min(\max(\obs{rf}{\attr{RRMO}}{t}\attr{RRMLT}+\attr{ARRATE}_i - \svar{Ipnr}{t^-},\attr{RRPF}),\attr{RRPC}) \\
 			i &= \sup k\in\Nat \mid \attr{ARPRANX}_k=t \\
 			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
 			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
@@ -1739,7 +1739,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Sd}{t^+} &= t \end{aligned}$}\par
 		with\par
 		{$\begin{aligned}
-			\Delta r &= \min(\max(\obs{rf}{\attr{RRMO}}{t}\attr{RRMT}+\attr{RRSP} - \svar{Ipnr}{t^-},\attr{RRPF}),\attr{RRPC}) \\
+			\Delta r &= \min(\max(\obs{rf}{\attr{RRMO}}{t}\attr{RRMLT}+\attr{RRSP} - \svar{Ipnr}{t^-},\attr{RRPF}),\attr{RRPC}) \\
 			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
 			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
   	\hline
@@ -2538,10 +2538,10 @@ with\par
 	TD & & Same as PAM \\
 	\hline
 	FP & $\vec{t}^{FP} = \begin{cases} \undef & \text{if} \quad \attr{FER}=\undef \lor \attr{FER}=0 \\
-					\sdl{s}{\attr{FPCL}}{T} & \text{else} \end{cases}$
-		& with\par $s = \begin{cases} \undef & \text{if} \quad \attr{FPANX}=\undef \land \attr{FPCL}=\undef\\
-					   \attr{PRD}+\attr{FPCL} & \text{else if} \quad \attr{FPANX} = \undef \\
-					   \attr{FPANX} & \text{else} \end{cases}$ \par
+					\sdl{s}{\attr{FECL}}{T} & \text{else} \end{cases}$
+		& with\par $s = \begin{cases} \undef & \text{if} \quad \attr{FEANX}=\undef \land \attr{FECL}=\undef\\
+					   \attr{PRD}+\attr{FECL} & \text{else if} \quad \attr{FEANX} = \undef \\
+					   \attr{FEANX} & \text{else} \end{cases}$ \par
 			$T = \begin{cases} \attr{MD} & \text{if}\quad t^{XD} = \undef \\
 					t^{XD} & \text{else} \end{cases}$ \\
 	\hline
