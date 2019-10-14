@@ -1,0 +1,10 @@
+# exclude build options
+build_options.tex
+
+# exclude various tex build files
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
