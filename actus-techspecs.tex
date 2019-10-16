@@ -2408,10 +2408,17 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	TD & & Same as PAM \\
 	\hline
-	XD & $t^{XD} = \attr{MD}$ &  \\
+	MD & $t^{MD} = \attr{MD}$ &  \\
 	\hline
-	STD & $t^{STD} = \begin{cases} \attr{MD} & \text{if}\quad \attr{STD}=\undef \\
-					\attr{STD} & \text{else} \end{cases}$ &  \\
+	XD & $t^{XD} = \begin{cases} \svar{Xd}{t_0} & \text{if}\quad \svar{Xd}{t_0} \neq \undef\\
+				\inf \tev{e^{XD}} & \text{else if}\quad \tev{e^{XD}} \neq \undef \wedge \attr{OPXT} \neq 'E'\\
+				\undef & \text{else} \end{cases}$ & with\par
+		$e^{XD} = e\in\obs{ev}{i,\attr{XD}}{t_0} | \tev{e} \leq \svar{Tmd}{t_0}$\par
+		and\par
+		$i = \attr{CTST}_{CoveredContract}^{Contract}(i)$ \\
+	\hline
+	STD & $t^{STD} = \begin{cases} \undef & \text{if}\quad \attr{XD}=\undef \\
+					\attr{XD} + \attr{STD} & \text{else} \end{cases}$ &  \\
 	\hline
 	CE & & Same as PAM \\
 \end{schedule}
@@ -2419,12 +2426,9 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: optns states ----------------------
 \begin{states}{OPTNS}
-	$\svar{Pos}{}$ & $\svar{Pos}{t_0} = \begin{cases}
-							0.0 & \text{if}\quad t_0\leq\attr{MD} \\
-							\max(S_{t_0}-\attr{OPS1},0) & \text{else if}\quad \attr{OPTP}=\text{'C'} \\
-							\max(\attr{OPS1}-S_{t_0},0) & \text{else if}\quad \attr{OPTP}=\text{'P'} \\
-							\max(S_{t_0}-\attr{OPS1},0) & \text{else} \\ \qquad + \max(\attr{OPS2}-S_{t_0},0) &  \end{cases}$ & with\par
-			$S_{t_0}=\obs{rf}{\cldca{\attr{CTST}_{Underlying}^{Contract}}{MOC}}{t_0}$ \\
+	$\svar{Xd}{}$ & $\svar{Xd}{t_0} = \attr{XD}$ & \\
+	\hline
+	$\svar{Xa}{}$ & $\svar{Xa}{t_0} = \attr{XA}$ & \\
 	\hline
 	$\svar{Prf}{}$ & & Same as PAM \\
 	\hline
@@ -2434,21 +2438,28 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: optns functions ----------------------
 \begin{functions}{OPTNS}
-	AD & \pof{AD}{PAM} & {$\begin{aligned}
-					\svar{Pos}{t^+} &= \begin{cases}
-								\max(S_t-\attr{OPS1},0) & \text{if}\quad \attr{OPTP}=\text{'C'} \\
-								\max(\attr{OPS1}-S_t,0) & \text{else if}\quad \attr{OPTP}=\text{'P'} \\
-								\max(S_t-\attr{OPS1},0) & \text{else} \\ \qquad + \max(\attr{OPS2}-S_t,0) &  \end{cases} \\
-					\svar{Sd}{t^+} &= t \end{aligned}$}\par
-with\par
-			$S_t=\obs{rf}{\cldca{\attr{CTST}_{Underlying}^{Contract}}{MOC}}{t}$ \\
+	AD & \pof{AD}{PAM} & $\svar{Sd}{t^+} = t$ \\
 	\hline
 	PRD & $\obs{rf}{\attr{CURS}}{t}(-1)\attr{PPRD}$ & \stf{PRD}{STK} \\
 	\hline
 	TD & $\obs{rf}{\attr{CURS}}{t}\attr{PTD}$ & \stf{TD}{STK} \\
 	\hline
+	MD & 0.0 & {$\begin{aligned}
+					\svar{Xd}{t^+} &= \begin{cases}
+								\svar{Xd}{t^-} & \text{if}\quad \svar{Xd}{t^-} \neq \undef \\
+								\undef & \text{ else if}\quad x=0.0 \\
+								t & \text{else} \end{cases}  \\
+					\svar{Sd}{t^+} &= t \end{aligned}$} \par
+			with\par
+			{$\begin{aligned}
+				x &= \begin{cases}
+								\max(S_t-\attr{OPS1},0) & \text{if}\quad \attr{OPTP}=\text{'C'} \\
+								\max(\attr{OPS1}-S_t,0) & \text{else if}\quad \attr{OPTP}=\text{'P'} \\
+								\max(S_t-\attr{OPS1},0) & \text{else} \\ \qquad + \max(\attr{OPS2}-S_t,0) &  \end{cases} \\
+				S_t &= \obs{rf}{\cldca{\attr{CTST}_{Underlying}^{Contract}}{MOC}}{t} \end{aligned}$} \\
+	\hline
 	XD & 0.0 & {$\begin{aligned}
-					\svar{Pos}{t^+} &= \begin{cases}
+					\svar{Xa}{t^+} &= \begin{cases}
 								\max(S_t-\attr{OPS1},0) & \text{if}\quad \attr{OPTP}=\text{'C'} \\
 								\max(\attr{OPS1}-S_t,0) & \text{else if}\quad \attr{OPTP}=\text{'P'} \\
 								\max(S_t-\attr{OPS1},0) & \text{else} \\ \qquad + \max(\attr{OPS2}-S_t,0) &  \end{cases} \\
@@ -2456,8 +2467,8 @@ with\par
 with\par
 			$S_t=\obs{rf}{\cldca{\attr{CTST}_{Underlying}^{Contract}}{MOC}}{t}$ \\
 	\hline
-	STD & $\obs{rf}{\attr{CURS}}{t}\sgn\svar{Pos}{t^-}$ & {$\begin{aligned}
-					\svar{Pos}{t^+} &= 0.0 \\
+	STD & $\obs{rf}{\attr{CURS}}{t}\sgn\svar{Xa}{t^-}$ & {$\begin{aligned}
+					\svar{Xa}{t^+} &= 0.0 \\
 					\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
 	CE & \pof{CE}{PAM} & \stf{AD}{OPTNS} \\
@@ -2478,6 +2489,8 @@ with\par
 	\hline
 	TD & & Same as PAM \\
 	\hline
+	MD & & Same as OPTNS \\
+	\hline
 	XD & & Same as OPTNS \\
 	\hline
 	STD & & Same as OPTNS \\
@@ -2488,9 +2501,9 @@ with\par
 
 % ---------------------- table: futur states ----------------------
 \begin{states}{FUTUR}
-	$\svar{Pos}{}$ & $\svar{Pos}{t_0} = \begin{cases} 0.0 & \text{if}\quad t_0\leq\attr{MD} \\
-							S_{t_0}-\attr{PFUT} & \text{else} \end{cases}$ & with\par
-			$S_{t_0}=\obs{rf}{\cldca{\attr{CTST}_{Underlying}^{Contract}}{MOC}}{t_0}$ \\
+	$\svar{Xd}{}$ & & Same as OPTNS \\
+	\hline
+	$\svar{Xa}{}$ & & Same as OPTNS \\
 	\hline
 	$\svar{Prf}{}$ & & Same as PAM \\
 	\hline
@@ -2500,18 +2513,24 @@ with\par
 
 % ---------------------- table: futur functions ----------------------
 \begin{functions}{FUTUR}
-	AD & \pof{AD}{PAM} & {$\begin{aligned}
-					\svar{Pos}{t^+} &= S_t-\attr{PFUT} \\
-					\svar{Sd}{t^+} &= t \end{aligned}$}\par
-with\par
-			$S_t=\obs{rf}{\cldca{\attr{CTST}_{Underlying}^{Contract}}{MOC}}{t}$ \\
+	AD & \pof{AD}{PAM} & \stf{AD}{OPTNS} \\
 	\hline
 	PRD & \pof{PRD}{OPTNS} & \stf{PRD}{STK} \\
 	\hline
 	TD & \pof{TD}{OPTNS} & \stf{TD}{STK} \\
 	\hline
-	XD & \pof{XD}{OPTNS} & {$\begin{aligned}
-					\svar{Pos}{t^+} &= S_t-\attr{PFUT} \\
+	MD & 0.0 & {$\begin{aligned}
+					\svar{Xd}{t^+} &= \begin{cases}
+								\undef & \text{if}\quad x=0.0 \\
+								t & \text{else} \end{cases}  \\
+					\svar{Sd}{t^+} &= t \end{aligned}$} \par
+			with\par
+			{$\begin{aligned}
+				x &= S_t-\attr{PFUT} \\
+				S_t &= \obs{rf}{\cldca{\attr{CTST}_{Underlying}^{Contract}}{MOC}}{t} \end{aligned}$} \\
+	\hline
+	XD & 0.0 & {$\begin{aligned}
+					\svar{Xa}{t^+} &= S_t-\attr{PFUT} \\
 					\svar{Sd}{t^+} &= t \end{aligned}$}\par
 with\par
 			$S_t=\obs{rf}{\cldca{\attr{CTST}_{Underlying}^{Contract}}{MOC}}{t}$ \\
@@ -2531,8 +2550,6 @@ with\par
 \begin{schedule}{CEG}
 	AD & & Same as PAM \\
 	\hline
-	IED & & Same as PAM \\
-	\hline
 	PRD & & Same as PAM \\
 	\hline
 	TD & & Same as PAM \\
@@ -2545,16 +2562,18 @@ with\par
 			$T = \begin{cases} \attr{MD} & \text{if}\quad t^{XD} = \undef \\
 					t^{XD} & \text{else} \end{cases}$ \\
 	\hline
-	XD & $t^{XD} = \inf \tev{e^{CE}}$ & with\par
+	MD & $t^{MD}=\begin{cases} \svar{Tmd}{t_0} & \text{if}\quad t^{XD}=\undef \\
+				\undef & \text{else} \end{cases}$ & \\
+	\hline
+	XD & $t^{XD} = \begin{cases} \svar{Xd}{t_0} & \text{if}\quad \svar{Xd}{t_0} \neq \undef\\
+				\inf \tev{e^{CE}} & \text{else if}\quad \tev{e^{CE}} \neq \undef\\
+				\undef & \text{else} \end{cases}$ & with\par
 		$e^{CE} = e\in\obs{ev}{i,\attr{CE}}{t_0} | \svar{Prf}{\tev{e}^+}==\attr{CET}\wedge$\par
 				\quad\quad $ \tev{e} \leq \svar{Tmd}{t_0}$\par
 		and\par
 		$i = \attr{CTST}_{CoveredContract}^{Contract}(i)$  \\
 	\hline
-	STD & $t^{STD} = t^{XD}$  \\
-	\hline
-	MD & $t^{MD}=\begin{cases} \svar{Tmd}{t_0} & \text{if}\quad t^{XD}=\undef \\
-				\undef & \text{else} \end{cases}$ & \\
+	STD & & Same as OPTNS  \\
 	\hline
 	CE & & Same as PAM \\
 \end{schedule}
@@ -2590,6 +2609,10 @@ with\par
 						t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
 						t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
   	\hline
+	$\svar{Xd}{}$ & & Same as OPTNS \\
+	\hline
+	$\svar{Xa}{}$ & & Same as OPTNS \\
+	\hline
 	$\svar{Prf}{}$ & & Same as PAM \\
 	\hline
 	$\svar{Sd}{}$ & & Same as PAM \\
@@ -2599,22 +2622,13 @@ with\par
 % ---------------------- table: ceg functions ----------------------
 \begin{functions}{CEG}
 	AD & \pof{AD}{PAM} & {$\begin{aligned}
-					\svar{Nt}{t^+} &= \begin{cases}
-							0.0 & \text{if}\quad t\geq\svar{Tmd}{t_0} \\
-							\svar{Nt}{t^-} & \text{else if}\quad \attr{NT}\neq\undef \\
-							\attr{CECV}\sum_{i=1}^{\mid I\mid} n_i & \text{else} \end{cases} \\
 					\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
 					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 					\svar{Sd}{t^+} &= t \end{aligned}$}\par
 with\par
-			{$\begin{aligned} n_i &= \begin{cases} \cldsv{I(i)}{t}{Nt}{} & \text{if}\quad \attr{CEGE}=NO \\
-					\cldsv{I(i)}{t}{Nt}{} & \text{else if}\quad \attr{CEGE}=NI \\
-					\quad + \cldsv{I(i)}{t}{Ipac}{} & \\
-					\obs{rf}{\cldca{I(i)}{MOC}}{t} & \text{else} \end{cases} \\
+			{$\begin{aligned}
 					t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
-					t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$}\par
-					where\par
-	$I=\attr{CTST}_{CoveredContract}^{Contract}$ \\
+					t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
 	\hline
 	PRD & \pof{PRD}{STK} & {$\begin{aligned}
 					\svar{Nt}{t^+} &= \begin{cases}
@@ -2650,13 +2664,18 @@ with\par
 					where\par
 	$I=\attr{CTST}_{CoveredContract}^{Contract}$ \\
 	\hline
+	MD & 0.0 & {$\begin{aligned}
+					\svar{Nt}{t^+} &= 0.0 \\
+					\svar{Sd}{t^+} &= t \end{aligned}$}\\
+	\hline
 	XD & \pof{XD}{OPTNS} & {$\begin{aligned}
 					\svar{Nt}{t^+} &= \begin{cases}
 							\svar{Nt}{t^-} & \text{else if}\quad \attr{NT}\neq\undef \\
 							\attr{CECV}\sum_{i=1}^{\mid I\mid} n_i & \text{else} \end{cases} \\
 					\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
 					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
-					\svar{Sd}{t^+} &= t \end{aligned}$}\par
+					\svar{Xa}{t^+} &= \svar{Nt}{t^-} \\
+ 					\svar{Sd}{t^+} &= t \end{aligned}$}\par
 with\par
 			{$\begin{aligned} n_i &= \begin{cases} \cldsv{I(i)}{t}{Nt}{} & \text{if}\quad \attr{CEGE}=NO \\
 					\cldsv{I(i)}{t}{Nt}{} & \text{else if}\quad \attr{CEGE}=NI \\
@@ -2667,14 +2686,10 @@ with\par
 					where\par
 	$I=\attr{CTST}_{CoveredContract}^{Contract}$ \\
 	\hline
-	STD & $\obs{rf}{\attr{CURS}}{t}\left(\svar{Nt}{t^-}+\svar{Feac}{t^-}\right)$ & {$\begin{aligned}
+	STD & $\obs{rf}{\attr{CURS}}{t}\left(\svar{Xa}{t^-}+\svar{Feac}{t^-}\right)$ & {$\begin{aligned}
 					\svar{Nt}{t^+} &= 0.0 \\
 					\svar{Feac}{t^+} &= 0.0 \\
 					\svar{Sd}{t^+} &= t \end{aligned}$} \\
-	\hline
-	MD & 0.0 & {$\begin{aligned}
-				\svar{Nt}{t^+} &= 0.0 \\
-				\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
 	CE & \pof{CE}{PAM} & \stf{AD}{CEG} \\
 \end{functions}
