@@ -28,10 +28,9 @@ then
   exit 1
 fi
 
-mkdir -p build
-pdflatex -output-directory=build -interaction=errorstopmode -halt-on-error actus-techspecs.tex && \
-bibtex build/actus-techspecs && \
-pdflatex -output-directory=build -interaction=errorstopmode -halt-on-error actus-techspecs.tex && \
-pdflatex -output-directory=build -interaction=errorstopmode -halt-on-error actus-techspecs.tex && \
-pdflatex -output-directory=build -interaction=errorstopmode -halt-on-error actus-techspecs.tex && \
+pdflatex -output-directory=. -interaction=errorstopmode -halt-on-error actus-techspecs.tex && \
+bibtex ./actus-techspecs && \
+pdflatex -output-directory=. -interaction=errorstopmode -halt-on-error actus-techspecs.tex && \
+pdflatex -output-directory=. -interaction=errorstopmode -halt-on-error actus-techspecs.tex && \
+pdflatex -output-directory=. -interaction=errorstopmode -halt-on-error actus-techspecs.tex && \
 rm -rf build_options.tex
