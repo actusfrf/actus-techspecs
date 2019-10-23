@@ -2675,7 +2675,7 @@ with\par
 							\attr{CECV}\sum_{i=1}^{\mid I\mid} n_i & \text{else} \end{cases} \\
 					\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
 					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
-					\svar{Xa}{t^+} &= \svar{Nt}{t^-} \\
+					\svar{Xa}{t^+} &= \attr{CECV}\svar{Nt}{t^-} \\
  					\svar{Sd}{t^+} &= t \end{aligned}$}\par
 with\par
 			{$\begin{aligned} n_i &= \begin{cases} \cldsv{I(i)}{t}{Nt}{} & \text{if}\quad \attr{CEGE}=NO \\
