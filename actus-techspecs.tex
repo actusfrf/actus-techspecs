@@ -397,7 +397,7 @@ A schedule is a function $S$ mapping times $s,T$ with $s<T$ and cycle $c$ onto a
 					(s=t_1,...,t_n=T) & \text{else} \end{cases}
 \]
 
-with $t_i<t_{i+1}, i=1,2,...$. While the schedule function can be used to create arbitrary sequences of times, it is usually used to generate sequences of cyclic events $\vec{t}^k$ of a certain type $k$, e.g. $k=IP$ for interest payment events (cf. table \ref{tbl:events}) and the following build inputs to the function
+with $t_i<t_{i+1}, i=1,2,...$. While the schedule function can be used to create arbitrary sequences of times, it is usually used to generate sequences of cyclic events $\vec{t}^k$ of a certain type $k$, e.g. $k=IP$ for interest payment events (see dictionary for a list of all events https://github.com/actusfrf/actus-dictionary/blob/master/actus-dictionary-event.json) and the following build inputs to the function
 
 \begin{itemize}
 	\item[$s$] $=k\attr{ANX}$ with $k\attr{ANX}$ attribute cycle anchor date of event type $k$
