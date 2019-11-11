@@ -120,6 +120,7 @@
 \newcommand{\dfl}[1]{D(\textbf{Prf}_{#1})}
 \newcommand{\sgn}{R(\attr{CNTRL})}
 \newcommand{\sdl}[3]{S(#1,#2,#3)}
+\newcommand{\sdll}[4]{S(#1,#2,#3,#4)}
 \newcommand{\vsdl}[3]{\vec{S}(#1,#2,#3)}
 \newcommand{\yfr}[2]{Y(#1,#2)}
 \newcommand{\yfrfunc}{Y}
@@ -403,7 +404,7 @@ with $t_i<t_{i+1}, i=1,2,...$. While the schedule function can be used to create
 
 	\item[$c$] $=k\attr{CL}$ with $k\attr{CL}$ event type $k$'s schedule cycle
 
-	\item[$T$] $=\attr{MD}$ with \attr{MD} the contract's maturity
+	\item[$T$] is the schedule end date (in many cases the contract's maturity date)
 \end{itemize}
 
 Thereby, cycles $k\attr{CL}$ have format $NPS$ where
@@ -414,12 +415,19 @@ Thereby, cycles $k\attr{CL}$ have format $NPS$ where
 	\item[$S$] is a \textit{stub} information ($+$=long last stub, $-$=short last stub)
 \end{itemize}
 
-Further, the last stub is defined as follows
+and with the stub defined as follows
 
 \begin{itemize}
 	\item[if] $t_{n-1}+c=T \lor S=$'-' then no stub correction applies
 
 	\item[else] $t_n$ is removed from the schedule
+\end{itemize}
+
+Further, the schedule function takes a fourth, optional boolean argument $B$, i.e. $\sdll{s}{c}{T}{B}$ indicating whether the schedule end date $T$ belongs to the schedule or not. More specifically:
+
+\begin{itemize}
+	\item[$B=T$] indicates that $T$ is part of the schedule
+	\item[$B=F$] means that $T$ is not part of the schedule
 \end{itemize}
 
 The sequence of schedule times $\vec{t}^k$ may also be influenced by the \attr{EOF} and \attr{BDC} conventions and the full function syntax becomes $\sdl{s}{c}{T, \attr{EOMC}, \attr{BDC}}$. Due to such effects the sequence of schedule times can be non-equidistant or, in other words, $t_i^k-t_{i-1}^k\neq t_j^k-t_{j-1}^k, i\neq j$.\\
@@ -809,7 +817,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	IED & $t^{IED} = \attr{IED}$ & \\
 	\hline
-	PR & $t^{PR} = \svar{Tmd}{t_0}$ & \\
+	MD & $t^{MD} = \svar{Tmd}{t_0}$ & \\
 	\hline
 	PP & $\vec{t}^{PP} = \begin{cases} \undef & \text{if} \quad \attr{PPEF}=\text{'N'} \\
 					(\vec{u},\vec{v}) & \text{else} \end{cases}$
@@ -923,10 +931,11 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		with\par
 		$y=\yfr{\attr{IPANX}}{t}$ \\
 	\hline
-	PR & $\obs{rf}{\attr{CURS}}{t}\svar{Nsc}{t^-}\svar{Nt}{t^-}$
+	MD & $\obs{rf}{\attr{CURS}}{t}(\svar{Nsc}{t^-}\svar{Nt}{t^-}+\svar{Isc}{t^-}\svar{Ipac}{t^-}+\svar{Feac}{t^-})$
 		& {$\begin{aligned}
 			\svar{Nt}{t^+} &= 0.0 \\
-			\svar{Ipnr}{t^+} &= 0.0 \\
+			\svar{Ipac}{t^+} &= 0.0 \\
+			\svar{Feac}{t^+} &= 0.0 \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
 	PP & $\obs{rf}{\attr{CURS}}{t}\fev{\obs{ev}{\attr{CID},\attr{PP}}{t}}$
@@ -1068,10 +1077,12 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	IED & & Same as PAM \\
 	\hline
-	PR & $t^{PR} = \sdl{s}{\attr{PRCL}}{T^{MD}}$
+	PR & $t^{PR} = \sdll{s}{\attr{PRCL}}{T^{MD}}{F}$
 		& with\par $s = \begin{cases} \undef & \text{if} \quad \attr{PRANX}=\undef \land \attr{PRCL}=\undef\\
 					   \attr{IED}+\attr{PRCL} & \text{else if} \quad \attr{PRANX} = \undef \\
 					   \attr{PRANX} & \text{else} \end{cases}$ \\
+	\hline
+	MD & $t^{MD} = \svar{Tmd}{t_0}$ & \\
 	\hline
 	PP & & Same as PAM \\
 	\hline
@@ -1170,6 +1181,13 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 		{$\begin{aligned}
 			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
 			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
+	\hline
+	MD & \pof{MD}{PAM} & {$\begin{aligned}
+			\svar{Nt}{t^+} &= 0.0 \\
+			\svar{Ipac}{t^+} &= 0.0 \\
+			\svar{Fac}{t^+} &= 0.0 \\
+			\svar{Ipcb}{t^+} &= 0.0 \\
+			\svar{Sd}{t^+} &= t \end{aligned}$} \\
 	\hline
 	PP & \pof{PP}{PAM}
 		& {$\begin{aligned}
@@ -1313,6 +1331,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			where\par
 			$n=\mid\attr{ARPRANX}\mid, c_k=\attr{ARPRCL}_1\forall k$ \\
 	\hline
+	MD & & Same as PAM \\
+	\hline
 	PI & $\vec{t}^{PI} = \begin{cases} \{ t_1, t_2, ..., t_i, ... \} & \text{if}\quad \attr{ARPRCL}=\undef \\
 					s_1 \cup s_2 \cup ... \cup s_i \cup ... & \text{else} \end{cases}$ \par
 		with\par
@@ -1415,6 +1435,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	PR & \pof{PR}{LAM} & \stf{PR}{LAM} \\
 	\hline
+	MD & \pof{MD}{PAM} & \stf{MD}{LAM} \\
+	\hline
 	PI & $\obs{rf}{\attr{CURS}}{t}\sgn(-1)\svar{Nsc}{t^-}\svar{Prnxt}{t^-}$ & {$\begin{aligned}
 			\svar{Nt}{t^+} &= \svar{Nt}{t^-}+\sgn\svar{Prnxt}{t^-} \\
 			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
@@ -1504,6 +1526,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	IED & & Same as PAM \\
 	\hline
 	PR & & Same as LAM \\
+	\hline
+	MD & & Same as PAM \\
 	\hline
 	PP & & Same as PAM \\
 	\hline
@@ -1595,6 +1619,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
 			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
 	\hline
+	MD & \pof{MD}{PAM} & \stf{MD}{LAM} \\
+	\hline
 	PP & \pof{PP}{PAM}
 		& \stf{PP}{LAM} \\
 	\hline
@@ -1645,6 +1671,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	IED & & Same as PAM \\
 	\hline
 	PR & & Same as LAM \\
+	\hline
+	MD & & Same as PAM \\
 	\hline
 	PP & & Same as PAM \\
 	\hline
@@ -1706,6 +1734,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	IED & \pof{IED}{PAM} & \stf{IED}{LAM} \\
 	\hline
 	PR & \pof{PR}{NAM} & \stf{PR}{NAM} \\
+	\hline
+	MD & \pof{MD}{PAM} & \stf{MD}{LAM} \\
 	\hline
 	PP & \pof{PP}{PAM}
 		& \stf{PP}{LAM} \\
