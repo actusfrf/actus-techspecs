@@ -125,6 +125,7 @@
 \newcommand{\yfr}[2]{Y(#1,#2)}
 \newcommand{\yfrfunc}{Y}
 \newcommand{\ann}[5]{A(#1,#2,#3,#4,#5)}
+\newcommand{\annfunc}{A}
 \newcommand{\obs}[3]{O^{#1}(#2,#3)}
 \newcommand{\obsfull}[5]{O^{#1}(#2,#3,#4,#5)}
 \newcommand{\obsfunc}[1]{O^{#1}}
@@ -589,7 +590,7 @@ Table \ref{tbl:cntrl} defines the domain of the Contract Role Sign function, i.e
 
 \subsection{Annuity Amount Function}\label{sec:annamount}
 
-In an \textit{Annuity} contract (ANN) the annuity amount is paid regularly from the \textit{borrower} to the \textit{lender}. Thereby, the annuity amount is comprised of a principal repayment portion and an interest portion and and dimensioned such that the total nominal amount $n$ at time $t$ is fully repaid at maturity $T$ of the annuity. The Annuity Amount function $\ann$ computes the annuity amount as follows
+In an \textit{Annuity} contract (ANN) the annuity amount is paid regularly from the \textit{borrower} to the \textit{lender}. Thereby, the annuity amount is comprised of a principal repayment portion and an interest portion and and dimensioned such that the total nominal amount $n$ at time $t$ is fully repaid at maturity $T$ of the annuity. The Annuity Amount function $\annfunc$ computes the annuity amount as follows
 
 \[
 	\ann{s}{T}{n}{a}{r}=(n+a)\frac{\prod_{i=1}^{m-1}1+r\yfr{t_i,t_{i+1}}}{1+\sum_{i=1}^{m-1}\prod_{j=i}^{m-1}1+r\yfr{t_j}{t_{j+1}}}
