@@ -820,7 +820,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	IED & $t^{IED} = \attr{IED}$ & \\
 	\hline
-	MD & $t^{MD} = \svar{Tmd}{t_0}$ & \\
+	MD & $t^{MD} = \svar{Md}{t_0}$ & \\
 	\hline
 	PP & $\vec{t}^{PP} = \begin{cases} \undef & \text{if} \quad \attr{PPEF}=\text{'N'} \\
 					(\vec{u},\vec{v}) & \text{else} \end{cases}$
@@ -883,7 +883,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: pam states ----------------------
 \begin{states}{PAM}
-	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \attr{MD}$ & \\
+	$\svar{Md}{}$ & $\svar{Md}{t_0} = \attr{MD}$ & \\
 	\hline
   	$\svar{Nt}{}$ & $\svar{Nt}{t_0} = \begin{cases} 0.0 & \text{if} \quad \attr{IED} > t_0 \\
 							\sgn\times\attr{NT} & \text{else} \end{cases}$ & \\
@@ -1085,7 +1085,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 					   \attr{IED}+\attr{PRCL} & \text{else if} \quad \attr{PRANX} = \undef \\
 					   \attr{PRANX} & \text{else} \end{cases}$ \\
 	\hline
-	MD & $t^{MD} = \svar{Tmd}{t_0}$ & \\
+	MD & $t^{MD} = \svar{Md}{t_0}$ & \\
 	\hline
 	PP & & Same as PAM \\
 	\hline
@@ -1119,8 +1119,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: lam states ----------------------
 \begin{states}{LAM}
-	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\begin{cases}
-						\attr{MD} & \text{if} \attr{MD}\neq\undef\\
+	$\svar{Md}{}$ & $\svar{Md}{t_0}=\begin{cases}
+						\attr{MD} & \text{if}\quad \attr{MD}\neq\undef\\
 						t^-+ceil(\frac{\attr{NT}}{\attr{PRNXT}})\attr{PRCL}
 							\end{cases}$ & where\par
 						$t^- = \begin{cases} \attr{PRANX} & \text{if}\quad \attr{PRANX}\neq\undef \land \attr{PRANX}\geq t_0 \\
@@ -1357,7 +1357,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	TD & & Same as PAM \\
 	\hline
-	IP & $\vec{t}^{IP} = \vsdl{\attr{ARIPANX}}{\attr{ARIPCL}}{\svar{Tmd}{t_0}}$ & \\
+	IP & $\vec{t}^{IP} = \vsdl{\attr{ARIPANX}}{\attr{ARIPCL}}{\svar{Md}{t_0}}$ & \\
 	\hline
 	IPCI & & Same as PAM \\
   	\hline
@@ -1389,7 +1389,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: lax states ----------------------
 \begin{states}{LAX}
-	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\begin{cases}
+	$\svar{Md}{}$ & $\svar{Md}{t_0}=\begin{cases}
 						\attr{MD} & \text{if}\quad \attr{MD}\neq\undef\\
 						\inf t>t_0 \mid N(t)=0 & \text{else} \end{cases}$ \par
 	with\par
@@ -1572,7 +1572,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: nam states ----------------------
 \begin{states}{NAM}
-	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\begin{cases}
+	$\svar{Md}{}$ & $\svar{Md}{t_0}=\begin{cases}
 						\attr{MD} & \text{if}\quad \attr{MD}\neq\undef\\
 						t^-+n\attr{PRCL} & \text{else} \end{cases}$ \par
 			with $n=ceil(\frac{\attr{NT}}{\attr{PRNXT}-\attr{NT}\yfr{t^-}{t^-+\attr{PRCL}}\attr{IPNR}})$ & where\par
@@ -1705,7 +1705,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: ann states ----------------------
 \begin{states}{ANN}
-	$\svar{Tmd}{}$ & & Same as NAM \\
+	$\svar{Md}{}$ & & Same as NAM \\
 	\hline
   	$\svar{Nt}{}$ & & Same as PAM \\
 	\hline
@@ -1770,7 +1770,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
 					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipnr}{t^+} &= \min(\max(\svar{Ipnr}{t^-}+\Delta r,\attr{RRLF}),\attr{RRLC}) \\
-			\svar{Prnxt}{t^+} &= \ann{t}{\svar{Tmd}{t^+}}{\svar{Nt}{t^+}}{\svar{Ipac}{t^+}}{\svar{Ipnr}{t^+}} \\
+			\svar{Prnxt}{t^+} &= \ann{t}{\svar{Md}{t^+}}{\svar{Nt}{t^+}}{\svar{Ipac}{t^+}}{\svar{Ipnr}{t^+}} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$}\par
 		with\par
 		{$\begin{aligned}
@@ -1784,7 +1784,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Fac}{t^+} &= \begin{cases} \svar{Fac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
 					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipnr}{t^+} &= \attr{RRNXT} \\
-			\svar{Prnxt}{t^+} &= \ann{t}{\svar{Tmd}{t^+}}{\svar{Nt}{t^+}}{\svar{Ipac}{t^+}}{\svar{Ipnr}{t^+}} \\
+			\svar{Prnxt}{t^+} &= \ann{t}{\svar{Md}{t^+}}{\svar{Nt}{t^+}}{\svar{Ipac}{t^+}}{\svar{Ipnr}{t^+}} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
 		{$\begin{aligned}
@@ -1814,11 +1814,11 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	FP & & Same as PAM \\
 	\hline
-	IP & $t^{IP}=\svar{Tmd}{t_0}$ & \\
+	IP & $t^{IP}=\svar{Md}{t_0}$ & \\
 	\hline
 	IPCI & $\vec{t}^{IPCI} = \begin{cases}
 					\undef & \text{if}\quad \attr{IPNR}=\undef \\
-					\sdl{s}{\attr{IPCL}}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ &
+					\sdl{s}{\attr{IPCL}}{\svar{Md}{t_0}} & \text{else} \end{cases}$ &
 				where\par
 				$s=\begin{cases} \attr{IPANX} & \text{if}\quad \attr{IPANX}\neq\undef\\
 						\attr{IED}+\attr{IPCL} & \text{else} \end{cases}$ \\
@@ -1833,7 +1833,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: clm states ----------------------
 \begin{states}{CLM}
-	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \begin{cases} \attr{MD} & \text{if}\quad \attr{MD}\neq\undef \\
+	$\svar{Md}{}$ & $\svar{Md}{t_0} = \begin{cases} \attr{MD} & \text{if}\quad \attr{MD}\neq\undef \\
 							s & \text{else if}\quad \obs{ev}{\attr{CID}}{t_0}\neq\{\} \\
 							\tmax & \text{else} \end{cases}$
 			& where\par
@@ -1900,7 +1900,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	IPCI & $\vec{t}^{IPCI} = \begin{cases}
 					\undef & \text{if}\quad \attr{IPNR}=\undef \\
-					\sdl{s}{\attr{IPCL}}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ &
+					\sdl{s}{\attr{IPCL}}{\svar{Md}{t_0}} & \text{else} \end{cases}$ &
 				where\par
 				$s=\begin{cases} \attr{IPANX} & \text{if}\quad \attr{IPANX}\neq\undef\\
 						\attr{IED}+\attr{IPCL} & \text{else} \end{cases}$ \\
@@ -1915,7 +1915,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: ump states ----------------------
 \begin{states}{UMP}
-	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \begin{cases} s & \text{if}\quad \obs{ev}{\attr{CID}}{t_0}\neq\{\} \\
+	$\svar{Md}{}$ & $\svar{Md}{t_0} = \begin{cases} s & \text{if}\quad \obs{ev}{\attr{CID}}{t_0}\neq\{\} \\
 							\tmax & \text{else} \end{cases}$
 			& where\par
 			$s=\sup t, t\in\tev{\obs{ev}{\attr{CID},i}{t_0}}$\par
@@ -2094,15 +2094,15 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	STD & $t^{STD} = \begin{cases}
 					\undef & \text{if}\quad \attr{DS}=\text{'D'} \\
-					\svar{Tmd}{t_0} & \text{else} \end{cases}$ & \\
+					\svar{Md}{t_0} & \text{else} \end{cases}$ & \\
 	\hline
 	STD$^{(1)}$ & $t^{STD} = \begin{cases}
 					\undef & \text{if}\quad \attr{DS}=\text{'S'} \\
-					\svar{Tmd}{t_0} & \text{else} \end{cases}$ & \\
+					\svar{Md}{t_0} & \text{else} \end{cases}$ & \\
 	\hline
 	STD$^{(2)}$ & $t^{STD} = \begin{cases}
 					\undef & \text{if}\quad \attr{DS}=\text{'S'} \\
-					\svar{Tmd}{t_0} & \text{else} \end{cases}$ & \\
+					\svar{Md}{t_0} & \text{else} \end{cases}$ & \\
 	\hline
 	CE & & Same as PAM \\
 \end{schedule}
@@ -2110,7 +2110,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: fxout states ----------------------
 \begin{states}{FXOUT}
-	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0} = \begin{cases} \attr{MD} & \text{if}\quad \attr{STD}=\undef\\
+	$\svar{Md}{}$ & $\svar{Md}{t_0} = \begin{cases} \attr{MD} & \text{if}\quad \attr{STD}=\undef\\
 							\attr{STD} & \text{else} \end{cases}$ & \\
 	\hline
   	$\svar{Prf}{}$ & & Same as PAM \\
@@ -2127,7 +2127,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	TD & \pof{TD}{STK} & \stf{TD}{STK} \\
 	\hline
-	STD & $\obs{rf}{\attr{CURS}}{t}\sgn (\attr{NT}-\obs{rf}{i}{\svar{Tmd}{t}}\attr{NT2})$\par
+	STD & $\obs{rf}{\attr{CURS}}{t}\sgn (\attr{NT}-\obs{rf}{i}{\svar{Md}{t}}\attr{NT2})$\par
 		where\par
 		$i=concat(\text{\attr{CUR2},"/",\attr{CUR}})$\par
 		and $concat(x,y,z)$ indicates the string concatenation function
@@ -2161,23 +2161,23 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	IP & $\vec{t}^{IP} = \begin{cases}
 					\undef & \text{if}\quad \attr{DS}=\text{'D'} \\
-					\svar{Tmd}{t_0} & \text{else if} \attr{IPCL}=\undef \\
-					\sdl{s}{\attr{IPCL}}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$
+					\svar{Md}{t_0} & \text{else if} \attr{IPCL}=\undef \\
+					\sdl{s}{\attr{IPCL}}{\svar{Md}{t_0}} & \text{else} \end{cases}$
 		& where\par
 			$s=\begin{cases} \attr{IPANX} & \text{if}\quad \attr{IPANX}\neq\undef \\
 					\attr{IED}+\attr{IPCL} & \text{else} \end{cases}$\\
 	\hline
 	IP$^{(fix)}$ & $\vec{t}^{IP^{(fix)}} = \begin{cases}
 					\undef & \text{if}\quad \attr{DS}=\text{'S'} \\
-					\svar{Tmd}{t_0} & \text{else if} \attr{IPCL}=\undef \\
-					\sdl{s}{\attr{IPCL}}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ & \\
+					\svar{Md}{t_0} & \text{else if} \attr{IPCL}=\undef \\
+					\sdl{s}{\attr{IPCL}}{\svar{Md}{t_0}} & \text{else} \end{cases}$ & \\
 	\hline
 	IP$^{(var)}$ & $\vec{t}^{IP^{(var)}} = \begin{cases}
 					\undef & \text{if}\quad \attr{DS}=\text{'S'} \\
-					\svar{Tmd}{t_0} & \text{else if} \attr{IPCL}=\undef \\
-					\sdl{s}{\attr{IPCL}}{\svar{Tmd}{t_0}} & \text{else} \end{cases}$ & \\
+					\svar{Md}{t_0} & \text{else if} \attr{IPCL}=\undef \\
+					\sdl{s}{\attr{IPCL}}{\svar{Md}{t_0}} & \text{else} \end{cases}$ & \\
 	\hline
-	RR & $\vec{t}^{RR}=\sdl{s}{\attr{RRCL}}{\svar{Tmd}{t_0}}$
+	RR & $\vec{t}^{RR}=\sdl{s}{\attr{RRCL}}{\svar{Md}{t_0}}$
 			& where\par
 				$s=\begin{cases} \attr{RRANX} & \text{if}\quad \attr{RRANX}\neq\undef \\
 						\attr{IED}+\attr{RRCL} & \text{else} \end{cases}$ \\
@@ -2188,7 +2188,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: swppv states ----------------------
 \begin{states}{SWPPV}
-	$\svar{Tmd}{}$ &  & Same as PAM \\
+	$\svar{Md}{}$ &  & Same as PAM \\
 	\hline
 	$\svar{Nt}{}$ &  & Same as PAM \\
 	\hline
@@ -2308,7 +2308,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: swaps states ----------------------
 \begin{states}{SWAPS}
-	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\max(\cldsvs{\attr{CTST}_{FirstLeg}^{Contract}}{t_0}{Tmd}, \cldsvs{\attr{CTST}_{SecondLeg}^{Contract}}{t_0}{Tmd})$ & \\
+	$\svar{Md}{}$ & $\svar{Md}{t_0}=\max(\cldsvs{\attr{CTST}_{FirstLeg}^{Contract}}{t_0}{Tmd}, \cldsvs{\attr{CTST}_{SecondLeg}^{Contract}}{t_0}{Tmd})$ & \\
 	\hline
   	$\svar{Ipac}{}$ & $\svar{Ipac}{t_0} = \cldsv{\attr{CTST}_{FirstLeg}^{Contract}}{t_0}{Ipac}{\attr{CNTRL}=r^{(1)}} + \cldsv{\attr{CTST}_{SecondLeg}^{Contract}}{t_0}{Ipac}{\attr{CNTRL}=r^{(2)}}$
 			& with\par
@@ -2380,7 +2380,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: capfl states ----------------------
 \begin{states}{CAPFL}
-	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\max(\cldsv{\attr{CTST}_{Underlying}^{Contract}}{t_0}{Tmd}{\attr{CNTRL}=RPA},$ \par
+	$\svar{Md}{}$ & $\svar{Md}{t_0}=\max(\cldsv{\attr{CTST}_{Underlying}^{Contract}}{t_0}{Tmd}{\attr{CNTRL}=RPA},$ \par
 			$\qquad \cldsv{\attr{CTST}_{Underlying}^{Contract}}{t_0}{Tmd}{\attr{CNTRL}=RPA,\attr{RRLC}=\attr{RRLC},\attr{RRLF}=\attr{RRLF}})$ & \\
 	\hline
   	$\svar{Ipac}{}$ & $\svar{Ipac}{t_0} = \sgn abs($ \par
@@ -2448,7 +2448,7 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	XD & $t^{XD} = \begin{cases} \svar{Xd}{t_0} & \text{if}\quad \svar{Xd}{t_0} \neq \undef\\
 				\inf \tev{e^{XD}} & \text{else if}\quad \tev{e^{XD}} \neq \undef \wedge \attr{OPXT} \neq 'E'\\
 				\undef & \text{else} \end{cases}$ & with\par
-		$e^{XD} = e\in\obs{ev}{i,\attr{XD}}{t_0} | \tev{e} \leq \svar{Tmd}{t_0}$\par
+		$e^{XD} = e\in\obs{ev}{i,\attr{XD}}{t_0} | \tev{e} \leq \svar{Md}{t_0}$\par
 		and\par
 		$i = \attr{CTST}_{CoveredContract}^{Contract}(i)$ \\
 	\hline
@@ -2597,14 +2597,14 @@ with\par
 			$T = \begin{cases} \attr{MD} & \text{if}\quad t^{XD} = \undef \\
 					t^{XD} & \text{else} \end{cases}$ \\
 	\hline
-	MD & $t^{MD}=\begin{cases} \svar{Tmd}{t_0} & \text{if}\quad t^{XD}=\undef \\
+	MD & $t^{MD}=\begin{cases} \svar{Md}{t_0} & \text{if}\quad t^{XD}=\undef \\
 				\undef & \text{else} \end{cases}$ & \\
 	\hline
 	XD & $t^{XD} = \begin{cases} \svar{Xd}{t_0} & \text{if}\quad \svar{Xd}{t_0} \neq \undef\\
 				\inf \tev{e^{CE}} & \text{else if}\quad \tev{e^{CE}} \neq \undef\\
 				\undef & \text{else} \end{cases}$ & with\par
 		$e^{CE} = e\in\obs{ev}{i,\attr{CE}}{t_0} | \svar{Prf}{\tev{e}^+}==\attr{CET}\wedge$\par
-				\quad\quad $ \tev{e} \leq \svar{Tmd}{t_0}$\par
+				\quad\quad $ \tev{e} \leq \svar{Md}{t_0}$\par
 		and\par
 		$i = \attr{CTST}_{CoveredContract}^{Contract}(i)$  \\
 	\hline
@@ -2616,7 +2616,7 @@ with\par
 
 % ---------------------- table: ceg states ----------------------
 \begin{states}{CEG}
-	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\begin{cases} \attr{MD} & \text{if}\quad \attr{MD}\neq\undef \\
+	$\svar{Md}{}$ & $\svar{Md}{t_0}=\begin{cases} \attr{MD} & \text{if}\quad \attr{MD}\neq\undef \\
 				\max(\tev{\{e_t^k\}}) & \text{else} \end{cases}$
 				& with\par
 					{$\begin{aligned}
@@ -2625,7 +2625,7 @@ with\par
 						n &= \mid \attr{CTST}_{CoveredContract}^{Contract} \mid \end{aligned}$} \\
 	\hline
 	$\svar{Nt}{}$ & $\svar{Nt}{t_0} = \begin{cases}
-							0.0 & \text{if}\quad t_0\geq\svar{Tmd}{t_0} \\
+							0.0 & \text{if}\quad t_0\geq\svar{Md}{t_0} \\
 							\attr{CECV}\sgn\attr{NT} & \text{else if}\quad \attr{NT}\neq\undef \\
 							\attr{CECV}\sgn\sum_{i=1}^{\mid I\mid} n_i & \text{else} \end{cases}$ & with\par
 			$n_i=\begin{cases} \cldsv{I(i)}{t_0}{Nt}{x} & \text{if}\quad \attr{CEGE}=NO \\
@@ -2750,7 +2750,7 @@ with\par
 
 % ---------------------- table: cec states ----------------------
 \begin{states}{CEC}
-	$\svar{Tmd}{}$ & $\svar{Tmd}{t_0}=\begin{cases} \attr{MD} & \text{if}\quad \attr{MD}\neq\undef \\
+	$\svar{Md}{}$ & $\svar{Md}{t_0}=\begin{cases} \attr{MD} & \text{if}\quad \attr{MD}\neq\undef \\
 				\max(\tev{\{e_t^k\}}) & \text{else} \end{cases}$
 				& with\par
 					{$\begin{aligned}
@@ -2759,7 +2759,7 @@ with\par
 						n &= \mid \attr{CTST}_{CoveredContract}^{Contract} \mid \end{aligned}$} \\
 	\hline
 	$\svar{Nt}{}$ & $\svar{Nt}{t_0} = \begin{cases}
-							0.0 & \text{if}\quad t_0\geq\svar{Tmd}{t_0} \\
+							0.0 & \text{if}\quad t_0\geq\svar{Md}{t_0} \\
 							\min\left(\sum_{j=1}^{\mid J\mid} v_j, \attr{CECV}\sum_{i=1}^{\mid I\mid} n_i\right) & \text{else} \end{cases}$ &  with\par
 			{$\begin{aligned}
 				n_i &= \begin{cases} \cldsv{I(i)}{t_0}{Nt}{} & \text{if}\quad \attr{CEGE}=NO \\
@@ -2778,7 +2778,7 @@ with\par
 \begin{functions}{CEC}
 	AD & \pof{AD}{PAM} & {$\begin{aligned}
 					\svar{Nt}{t^+} &= \begin{cases}
-							0.0 & \text{if}\quad t\geq\svar{Tmd}{t_0} \\
+							0.0 & \text{if}\quad t\geq\svar{Md}{t_0} \\
 							\min\left(\sum_{j=1}^{\mid J\mid} v_j, \attr{CECV}\sum_{i=1}^{\mid I\mid} n_i\right) & \text{else} \end{cases} \\
 					\svar{Sd}{t^+} &= t \end{aligned}$}\par
  with\par
