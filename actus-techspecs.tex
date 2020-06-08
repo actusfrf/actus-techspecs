@@ -1996,7 +1996,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	DV$^{(fix)}$ & $X_{\attr{CUR}}^{\attr{CURS}}(t)\sgn\attr{DVNP}$ & $\svar{Sd}{t^+}=t$ \\
 	\hline
-	DV & $X_{\attr{CUR}}^{\attr{CURS}}(t)\sgn \obs{rf}{\attr{DVMO}}{t}$
+	DV & $X_{\attr{CUR}}^{\attr{CURS}}(t)\sgn \obs{rf}{concat(\text{\attr{CID},"-DV"})}{t}$ \par
+	with $concat(x,y,z)$ indicates the string concatenation function
 		& $\svar{Sd}{t^+}=t$ \\
 	\hline
 	CE & \pof{CE}{PAM} & \stf{AD}{STK} \\
