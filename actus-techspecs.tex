@@ -1638,6 +1638,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	PY & & Same as PAM \\
 	\hline
+	PRF & $\vec{t}^{PRF} = \vec{t}^{RR} \cup t^{RRF} $ & \\
+	\hline
 	FP & & Same as PAM \\
 	\hline
 	PRD & & Same as PAM \\
@@ -1662,7 +1664,14 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 
 % ---------------------- table: ann states ----------------------
 \begin{states}{ANN}
-	$\svar{Md}{}$ & & Same as NAM \\
+	$\svar{Md}{}$ & $\svar{Md}{t_0}=\begin{cases}
+		\attr{MD} & \text{if}\quad \attr{MD}\neq\undef\\
+		\attr{AMD} & \text{else if}\quad \attr{AMD}\neq\undef\\
+		t^-+n\attr{PRCL} & \text{else} \end{cases}$ \par
+with $n=ceil(\frac{\attr{NT}}{\attr{PRNXT}-\attr{NT}\yfr{t^-}{t^-+\attr{PRCL}}\attr{IPNR}})$ & where\par
+		$t^- = \begin{cases} \attr{PRANX} & \text{if}\quad \attr{PRANX}\neq\undef \land \attr{PRANX}\geq t_0 \\
+				\attr{IED}+\attr{PRCL} & \text{else if}\quad \attr{IED}+\attr{PRCL}\geq t_0 \\
+				\sup t \in t^{PR}\mid t<t_0 & \text{else} \end{cases}$ \\
 	\hline
   	$\svar{Nt}{}$ & & Same as PAM \\
 	\hline
@@ -1681,7 +1690,8 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	$\svar{Sd}{}$ & & Same as PAM \\
 	\hline
 	$\svar{Prnxt}{}$ & $\svar{Prnxt}{t_0} = \begin{cases} \sgn\attr{PRNXT} & \text{if}\quad \attr{PRNXT}\neq\undef \\
-							(\attr{NT}+\svar{Ipac}{t_0})\frac{todo}{todo} & \text{else} \end{cases}$ & where $n=|\vec{t}|$ with $|a|$ indicating the cardinality of set $a$ \\
+		\sgn\times & \\ 
+		\ann{t}{\svar{Md}{t_0}}{\svar{Nt}{t_0}}{\svar{Ipac}{t_0}}{\svar{Ipnr}{t_0}} & \text{else} \end{cases}$ &  \\
 	\hline
 	$\svar{Ipcb}{}$ & & Same as LAM \\
 \end{states}
@@ -1702,6 +1712,14 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 	\hline
 	PY & \pof{PY}{PAM}
 		& \stf{PY}{LAM} \\
+	\hline
+	PRF & \pof{RR}{PAM}
+		&  {$\begin{aligned}
+			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
+			\svar{Feac}{t^+} &= \begin{cases} \svar{Feac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
+					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
+			\svar{Prnxt}{t^+} &= \sgn\ann{t}{\svar{Md}{t^+}}{\svar{Nt}{t^+}}{\svar{Ipac}{t^+}}{\svar{Ipnr}{t^+}} \\
+			\svar{Sd}{t^+} &= t \end{aligned}$}\par\\
 	\hline
 	FP & \pof{FP}{PAM}
 		& \stf{FP}{LAM} \\
@@ -1727,7 +1745,6 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Feac}{t^+} &= \begin{cases} \svar{Feac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
 					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipnr}{t^+} &= \min(\max(\svar{Ipnr}{t^-}+\Delta r,\attr{RRLF}),\attr{RRLC}) \\
-			\svar{Prnxt}{t^+} &= \ann{t}{\svar{Md}{t^+}}{\svar{Nt}{t^+}}{\svar{Ipac}{t^+}}{\svar{Ipnr}{t^+}} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$}\par
 		with\par
 		{$\begin{aligned}
@@ -1741,7 +1758,6 @@ For brevity we will omit the $x$ and $a$ function arguments wherever this does n
 			\svar{Feac}{t^+} &= \begin{cases} \svar{Feac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
 					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
 			\svar{Ipnr}{t^+} &= \attr{RRNXT} \\
-			\svar{Prnxt}{t^+} &= \ann{t}{\svar{Md}{t^+}}{\svar{Nt}{t^+}}{\svar{Ipac}{t^+}}{\svar{Ipnr}{t^+}} \\
 			\svar{Sd}{t^+} &= t \end{aligned}$} \par
 		with\par
 		{$\begin{aligned}
