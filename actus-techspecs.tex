@@ -1742,29 +1742,10 @@ with $n=ceil(\frac{\attr{NT}}{\attr{PRNXT}-\attr{NT}\yfr{t^-}{t^-+\attr{PRCL}}\a
 		& \stf{IPCB}{LAM} \\
 	\hline
 	RR & \pof{RR}{PAM}
-		& {$\begin{aligned}
-			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
-			\svar{Feac}{t^+} &= \begin{cases} \svar{Feac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
-			\svar{Ipnr}{t^+} &= \min(\max(\svar{Ipnr}{t^-}+\Delta r,\attr{RRLF}),\attr{RRLC}) \\
-			\svar{Sd}{t^+} &= t \end{aligned}$}\par
-		with\par
-		{$\begin{aligned}
-			\Delta r &= \min(\max(\obs{rf}{\attr{RRMO}}{t}\attr{RRMLT}+\attr{RRSP} - \svar{Ipnr}{t^-},\attr{RRPF}),\attr{RRPC}) \\
-			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
-			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
+		& \stf{RR}{LAM} \\
   	\hline
 	RRF & \pof{RRF}{PAM}
-		& {$\begin{aligned}
-			\svar{Ipac}{t^+} &= \svar{Ipac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Ipnr}{t^-}\svar{Ipcb}{t^-} \\
-			\svar{Feac}{t^+} &= \begin{cases} \svar{Feac}{t^-} + \yfr{\svar{Sd}{t^-}}{t}\svar{Nt}{t^-}\attr{FER} & \text{if} \quad \attr{FEB}=\text{'N'} \\
-					\frac{\yfr{t^{FP-}}{t}}{\yfr{t^{FP-}}{t^{FP+}}}\sgn\attr{FER} & \text{else} \end{cases} \\
-			\svar{Ipnr}{t^+} &= \attr{RRNXT} \\
-			\svar{Sd}{t^+} &= t \end{aligned}$} \par
-		with\par
-		{$\begin{aligned}
-			t^{FP-} &= \sup t \in \vec{t}^{FP}\mid t<t_0 \\
-			t^{FP+} &= \inf t \in \vec{t}^{FP}\mid t>t_0 \end{aligned}$} \\
+		& \stf{RRF}{LAM} \\
 	\hline
 	SC & \pof{SC}{PAM}
 		& \stf{SC}{LAM} \\
