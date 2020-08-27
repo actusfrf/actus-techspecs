@@ -2053,11 +2053,11 @@ with $n=ceil(\frac{\attr{NT}}{\attr{PRNXT}-\attr{NT}\yfr{t^-}{t^-+\attr{PRCL}}\a
 					\undef & \text{if}\quad \attr{DS}=\text{'D'} \\
 					\svar{Md}{t_0} & \text{else} \end{cases}$ & \\
 	\hline
-	STD$^{(1)}$ & $t^{STD} = \begin{cases}
+	MD$^{(1)}$ & $t^{MD^{(1)}} = \begin{cases}
 					\undef & \text{if}\quad \attr{DS}=\text{'S'} \\
 					\svar{Md}{t_0} & \text{else} \end{cases}$ & \\
 	\hline
-	STD$^{(2)}$ & $t^{STD} = \begin{cases}
+	MD$^{(2)}$ & $t^{MD^{(1)}} = \begin{cases}
 					\undef & \text{if}\quad \attr{DS}=\text{'S'} \\
 					\svar{Md}{t_0} & \text{else} \end{cases}$ & \\
 	\hline
@@ -2090,9 +2090,9 @@ with $n=ceil(\frac{\attr{NT}}{\attr{PRNXT}-\attr{NT}\yfr{t^-}{t^-+\attr{PRCL}}\a
 		and $concat(x,y,z)$ indicates the string concatenation function
 		& $\svar{Sd}{t^+}=t$ \\
 	\hline
-	STD$^{(1)}$ & $X_{\attr{CUR}}^{\attr{CURS}}(t)\sgn\attr{NT}$ & $\svar{Sd}{t^+}=t$ \\
+	MD$^{(1)}$ & $X_{\attr{CUR}}^{\attr{CURS}}(t)\sgn\attr{NT}$ & $\svar{Sd}{t^+}=t$ \\
 	\hline
-	STD$^{(2)}$ & $X_{\attr{CUR}}^{\attr{CURS}}(t)\sgn (-1)\attr{NT2}$ & $\svar{Sd}{t^+}=t$ \\
+	MD$^{(2)}$ & $X_{\attr{CUR}}^{\attr{CURS}}(t)\sgn (-1)\attr{NT2}$ & $\svar{Sd}{t^+}=t$ \\
 	\hline
 	CE & \pof{CE}{PAM} & \stf{CD}{STK} \\
 \end{functions}
